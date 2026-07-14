@@ -8,7 +8,7 @@ package history
 
 import (
 	context "context"
-	v11 "github.com/alis-build/public-go/alis/iam/v1"
+	iam "github.com/alis-build/public-go/alis/iam"
 	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -39,8 +39,8 @@ const (
 type ThreadServiceClient interface {
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
-	AddIamBindings(ctx context.Context, in *v11.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
-	RemoveIamBindings(ctx context.Context, in *v11.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
 	ListThreads(ctx context.Context, in *ListThreadsRequest, opts ...grpc.CallOption) (*ListThreadsResponse, error)
 	GetThread(ctx context.Context, in *GetThreadRequest, opts ...grpc.CallOption) (*Thread, error)
 	DeleteThread(ctx context.Context, in *DeleteThreadRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -76,7 +76,7 @@ func (c *threadServiceClient) SetIamPolicy(ctx context.Context, in *v1.SetIamPol
 	return out, nil
 }
 
-func (c *threadServiceClient) AddIamBindings(ctx context.Context, in *v11.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
+func (c *threadServiceClient) AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.Policy)
 	err := c.cc.Invoke(ctx, ThreadService_AddIamBindings_FullMethodName, in, out, cOpts...)
@@ -86,7 +86,7 @@ func (c *threadServiceClient) AddIamBindings(ctx context.Context, in *v11.AddIam
 	return out, nil
 }
 
-func (c *threadServiceClient) RemoveIamBindings(ctx context.Context, in *v11.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
+func (c *threadServiceClient) RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.Policy)
 	err := c.cc.Invoke(ctx, ThreadService_RemoveIamBindings_FullMethodName, in, out, cOpts...)
@@ -152,8 +152,8 @@ func (c *threadServiceClient) UpdateUserThreadState(ctx context.Context, in *Upd
 type ThreadServiceServer interface {
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
-	AddIamBindings(context.Context, *v11.AddIamBindingsRequest) (*v1.Policy, error)
-	RemoveIamBindings(context.Context, *v11.RemoveIamBindingsRequest) (*v1.Policy, error)
+	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
 	ListThreads(context.Context, *ListThreadsRequest) (*ListThreadsResponse, error)
 	GetThread(context.Context, *GetThreadRequest) (*Thread, error)
 	DeleteThread(context.Context, *DeleteThreadRequest) (*emptypb.Empty, error)
@@ -175,10 +175,10 @@ func (UnimplementedThreadServiceServer) GetIamPolicy(context.Context, *v1.GetIam
 func (UnimplementedThreadServiceServer) SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetIamPolicy not implemented")
 }
-func (UnimplementedThreadServiceServer) AddIamBindings(context.Context, *v11.AddIamBindingsRequest) (*v1.Policy, error) {
+func (UnimplementedThreadServiceServer) AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method AddIamBindings not implemented")
 }
-func (UnimplementedThreadServiceServer) RemoveIamBindings(context.Context, *v11.RemoveIamBindingsRequest) (*v1.Policy, error) {
+func (UnimplementedThreadServiceServer) RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method RemoveIamBindings not implemented")
 }
 func (UnimplementedThreadServiceServer) ListThreads(context.Context, *ListThreadsRequest) (*ListThreadsResponse, error) {
@@ -254,7 +254,7 @@ func _ThreadService_SetIamPolicy_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _ThreadService_AddIamBindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.AddIamBindingsRequest)
+	in := new(iam.AddIamBindingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -266,13 +266,13 @@ func _ThreadService_AddIamBindings_Handler(srv interface{}, ctx context.Context,
 		FullMethod: ThreadService_AddIamBindings_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadServiceServer).AddIamBindings(ctx, req.(*v11.AddIamBindingsRequest))
+		return srv.(ThreadServiceServer).AddIamBindings(ctx, req.(*iam.AddIamBindingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ThreadService_RemoveIamBindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.RemoveIamBindingsRequest)
+	in := new(iam.RemoveIamBindingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -284,7 +284,7 @@ func _ThreadService_RemoveIamBindings_Handler(srv interface{}, ctx context.Conte
 		FullMethod: ThreadService_RemoveIamBindings_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadServiceServer).RemoveIamBindings(ctx, req.(*v11.RemoveIamBindingsRequest))
+		return srv.(ThreadServiceServer).RemoveIamBindings(ctx, req.(*iam.RemoveIamBindingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

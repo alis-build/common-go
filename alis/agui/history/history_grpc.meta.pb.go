@@ -3,7 +3,7 @@
 // Source: alis/agui/history/v1/history.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-07-02 09:25:52 UTC
+// Generated on: 2026-07-14 13:56:15 UTC
 
 package history
 

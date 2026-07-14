@@ -7,7 +7,7 @@
 package history
 
 import (
-	v11 "github.com/alis-build/public-go/alis/iam/v1"
+	iam "github.com/alis-build/public-go/alis/iam"
 	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -707,8 +707,8 @@ var file_alis_agui_history_v1_history_proto_goTypes = []any{
 	(*fieldmaskpb.FieldMask)(nil),        // 10: google.protobuf.FieldMask
 	(*v1.GetIamPolicyRequest)(nil),       // 11: google.iam.v1.GetIamPolicyRequest
 	(*v1.SetIamPolicyRequest)(nil),       // 12: google.iam.v1.SetIamPolicyRequest
-	(*v11.AddIamBindingsRequest)(nil),    // 13: alis.iam.v1.AddIamBindingsRequest
-	(*v11.RemoveIamBindingsRequest)(nil), // 14: alis.iam.v1.RemoveIamBindingsRequest
+	(*iam.AddIamBindingsRequest)(nil),    // 13: alis.iam.v1.AddIamBindingsRequest
+	(*iam.RemoveIamBindingsRequest)(nil), // 14: alis.iam.v1.RemoveIamBindingsRequest
 	(*v1.Policy)(nil),                    // 15: google.iam.v1.Policy
 	(*emptypb.Empty)(nil),                // 16: google.protobuf.Empty
 }
