@@ -2073,6 +2073,66 @@ func (x *RunInfraObservationResponse) GetRuns() []string {
 	return nil
 }
 
+type Validation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status        Status                 `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Validation) Reset() {
+	*x = Validation{}
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Validation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Validation) ProtoMessage() {}
+
+func (x *Validation) ProtoReflect() protoreflect.Message {
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Validation.ProtoReflect.Descriptor instead.
+func (*Validation) Descriptor() ([]byte, []int) {
+	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *Validation) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Validation) GetStatus() Status {
+	if x != nil {
+		return x.Status
+	}
+	return Status_STATUS_UNSPECIFIED
+}
+
+func (x *Validation) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type RunPublishedEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Run           *Run                   `protobuf:"bytes,1,opt,name=run,proto3" json:"run,omitempty"`
@@ -2082,7 +2142,7 @@ type RunPublishedEvent struct {
 
 func (x *RunPublishedEvent) Reset() {
 	*x = RunPublishedEvent{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[25]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2094,7 +2154,7 @@ func (x *RunPublishedEvent) String() string {
 func (*RunPublishedEvent) ProtoMessage() {}
 
 func (x *RunPublishedEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[25]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2107,7 +2167,7 @@ func (x *RunPublishedEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunPublishedEvent.ProtoReflect.Descriptor instead.
 func (*RunPublishedEvent) Descriptor() ([]byte, []int) {
-	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{25}
+	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *RunPublishedEvent) GetRun() *Run {
@@ -2129,7 +2189,7 @@ type IntegrationTestResults_Case struct {
 
 func (x *IntegrationTestResults_Case) Reset() {
 	*x = IntegrationTestResults_Case{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[26]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2141,7 +2201,7 @@ func (x *IntegrationTestResults_Case) String() string {
 func (*IntegrationTestResults_Case) ProtoMessage() {}
 
 func (x *IntegrationTestResults_Case) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[26]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2196,7 +2256,7 @@ type IntegrationTestResults_Case_Check struct {
 
 func (x *IntegrationTestResults_Case_Check) Reset() {
 	*x = IntegrationTestResults_Case_Check{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[27]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2208,7 +2268,7 @@ func (x *IntegrationTestResults_Case_Check) String() string {
 func (*IntegrationTestResults_Case_Check) ProtoMessage() {}
 
 func (x *IntegrationTestResults_Case_Check) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[27]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2255,7 +2315,7 @@ type LoadTestResults_StringEntry struct {
 
 func (x *LoadTestResults_StringEntry) Reset() {
 	*x = LoadTestResults_StringEntry{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[28]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2267,7 +2327,7 @@ func (x *LoadTestResults_StringEntry) String() string {
 func (*LoadTestResults_StringEntry) ProtoMessage() {}
 
 func (x *LoadTestResults_StringEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[28]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2307,7 +2367,7 @@ type LoadTestResults_Int64Entry struct {
 
 func (x *LoadTestResults_Int64Entry) Reset() {
 	*x = LoadTestResults_Int64Entry{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[29]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2319,7 +2379,7 @@ func (x *LoadTestResults_Int64Entry) String() string {
 func (*LoadTestResults_Int64Entry) ProtoMessage() {}
 
 func (x *LoadTestResults_Int64Entry) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[29]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2359,13 +2419,14 @@ type LoadTestResults_Case struct {
 	CloudRun      []*CloudRunTargetSnapshot      `protobuf:"bytes,6,rep,name=cloud_run,json=cloudRun,proto3" json:"cloud_run,omitempty"`
 	Spanner       []*SpannerTargetSnapshot       `protobuf:"bytes,7,rep,name=spanner,proto3" json:"spanner,omitempty"`
 	InfraChecks   []*InfraSloCheck               `protobuf:"bytes,8,rep,name=infra_checks,json=infraChecks,proto3" json:"infra_checks,omitempty"`
+	Validations   []*Validation                  `protobuf:"bytes,9,rep,name=validations,proto3" json:"validations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *LoadTestResults_Case) Reset() {
 	*x = LoadTestResults_Case{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[30]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2377,7 +2438,7 @@ func (x *LoadTestResults_Case) String() string {
 func (*LoadTestResults_Case) ProtoMessage() {}
 
 func (x *LoadTestResults_Case) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[30]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2449,6 +2510,13 @@ func (x *LoadTestResults_Case) GetInfraChecks() []*InfraSloCheck {
 	return nil
 }
 
+func (x *LoadTestResults_Case) GetValidations() []*Validation {
+	if x != nil {
+		return x.Validations
+	}
+	return nil
+}
+
 type LoadTestResults_Summary struct {
 	state             protoimpl.MessageState         `protogen:"open.v1"`
 	Mode              RunLoadTestRequest_Mode        `protobuf:"varint,1,opt,name=mode,proto3,enum=alis.evals.v1.RunLoadTestRequest_Mode" json:"mode,omitempty"`
@@ -2472,7 +2540,7 @@ type LoadTestResults_Summary struct {
 
 func (x *LoadTestResults_Summary) Reset() {
 	*x = LoadTestResults_Summary{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[31]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2484,7 +2552,7 @@ func (x *LoadTestResults_Summary) String() string {
 func (*LoadTestResults_Summary) ProtoMessage() {}
 
 func (x *LoadTestResults_Summary) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[31]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2615,7 +2683,7 @@ type LoadTestResults_LoadStage struct {
 
 func (x *LoadTestResults_LoadStage) Reset() {
 	*x = LoadTestResults_LoadStage{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[32]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2627,7 +2695,7 @@ func (x *LoadTestResults_LoadStage) String() string {
 func (*LoadTestResults_LoadStage) ProtoMessage() {}
 
 func (x *LoadTestResults_LoadStage) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[32]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2670,7 +2738,7 @@ type LoadTestResults_StreamSummary struct {
 
 func (x *LoadTestResults_StreamSummary) Reset() {
 	*x = LoadTestResults_StreamSummary{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[33]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2682,7 +2750,7 @@ func (x *LoadTestResults_StreamSummary) String() string {
 func (*LoadTestResults_StreamSummary) ProtoMessage() {}
 
 func (x *LoadTestResults_StreamSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[33]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2747,7 +2815,7 @@ type LoadTestResults_SloCheck struct {
 
 func (x *LoadTestResults_SloCheck) Reset() {
 	*x = LoadTestResults_SloCheck{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[34]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2759,7 +2827,7 @@ func (x *LoadTestResults_SloCheck) String() string {
 func (*LoadTestResults_SloCheck) ProtoMessage() {}
 
 func (x *LoadTestResults_SloCheck) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[34]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2829,7 +2897,7 @@ type AgentEvalResults_JudgeInfo struct {
 
 func (x *AgentEvalResults_JudgeInfo) Reset() {
 	*x = AgentEvalResults_JudgeInfo{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[35]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2841,7 +2909,7 @@ func (x *AgentEvalResults_JudgeInfo) String() string {
 func (*AgentEvalResults_JudgeInfo) ProtoMessage() {}
 
 func (x *AgentEvalResults_JudgeInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[35]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2892,13 +2960,14 @@ type AgentEvalResults_Case struct {
 	Duration      *durationpb.Duration            `protobuf:"bytes,3,opt,name=duration,proto3" json:"duration,omitempty"`
 	SessionId     string                          `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Metrics       []*AgentEvalResults_Case_Metric `protobuf:"bytes,5,rep,name=metrics,proto3" json:"metrics,omitempty"`
+	Validations   []*Validation                   `protobuf:"bytes,6,rep,name=validations,proto3" json:"validations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AgentEvalResults_Case) Reset() {
 	*x = AgentEvalResults_Case{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[36]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2910,7 +2979,7 @@ func (x *AgentEvalResults_Case) String() string {
 func (*AgentEvalResults_Case) ProtoMessage() {}
 
 func (x *AgentEvalResults_Case) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[36]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2961,6 +3030,13 @@ func (x *AgentEvalResults_Case) GetMetrics() []*AgentEvalResults_Case_Metric {
 	return nil
 }
 
+func (x *AgentEvalResults_Case) GetValidations() []*Validation {
+	if x != nil {
+		return x.Validations
+	}
+	return nil
+}
+
 type AgentEvalResults_Case_Metric struct {
 	state         protoimpl.MessageState                      `protogen:"open.v1"`
 	Id            string                                      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -2975,7 +3051,7 @@ type AgentEvalResults_Case_Metric struct {
 
 func (x *AgentEvalResults_Case_Metric) Reset() {
 	*x = AgentEvalResults_Case_Metric{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[37]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2987,7 +3063,7 @@ func (x *AgentEvalResults_Case_Metric) String() string {
 func (*AgentEvalResults_Case_Metric) ProtoMessage() {}
 
 func (x *AgentEvalResults_Case_Metric) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[37]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3057,7 +3133,7 @@ type AgentEvalResults_Case_Metric_RubricScore struct {
 
 func (x *AgentEvalResults_Case_Metric_RubricScore) Reset() {
 	*x = AgentEvalResults_Case_Metric_RubricScore{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[38]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3069,7 +3145,7 @@ func (x *AgentEvalResults_Case_Metric_RubricScore) String() string {
 func (*AgentEvalResults_Case_Metric_RubricScore) ProtoMessage() {}
 
 func (x *AgentEvalResults_Case_Metric_RubricScore) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[38]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3123,13 +3199,14 @@ type InfraObservationResults_Case struct {
 	CloudRun      []*CloudRunTargetSnapshot `protobuf:"bytes,6,rep,name=cloud_run,json=cloudRun,proto3" json:"cloud_run,omitempty"`
 	Spanner       []*SpannerTargetSnapshot  `protobuf:"bytes,7,rep,name=spanner,proto3" json:"spanner,omitempty"`
 	InfraChecks   []*InfraSloCheck          `protobuf:"bytes,8,rep,name=infra_checks,json=infraChecks,proto3" json:"infra_checks,omitempty"`
+	Validations   []*Validation             `protobuf:"bytes,9,rep,name=validations,proto3" json:"validations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InfraObservationResults_Case) Reset() {
 	*x = InfraObservationResults_Case{}
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[39]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3141,7 +3218,7 @@ func (x *InfraObservationResults_Case) String() string {
 func (*InfraObservationResults_Case) ProtoMessage() {}
 
 func (x *InfraObservationResults_Case) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[39]
+	mi := &file_alis_evals_v1_evaluation_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3213,6 +3290,13 @@ func (x *InfraObservationResults_Case) GetInfraChecks() []*InfraSloCheck {
 	return nil
 }
 
+func (x *InfraObservationResults_Case) GetValidations() []*Validation {
+	if x != nil {
+		return x.Validations
+	}
+	return nil
+}
+
 var File_alis_evals_v1_evaluation_proto protoreflect.FileDescriptor
 
 const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
@@ -3263,7 +3347,7 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"\x06p99_ms\x18\x03 \x01(\x01R\x05p99Ms\x12\x15\n" +
 	"\x06min_ms\x18\x04 \x01(\x01R\x05minMs\x12\x17\n" +
 	"\amean_ms\x18\x05 \x01(\x01R\x06meanMs\x12\x15\n" +
-	"\x06max_ms\x18\x06 \x01(\x01R\x05maxMs\"\xf1\x0f\n" +
+	"\x06max_ms\x18\x06 \x01(\x01R\x05maxMs\"\xae\x10\n" +
 	"\x0fLoadTestResults\x129\n" +
 	"\x05cases\x18\x01 \x03(\v2#.alis.evals.v1.LoadTestResults.CaseR\x05cases\x1a5\n" +
 	"\vStringEntry\x12\x10\n" +
@@ -3272,7 +3356,7 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"\n" +
 	"Int64Entry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05value\x1a\xcd\x03\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value\x1a\x8a\x04\n" +
 	"\x04Case\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x15.alis.evals.v1.StatusR\x06status\x12@\n" +
@@ -3281,7 +3365,8 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"\x04tags\x18\x05 \x03(\v2*.alis.evals.v1.LoadTestResults.StringEntryR\x04tags\x12B\n" +
 	"\tcloud_run\x18\x06 \x03(\v2%.alis.evals.v1.CloudRunTargetSnapshotR\bcloudRun\x12>\n" +
 	"\aspanner\x18\a \x03(\v2$.alis.evals.v1.SpannerTargetSnapshotR\aspanner\x12?\n" +
-	"\finfra_checks\x18\b \x03(\v2\x1c.alis.evals.v1.InfraSloCheckR\vinfraChecks\x1a\xa9\x06\n" +
+	"\finfra_checks\x18\b \x03(\v2\x1c.alis.evals.v1.InfraSloCheckR\vinfraChecks\x12;\n" +
+	"\vvalidations\x18\t \x03(\v2\x19.alis.evals.v1.ValidationR\vvalidations\x1a\xa9\x06\n" +
 	"\aSummary\x12:\n" +
 	"\x04mode\x18\x01 \x01(\x0e2&.alis.evals.v1.RunLoadTestRequest.ModeR\x04mode\x12\x1d\n" +
 	"\n" +
@@ -3319,7 +3404,7 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12\x1a\n" +
 	"\bobserved\x18\x04 \x01(\x01R\bobserved\x12\x14\n" +
 	"\x05limit\x18\x05 \x01(\x01R\x05limit\x12\x12\n" +
-	"\x04unit\x18\x06 \x01(\tR\x04unit\"\xe9\a\n" +
+	"\x04unit\x18\x06 \x01(\tR\x04unit\"\xa6\b\n" +
 	"\x10AgentEvalResults\x12:\n" +
 	"\x05cases\x18\x01 \x03(\v2$.alis.evals.v1.AgentEvalResults.CaseR\x05cases\x12D\n" +
 	"\x05judge\x18\x02 \x01(\v2).alis.evals.v1.AgentEvalResults.JudgeInfoH\x00R\x05judge\x88\x01\x01\x1a\xb3\x01\n" +
@@ -3328,14 +3413,15 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"\rmodel_version\x18\x02 \x01(\tH\x00R\fmodelVersion\x88\x01\x01\x12(\n" +
 	"\x10judge_call_count\x18\x03 \x01(\x03R\x0ejudgeCallCount\x12*\n" +
 	"\x11judge_error_count\x18\x04 \x01(\x03R\x0fjudgeErrorCountB\x10\n" +
-	"\x0e_model_version\x1a\x92\x05\n" +
+	"\x0e_model_version\x1a\xcf\x05\n" +
 	"\x04Case\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x15.alis.evals.v1.StatusR\x06status\x125\n" +
 	"\bduration\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\bduration\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x04 \x01(\tR\tsessionId\x12E\n" +
-	"\ametrics\x18\x05 \x03(\v2+.alis.evals.v1.AgentEvalResults.Case.MetricR\ametrics\x1a\xad\x03\n" +
+	"\ametrics\x18\x05 \x03(\v2+.alis.evals.v1.AgentEvalResults.Case.MetricR\ametrics\x12;\n" +
+	"\vvalidations\x18\x06 \x03(\v2\x19.alis.evals.v1.ValidationR\vvalidations\x1a\xad\x03\n" +
 	"\x06Metric\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x15.alis.evals.v1.StatusR\x06status\x12\x19\n" +
@@ -3427,9 +3513,9 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"\x05limit\x18\a \x01(\x01R\x05limit\x12\x12\n" +
 	"\x04unit\x18\b \x01(\tR\x04unitB\n" +
 	"\n" +
-	"\b_message\"\x9a\x04\n" +
+	"\b_message\"\xd7\x04\n" +
 	"\x17InfraObservationResults\x12A\n" +
-	"\x05cases\x18\x01 \x03(\v2+.alis.evals.v1.InfraObservationResults.CaseR\x05cases\x1a\xbb\x03\n" +
+	"\x05cases\x18\x01 \x03(\v2+.alis.evals.v1.InfraObservationResults.CaseR\x05cases\x1a\xf8\x03\n" +
 	"\x04Case\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x15.alis.evals.v1.StatusR\x06status\x125\n" +
@@ -3439,7 +3525,8 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"window_end\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\twindowEnd\x12B\n" +
 	"\tcloud_run\x18\x06 \x03(\v2%.alis.evals.v1.CloudRunTargetSnapshotR\bcloudRun\x12>\n" +
 	"\aspanner\x18\a \x03(\v2$.alis.evals.v1.SpannerTargetSnapshotR\aspanner\x12?\n" +
-	"\finfra_checks\x18\b \x03(\v2\x1c.alis.evals.v1.InfraSloCheckR\vinfraChecks\"c\n" +
+	"\finfra_checks\x18\b \x03(\v2\x1c.alis.evals.v1.InfraSloCheckR\vinfraChecks\x12;\n" +
+	"\vvalidations\x18\t \x03(\v2\x19.alis.evals.v1.ValidationR\vvalidations\"c\n" +
 	"\x19RunIntegrationTestRequest\x12\x1e\n" +
 	"\bbatch_id\x18\x01 \x01(\tH\x00R\abatchId\x88\x01\x01\x12\x19\n" +
 	"\bcase_ids\x18\x02 \x03(\tR\acaseIdsB\v\n" +
@@ -3499,7 +3586,12 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"suiteCount\x122\n" +
 	"\x15completed_suite_count\x18\x04 \x01(\x05R\x13completedSuiteCount\"1\n" +
 	"\x1bRunInfraObservationResponse\x12\x12\n" +
-	"\x04runs\x18\x01 \x03(\tR\x04runs\"9\n" +
+	"\x04runs\x18\x01 \x03(\tR\x04runs\"e\n" +
+	"\n" +
+	"Validation\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
+	"\x06status\x18\x02 \x01(\x0e2\x15.alis.evals.v1.StatusR\x06status\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"9\n" +
 	"\x11RunPublishedEvent\x12$\n" +
 	"\x03run\x18\x01 \x01(\v2\x12.alis.evals.v1.RunR\x03run*s\n" +
 	"\x0fInfraTargetRole\x12!\n" +
@@ -3546,7 +3638,7 @@ func file_alis_evals_v1_evaluation_proto_rawDescGZIP() []byte {
 }
 
 var file_alis_evals_v1_evaluation_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
-var file_alis_evals_v1_evaluation_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
+var file_alis_evals_v1_evaluation_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_alis_evals_v1_evaluation_proto_goTypes = []any{
 	(InfraTargetRole)(0),                             // 0: alis.evals.v1.InfraTargetRole
 	(InfraFetchStatus)(0),                            // 1: alis.evals.v1.InfraFetchStatus
@@ -3579,25 +3671,26 @@ var file_alis_evals_v1_evaluation_proto_goTypes = []any{
 	(*RunInfraObservationRequest)(nil),               // 28: alis.evals.v1.RunInfraObservationRequest
 	(*RunInfraObservationMetadata)(nil),              // 29: alis.evals.v1.RunInfraObservationMetadata
 	(*RunInfraObservationResponse)(nil),              // 30: alis.evals.v1.RunInfraObservationResponse
-	(*RunPublishedEvent)(nil),                        // 31: alis.evals.v1.RunPublishedEvent
-	(*IntegrationTestResults_Case)(nil),              // 32: alis.evals.v1.IntegrationTestResults.Case
-	(*IntegrationTestResults_Case_Check)(nil),        // 33: alis.evals.v1.IntegrationTestResults.Case.Check
-	(*LoadTestResults_StringEntry)(nil),              // 34: alis.evals.v1.LoadTestResults.StringEntry
-	(*LoadTestResults_Int64Entry)(nil),               // 35: alis.evals.v1.LoadTestResults.Int64Entry
-	(*LoadTestResults_Case)(nil),                     // 36: alis.evals.v1.LoadTestResults.Case
-	(*LoadTestResults_Summary)(nil),                  // 37: alis.evals.v1.LoadTestResults.Summary
-	(*LoadTestResults_LoadStage)(nil),                // 38: alis.evals.v1.LoadTestResults.LoadStage
-	(*LoadTestResults_StreamSummary)(nil),            // 39: alis.evals.v1.LoadTestResults.StreamSummary
-	(*LoadTestResults_SloCheck)(nil),                 // 40: alis.evals.v1.LoadTestResults.SloCheck
-	(*AgentEvalResults_JudgeInfo)(nil),               // 41: alis.evals.v1.AgentEvalResults.JudgeInfo
-	(*AgentEvalResults_Case)(nil),                    // 42: alis.evals.v1.AgentEvalResults.Case
-	(*AgentEvalResults_Case_Metric)(nil),             // 43: alis.evals.v1.AgentEvalResults.Case.Metric
-	(*AgentEvalResults_Case_Metric_RubricScore)(nil), // 44: alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore
-	(*InfraObservationResults_Case)(nil),             // 45: alis.evals.v1.InfraObservationResults.Case
-	(*timestamppb.Timestamp)(nil),                    // 46: google.protobuf.Timestamp
-	(*status.Status)(nil),                            // 47: google.rpc.Status
-	(*durationpb.Duration)(nil),                      // 48: google.protobuf.Duration
-	(*longrunning.Operation)(nil),                    // 49: google.longrunning.Operation
+	(*Validation)(nil),                               // 31: alis.evals.v1.Validation
+	(*RunPublishedEvent)(nil),                        // 32: alis.evals.v1.RunPublishedEvent
+	(*IntegrationTestResults_Case)(nil),              // 33: alis.evals.v1.IntegrationTestResults.Case
+	(*IntegrationTestResults_Case_Check)(nil),        // 34: alis.evals.v1.IntegrationTestResults.Case.Check
+	(*LoadTestResults_StringEntry)(nil),              // 35: alis.evals.v1.LoadTestResults.StringEntry
+	(*LoadTestResults_Int64Entry)(nil),               // 36: alis.evals.v1.LoadTestResults.Int64Entry
+	(*LoadTestResults_Case)(nil),                     // 37: alis.evals.v1.LoadTestResults.Case
+	(*LoadTestResults_Summary)(nil),                  // 38: alis.evals.v1.LoadTestResults.Summary
+	(*LoadTestResults_LoadStage)(nil),                // 39: alis.evals.v1.LoadTestResults.LoadStage
+	(*LoadTestResults_StreamSummary)(nil),            // 40: alis.evals.v1.LoadTestResults.StreamSummary
+	(*LoadTestResults_SloCheck)(nil),                 // 41: alis.evals.v1.LoadTestResults.SloCheck
+	(*AgentEvalResults_JudgeInfo)(nil),               // 42: alis.evals.v1.AgentEvalResults.JudgeInfo
+	(*AgentEvalResults_Case)(nil),                    // 43: alis.evals.v1.AgentEvalResults.Case
+	(*AgentEvalResults_Case_Metric)(nil),             // 44: alis.evals.v1.AgentEvalResults.Case.Metric
+	(*AgentEvalResults_Case_Metric_RubricScore)(nil), // 45: alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore
+	(*InfraObservationResults_Case)(nil),             // 46: alis.evals.v1.InfraObservationResults.Case
+	(*timestamppb.Timestamp)(nil),                    // 47: google.protobuf.Timestamp
+	(*status.Status)(nil),                            // 48: google.rpc.Status
+	(*durationpb.Duration)(nil),                      // 49: google.protobuf.Duration
+	(*longrunning.Operation)(nil),                    // 50: google.longrunning.Operation
 }
 var file_alis_evals_v1_evaluation_proto_depIdxs = []int32{
 	4,  // 0: alis.evals.v1.Run.type:type_name -> alis.evals.v1.Run.Type
@@ -3606,84 +3699,88 @@ var file_alis_evals_v1_evaluation_proto_depIdxs = []int32{
 	9,  // 3: alis.evals.v1.Run.load_test:type_name -> alis.evals.v1.LoadTestResults
 	10, // 4: alis.evals.v1.Run.agent_eval:type_name -> alis.evals.v1.AgentEvalResults
 	18, // 5: alis.evals.v1.Run.infra_observation:type_name -> alis.evals.v1.InfraObservationResults
-	46, // 6: alis.evals.v1.Run.start_time:type_name -> google.protobuf.Timestamp
-	46, // 7: alis.evals.v1.Run.end_time:type_name -> google.protobuf.Timestamp
-	47, // 8: alis.evals.v1.Run.error:type_name -> google.rpc.Status
-	46, // 9: alis.evals.v1.Run.create_time:type_name -> google.protobuf.Timestamp
-	32, // 10: alis.evals.v1.IntegrationTestResults.cases:type_name -> alis.evals.v1.IntegrationTestResults.Case
-	36, // 11: alis.evals.v1.LoadTestResults.cases:type_name -> alis.evals.v1.LoadTestResults.Case
-	42, // 12: alis.evals.v1.AgentEvalResults.cases:type_name -> alis.evals.v1.AgentEvalResults.Case
-	41, // 13: alis.evals.v1.AgentEvalResults.judge:type_name -> alis.evals.v1.AgentEvalResults.JudgeInfo
+	47, // 6: alis.evals.v1.Run.start_time:type_name -> google.protobuf.Timestamp
+	47, // 7: alis.evals.v1.Run.end_time:type_name -> google.protobuf.Timestamp
+	48, // 8: alis.evals.v1.Run.error:type_name -> google.rpc.Status
+	47, // 9: alis.evals.v1.Run.create_time:type_name -> google.protobuf.Timestamp
+	33, // 10: alis.evals.v1.IntegrationTestResults.cases:type_name -> alis.evals.v1.IntegrationTestResults.Case
+	37, // 11: alis.evals.v1.LoadTestResults.cases:type_name -> alis.evals.v1.LoadTestResults.Case
+	43, // 12: alis.evals.v1.AgentEvalResults.cases:type_name -> alis.evals.v1.AgentEvalResults.Case
+	42, // 13: alis.evals.v1.AgentEvalResults.judge:type_name -> alis.evals.v1.AgentEvalResults.JudgeInfo
 	8,  // 14: alis.evals.v1.CloudRunMetrics.latency:type_name -> alis.evals.v1.LatencyPercentiles
 	8,  // 15: alis.evals.v1.SpannerMetrics.api_latency:type_name -> alis.evals.v1.LatencyPercentiles
 	8,  // 16: alis.evals.v1.SpannerMetrics.query_latency:type_name -> alis.evals.v1.LatencyPercentiles
 	0,  // 17: alis.evals.v1.CloudRunTargetSnapshot.role:type_name -> alis.evals.v1.InfraTargetRole
 	11, // 18: alis.evals.v1.CloudRunTargetSnapshot.target:type_name -> alis.evals.v1.CloudRunTargetRef
-	46, // 19: alis.evals.v1.CloudRunTargetSnapshot.window_start:type_name -> google.protobuf.Timestamp
-	46, // 20: alis.evals.v1.CloudRunTargetSnapshot.window_end:type_name -> google.protobuf.Timestamp
+	47, // 19: alis.evals.v1.CloudRunTargetSnapshot.window_start:type_name -> google.protobuf.Timestamp
+	47, // 20: alis.evals.v1.CloudRunTargetSnapshot.window_end:type_name -> google.protobuf.Timestamp
 	1,  // 21: alis.evals.v1.CloudRunTargetSnapshot.fetch_status:type_name -> alis.evals.v1.InfraFetchStatus
 	13, // 22: alis.evals.v1.CloudRunTargetSnapshot.metrics:type_name -> alis.evals.v1.CloudRunMetrics
 	0,  // 23: alis.evals.v1.SpannerTargetSnapshot.role:type_name -> alis.evals.v1.InfraTargetRole
 	12, // 24: alis.evals.v1.SpannerTargetSnapshot.target:type_name -> alis.evals.v1.SpannerTargetRef
-	46, // 25: alis.evals.v1.SpannerTargetSnapshot.window_start:type_name -> google.protobuf.Timestamp
-	46, // 26: alis.evals.v1.SpannerTargetSnapshot.window_end:type_name -> google.protobuf.Timestamp
+	47, // 25: alis.evals.v1.SpannerTargetSnapshot.window_start:type_name -> google.protobuf.Timestamp
+	47, // 26: alis.evals.v1.SpannerTargetSnapshot.window_end:type_name -> google.protobuf.Timestamp
 	1,  // 27: alis.evals.v1.SpannerTargetSnapshot.fetch_status:type_name -> alis.evals.v1.InfraFetchStatus
 	14, // 28: alis.evals.v1.SpannerTargetSnapshot.metrics:type_name -> alis.evals.v1.SpannerMetrics
 	2,  // 29: alis.evals.v1.InfraSloCheck.kind:type_name -> alis.evals.v1.InfraKind
 	3,  // 30: alis.evals.v1.InfraSloCheck.status:type_name -> alis.evals.v1.Status
-	45, // 31: alis.evals.v1.InfraObservationResults.cases:type_name -> alis.evals.v1.InfraObservationResults.Case
+	46, // 31: alis.evals.v1.InfraObservationResults.cases:type_name -> alis.evals.v1.InfraObservationResults.Case
 	5,  // 32: alis.evals.v1.RunLoadTestRequest.mode:type_name -> alis.evals.v1.RunLoadTestRequest.Mode
-	48, // 33: alis.evals.v1.RunInfraObservationRequest.lookback:type_name -> google.protobuf.Duration
-	6,  // 34: alis.evals.v1.RunPublishedEvent.run:type_name -> alis.evals.v1.Run
-	3,  // 35: alis.evals.v1.IntegrationTestResults.Case.status:type_name -> alis.evals.v1.Status
-	33, // 36: alis.evals.v1.IntegrationTestResults.Case.checks:type_name -> alis.evals.v1.IntegrationTestResults.Case.Check
-	48, // 37: alis.evals.v1.IntegrationTestResults.Case.duration:type_name -> google.protobuf.Duration
-	3,  // 38: alis.evals.v1.IntegrationTestResults.Case.Check.status:type_name -> alis.evals.v1.Status
-	3,  // 39: alis.evals.v1.LoadTestResults.Case.status:type_name -> alis.evals.v1.Status
-	37, // 40: alis.evals.v1.LoadTestResults.Case.summary:type_name -> alis.evals.v1.LoadTestResults.Summary
-	40, // 41: alis.evals.v1.LoadTestResults.Case.checks:type_name -> alis.evals.v1.LoadTestResults.SloCheck
-	34, // 42: alis.evals.v1.LoadTestResults.Case.tags:type_name -> alis.evals.v1.LoadTestResults.StringEntry
-	15, // 43: alis.evals.v1.LoadTestResults.Case.cloud_run:type_name -> alis.evals.v1.CloudRunTargetSnapshot
-	16, // 44: alis.evals.v1.LoadTestResults.Case.spanner:type_name -> alis.evals.v1.SpannerTargetSnapshot
-	17, // 45: alis.evals.v1.LoadTestResults.Case.infra_checks:type_name -> alis.evals.v1.InfraSloCheck
-	5,  // 46: alis.evals.v1.LoadTestResults.Summary.mode:type_name -> alis.evals.v1.RunLoadTestRequest.Mode
-	48, // 47: alis.evals.v1.LoadTestResults.Summary.duration:type_name -> google.protobuf.Duration
-	8,  // 48: alis.evals.v1.LoadTestResults.Summary.latency:type_name -> alis.evals.v1.LatencyPercentiles
-	35, // 49: alis.evals.v1.LoadTestResults.Summary.errors_by_code:type_name -> alis.evals.v1.LoadTestResults.Int64Entry
-	39, // 50: alis.evals.v1.LoadTestResults.Summary.stream:type_name -> alis.evals.v1.LoadTestResults.StreamSummary
-	38, // 51: alis.evals.v1.LoadTestResults.Summary.qps_stages:type_name -> alis.evals.v1.LoadTestResults.LoadStage
-	38, // 52: alis.evals.v1.LoadTestResults.Summary.concurrency_stages:type_name -> alis.evals.v1.LoadTestResults.LoadStage
-	48, // 53: alis.evals.v1.LoadTestResults.LoadStage.duration:type_name -> google.protobuf.Duration
-	8,  // 54: alis.evals.v1.LoadTestResults.StreamSummary.ttfb:type_name -> alis.evals.v1.LatencyPercentiles
-	8,  // 55: alis.evals.v1.LoadTestResults.StreamSummary.response_latency:type_name -> alis.evals.v1.LatencyPercentiles
-	8,  // 56: alis.evals.v1.LoadTestResults.StreamSummary.total_duration:type_name -> alis.evals.v1.LatencyPercentiles
-	3,  // 57: alis.evals.v1.LoadTestResults.SloCheck.status:type_name -> alis.evals.v1.Status
-	3,  // 58: alis.evals.v1.AgentEvalResults.Case.status:type_name -> alis.evals.v1.Status
-	48, // 59: alis.evals.v1.AgentEvalResults.Case.duration:type_name -> google.protobuf.Duration
-	43, // 60: alis.evals.v1.AgentEvalResults.Case.metrics:type_name -> alis.evals.v1.AgentEvalResults.Case.Metric
-	3,  // 61: alis.evals.v1.AgentEvalResults.Case.Metric.status:type_name -> alis.evals.v1.Status
-	44, // 62: alis.evals.v1.AgentEvalResults.Case.Metric.rubric:type_name -> alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore
-	3,  // 63: alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore.status:type_name -> alis.evals.v1.Status
-	3,  // 64: alis.evals.v1.InfraObservationResults.Case.status:type_name -> alis.evals.v1.Status
-	48, // 65: alis.evals.v1.InfraObservationResults.Case.lookback:type_name -> google.protobuf.Duration
-	46, // 66: alis.evals.v1.InfraObservationResults.Case.window_start:type_name -> google.protobuf.Timestamp
-	46, // 67: alis.evals.v1.InfraObservationResults.Case.window_end:type_name -> google.protobuf.Timestamp
-	15, // 68: alis.evals.v1.InfraObservationResults.Case.cloud_run:type_name -> alis.evals.v1.CloudRunTargetSnapshot
-	16, // 69: alis.evals.v1.InfraObservationResults.Case.spanner:type_name -> alis.evals.v1.SpannerTargetSnapshot
-	17, // 70: alis.evals.v1.InfraObservationResults.Case.infra_checks:type_name -> alis.evals.v1.InfraSloCheck
-	19, // 71: alis.evals.v1.TestService.RunIntegrationTest:input_type -> alis.evals.v1.RunIntegrationTestRequest
-	22, // 72: alis.evals.v1.TestService.RunLoadTest:input_type -> alis.evals.v1.RunLoadTestRequest
-	25, // 73: alis.evals.v1.TestService.RunAgentEval:input_type -> alis.evals.v1.RunAgentEvalRequest
-	28, // 74: alis.evals.v1.TestService.RunInfraObservation:input_type -> alis.evals.v1.RunInfraObservationRequest
-	49, // 75: alis.evals.v1.TestService.RunIntegrationTest:output_type -> google.longrunning.Operation
-	49, // 76: alis.evals.v1.TestService.RunLoadTest:output_type -> google.longrunning.Operation
-	49, // 77: alis.evals.v1.TestService.RunAgentEval:output_type -> google.longrunning.Operation
-	49, // 78: alis.evals.v1.TestService.RunInfraObservation:output_type -> google.longrunning.Operation
-	75, // [75:79] is the sub-list for method output_type
-	71, // [71:75] is the sub-list for method input_type
-	71, // [71:71] is the sub-list for extension type_name
-	71, // [71:71] is the sub-list for extension extendee
-	0,  // [0:71] is the sub-list for field type_name
+	49, // 33: alis.evals.v1.RunInfraObservationRequest.lookback:type_name -> google.protobuf.Duration
+	3,  // 34: alis.evals.v1.Validation.status:type_name -> alis.evals.v1.Status
+	6,  // 35: alis.evals.v1.RunPublishedEvent.run:type_name -> alis.evals.v1.Run
+	3,  // 36: alis.evals.v1.IntegrationTestResults.Case.status:type_name -> alis.evals.v1.Status
+	34, // 37: alis.evals.v1.IntegrationTestResults.Case.checks:type_name -> alis.evals.v1.IntegrationTestResults.Case.Check
+	49, // 38: alis.evals.v1.IntegrationTestResults.Case.duration:type_name -> google.protobuf.Duration
+	3,  // 39: alis.evals.v1.IntegrationTestResults.Case.Check.status:type_name -> alis.evals.v1.Status
+	3,  // 40: alis.evals.v1.LoadTestResults.Case.status:type_name -> alis.evals.v1.Status
+	38, // 41: alis.evals.v1.LoadTestResults.Case.summary:type_name -> alis.evals.v1.LoadTestResults.Summary
+	41, // 42: alis.evals.v1.LoadTestResults.Case.checks:type_name -> alis.evals.v1.LoadTestResults.SloCheck
+	35, // 43: alis.evals.v1.LoadTestResults.Case.tags:type_name -> alis.evals.v1.LoadTestResults.StringEntry
+	15, // 44: alis.evals.v1.LoadTestResults.Case.cloud_run:type_name -> alis.evals.v1.CloudRunTargetSnapshot
+	16, // 45: alis.evals.v1.LoadTestResults.Case.spanner:type_name -> alis.evals.v1.SpannerTargetSnapshot
+	17, // 46: alis.evals.v1.LoadTestResults.Case.infra_checks:type_name -> alis.evals.v1.InfraSloCheck
+	31, // 47: alis.evals.v1.LoadTestResults.Case.validations:type_name -> alis.evals.v1.Validation
+	5,  // 48: alis.evals.v1.LoadTestResults.Summary.mode:type_name -> alis.evals.v1.RunLoadTestRequest.Mode
+	49, // 49: alis.evals.v1.LoadTestResults.Summary.duration:type_name -> google.protobuf.Duration
+	8,  // 50: alis.evals.v1.LoadTestResults.Summary.latency:type_name -> alis.evals.v1.LatencyPercentiles
+	36, // 51: alis.evals.v1.LoadTestResults.Summary.errors_by_code:type_name -> alis.evals.v1.LoadTestResults.Int64Entry
+	40, // 52: alis.evals.v1.LoadTestResults.Summary.stream:type_name -> alis.evals.v1.LoadTestResults.StreamSummary
+	39, // 53: alis.evals.v1.LoadTestResults.Summary.qps_stages:type_name -> alis.evals.v1.LoadTestResults.LoadStage
+	39, // 54: alis.evals.v1.LoadTestResults.Summary.concurrency_stages:type_name -> alis.evals.v1.LoadTestResults.LoadStage
+	49, // 55: alis.evals.v1.LoadTestResults.LoadStage.duration:type_name -> google.protobuf.Duration
+	8,  // 56: alis.evals.v1.LoadTestResults.StreamSummary.ttfb:type_name -> alis.evals.v1.LatencyPercentiles
+	8,  // 57: alis.evals.v1.LoadTestResults.StreamSummary.response_latency:type_name -> alis.evals.v1.LatencyPercentiles
+	8,  // 58: alis.evals.v1.LoadTestResults.StreamSummary.total_duration:type_name -> alis.evals.v1.LatencyPercentiles
+	3,  // 59: alis.evals.v1.LoadTestResults.SloCheck.status:type_name -> alis.evals.v1.Status
+	3,  // 60: alis.evals.v1.AgentEvalResults.Case.status:type_name -> alis.evals.v1.Status
+	49, // 61: alis.evals.v1.AgentEvalResults.Case.duration:type_name -> google.protobuf.Duration
+	44, // 62: alis.evals.v1.AgentEvalResults.Case.metrics:type_name -> alis.evals.v1.AgentEvalResults.Case.Metric
+	31, // 63: alis.evals.v1.AgentEvalResults.Case.validations:type_name -> alis.evals.v1.Validation
+	3,  // 64: alis.evals.v1.AgentEvalResults.Case.Metric.status:type_name -> alis.evals.v1.Status
+	45, // 65: alis.evals.v1.AgentEvalResults.Case.Metric.rubric:type_name -> alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore
+	3,  // 66: alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore.status:type_name -> alis.evals.v1.Status
+	3,  // 67: alis.evals.v1.InfraObservationResults.Case.status:type_name -> alis.evals.v1.Status
+	49, // 68: alis.evals.v1.InfraObservationResults.Case.lookback:type_name -> google.protobuf.Duration
+	47, // 69: alis.evals.v1.InfraObservationResults.Case.window_start:type_name -> google.protobuf.Timestamp
+	47, // 70: alis.evals.v1.InfraObservationResults.Case.window_end:type_name -> google.protobuf.Timestamp
+	15, // 71: alis.evals.v1.InfraObservationResults.Case.cloud_run:type_name -> alis.evals.v1.CloudRunTargetSnapshot
+	16, // 72: alis.evals.v1.InfraObservationResults.Case.spanner:type_name -> alis.evals.v1.SpannerTargetSnapshot
+	17, // 73: alis.evals.v1.InfraObservationResults.Case.infra_checks:type_name -> alis.evals.v1.InfraSloCheck
+	31, // 74: alis.evals.v1.InfraObservationResults.Case.validations:type_name -> alis.evals.v1.Validation
+	19, // 75: alis.evals.v1.TestService.RunIntegrationTest:input_type -> alis.evals.v1.RunIntegrationTestRequest
+	22, // 76: alis.evals.v1.TestService.RunLoadTest:input_type -> alis.evals.v1.RunLoadTestRequest
+	25, // 77: alis.evals.v1.TestService.RunAgentEval:input_type -> alis.evals.v1.RunAgentEvalRequest
+	28, // 78: alis.evals.v1.TestService.RunInfraObservation:input_type -> alis.evals.v1.RunInfraObservationRequest
+	50, // 79: alis.evals.v1.TestService.RunIntegrationTest:output_type -> google.longrunning.Operation
+	50, // 80: alis.evals.v1.TestService.RunLoadTest:output_type -> google.longrunning.Operation
+	50, // 81: alis.evals.v1.TestService.RunAgentEval:output_type -> google.longrunning.Operation
+	50, // 82: alis.evals.v1.TestService.RunInfraObservation:output_type -> google.longrunning.Operation
+	79, // [79:83] is the sub-list for method output_type
+	75, // [75:79] is the sub-list for method input_type
+	75, // [75:75] is the sub-list for extension type_name
+	75, // [75:75] is the sub-list for extension extendee
+	0,  // [0:75] is the sub-list for field type_name
 }
 
 func init() { file_alis_evals_v1_evaluation_proto_init() }
@@ -3707,17 +3804,17 @@ func file_alis_evals_v1_evaluation_proto_init() {
 	file_alis_evals_v1_evaluation_proto_msgTypes[13].OneofWrappers = []any{}
 	file_alis_evals_v1_evaluation_proto_msgTypes[16].OneofWrappers = []any{}
 	file_alis_evals_v1_evaluation_proto_msgTypes[22].OneofWrappers = []any{}
-	file_alis_evals_v1_evaluation_proto_msgTypes[31].OneofWrappers = []any{}
-	file_alis_evals_v1_evaluation_proto_msgTypes[35].OneofWrappers = []any{}
-	file_alis_evals_v1_evaluation_proto_msgTypes[37].OneofWrappers = []any{}
+	file_alis_evals_v1_evaluation_proto_msgTypes[32].OneofWrappers = []any{}
+	file_alis_evals_v1_evaluation_proto_msgTypes[36].OneofWrappers = []any{}
 	file_alis_evals_v1_evaluation_proto_msgTypes[38].OneofWrappers = []any{}
+	file_alis_evals_v1_evaluation_proto_msgTypes[39].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_alis_evals_v1_evaluation_proto_rawDesc), len(file_alis_evals_v1_evaluation_proto_rawDesc)),
 			NumEnums:      6,
-			NumMessages:   40,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
