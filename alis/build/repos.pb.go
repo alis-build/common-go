@@ -111,6 +111,7 @@ func (*Empty) Descriptor() ([]byte, []int) {
 
 type ListReposRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	LandingZoneId string                 `protobuf:"bytes,1,opt,name=landing_zone_id,json=landingZoneId,proto3" json:"landing_zone_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -143,6 +144,13 @@ func (x *ListReposRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListReposRequest.ProtoReflect.Descriptor instead.
 func (*ListReposRequest) Descriptor() ([]byte, []int) {
 	return file_alis_build_v1_repos_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ListReposRequest) GetLandingZoneId() string {
+	if x != nil {
+		return x.LandingZoneId
+	}
+	return ""
 }
 
 type ListReposResponse struct {
@@ -1150,8 +1158,9 @@ var File_alis_build_v1_repos_proto protoreflect.FileDescriptor
 const file_alis_build_v1_repos_proto_rawDesc = "" +
 	"\n" +
 	"\x19alis/build/v1/repos.proto\x12\ralis.build.v1\"\a\n" +
-	"\x05Empty\"\x12\n" +
-	"\x10ListReposRequest\">\n" +
+	"\x05Empty\":\n" +
+	"\x10ListReposRequest\x12&\n" +
+	"\x0flanding_zone_id\x18\x01 \x01(\tR\rlandingZoneId\">\n" +
 	"\x11ListReposResponse\x12)\n" +
 	"\x05repos\x18\x01 \x03(\v2\x13.alis.build.v1.RepoR\x05repos\"S\n" +
 	"\x13CreateBranchRequest\x12\x12\n" +
