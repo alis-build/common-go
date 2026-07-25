@@ -8,7 +8,7 @@ package iam
 
 import (
 	context "context"
-	validation "github.com/alis-build/public-go/alis/open/validation"
+	validation "go.alis.build/common/alis/open/validation"
 	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"

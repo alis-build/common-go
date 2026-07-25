@@ -7,7 +7,7 @@
 package iam
 
 import (
-	validation "github.com/alis-build/public-go/alis/open/validation"
+	validation "go.alis.build/common/alis/open/validation"
 	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
