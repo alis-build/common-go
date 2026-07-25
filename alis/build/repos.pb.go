@@ -1242,7 +1242,7 @@ const file_alis_build_v1_repos_proto_rawDesc = "" +
 	"\fCreateCommit\x12\".alis.build.v1.CreateCommitRequest\x1a\x14.alis.build.v1.Empty\"\x00\x12V\n" +
 	"\vListCommits\x12!.alis.build.v1.ListCommitsRequest\x1a\".alis.build.v1.ListCommitsResponse\"\x00\x12P\n" +
 	"\tListFiles\x12\x1f.alis.build.v1.ListFilesRequest\x1a .alis.build.v1.ListFilesResponse\"\x00\x12M\n" +
-	"\bViewFile\x12\x1e.alis.build.v1.ViewFileRequest\x1a\x1f.alis.build.v1.ViewFileResponse\"\x00B,Z*github.com/alis-build/public-go/alis/buildb\x06proto3"
+	"\bViewFile\x12\x1e.alis.build.v1.ViewFileRequest\x1a\x1f.alis.build.v1.ViewFileResponse\"\x00B!Z\x1fgo.alis.build/common/alis/buildb\x06proto3"
 
 var (
 	file_alis_build_v1_repos_proto_rawDescOnce sync.Once
