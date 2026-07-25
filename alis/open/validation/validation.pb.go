@@ -370,7 +370,7 @@ const file_alis_open_validation_v1_validation_proto_rawDesc = "" +
 	"\x0eviolated_rules\x18\x02 \x03(\v2\x1d.alis.open.validation.v1.RuleR\rviolatedRules2\xfd\x01\n" +
 	"\x11ValidationService\x12p\n" +
 	"\rRetrieveRules\x12-.alis.open.validation.v1.RetrieveRulesRequest\x1a..alis.open.validation.v1.RetrieveRulesResponse\"\x00\x12v\n" +
-	"\x0fValidateMessage\x12/.alis.open.validation.v1.ValidateMessageRequest\x1a0.alis.open.validation.v1.ValidateMessageResponse\"\x00B6Z4github.com/alis-build/public-go/alis/open/validationb\x06proto3"
+	"\x0fValidateMessage\x12/.alis.open.validation.v1.ValidateMessageRequest\x1a0.alis.open.validation.v1.ValidateMessageResponse\"\x00B+Z)go.alis.build/common/alis/open/validationb\x06proto3"
 
 var (
 	file_alis_open_validation_v1_validation_proto_rawDescOnce sync.Once
