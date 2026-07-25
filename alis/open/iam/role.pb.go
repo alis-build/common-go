@@ -146,7 +146,7 @@ const file_alis_open_iam_v1_role_proto_rawDesc = "" +
 	"\vdescription\x18\x06 \x01(\tR\vdescription\x12 \n" +
 	"\vpermissions\x18\a \x03(\tR\vpermissions\x12%\n" +
 	"\x0eresource_types\x18\b \x03(\tR\rresourceTypes\x12\x1b\n" +
-	"\tall_users\x18\t \x01(\bR\ballUsersB/Z-github.com/alis-build/public-go/alis/open/iamb\x06proto3"
+	"\tall_users\x18\t \x01(\bR\ballUsersB$Z\"go.alis.build/common/alis/open/iamb\x06proto3"
 
 var (
 	file_alis_open_iam_v1_role_proto_rawDescOnce sync.Once

@@ -860,7 +860,7 @@ const file_alis_open_iam_v1_oauth_proto_rawDesc = "" +
 	"\fRefreshToken\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12>\n" +
 	"\bprovider\x18\x02 \x01(\x0e2\".alis.open.iam.v1.IdentityProviderR\bprovider\x12!\n" +
-	"\fredirect_uri\x18\x03 \x01(\tR\vredirectUriB/Z-github.com/alis-build/public-go/alis/open/iamb\x06proto3"
+	"\fredirect_uri\x18\x03 \x01(\tR\vredirectUriB$Z\"go.alis.build/common/alis/open/iamb\x06proto3"
 
 var (
 	file_alis_open_iam_v1_oauth_proto_rawDescOnce sync.Once
