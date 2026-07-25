@@ -1,4 +1,4 @@
-module github.com/alis-build/public-go/alis/open/agent
+module go.alis.build/common/alis/open/agent
 go 1.26
 
 require ()

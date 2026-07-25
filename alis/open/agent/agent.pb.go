@@ -3723,7 +3723,7 @@ const file_alis_open_agent_v1_agent_proto_rawDesc = "" +
 	"\x1eListTaskPushNotificationConfig\x129.alis.open.agent.v1.ListTaskPushNotificationConfigRequest\x1a:.alis.open.agent.v1.ListTaskPushNotificationConfigResponse\"=\xdaA\x06parent\x82\xd3\xe4\x93\x02.\x12,/v1/{parent=tasks/*}/pushNotificationConfigs\x12h\n" +
 	"\fGetAgentCard\x12'.alis.open.agent.v1.GetAgentCardRequest\x1a\x1d.alis.open.agent.v1.AgentCard\"\x10\x82\xd3\xe4\x93\x02\n" +
 	"\x12\b/v1/card\x12\xb4\x01\n" +
-	" DeleteTaskPushNotificationConfig\x12;.alis.open.agent.v1.DeleteTaskPushNotificationConfigRequest\x1a\x16.google.protobuf.Empty\";\xdaA\x04name\x82\xd3\xe4\x93\x02.*,/v1/{name=tasks/*/pushNotificationConfigs/*}B1Z/github.com/alis-build/public-go/alis/open/agentb\x06proto3"
+	" DeleteTaskPushNotificationConfig\x12;.alis.open.agent.v1.DeleteTaskPushNotificationConfigRequest\x1a\x16.google.protobuf.Empty\";\xdaA\x04name\x82\xd3\xe4\x93\x02.*,/v1/{name=tasks/*/pushNotificationConfigs/*}B&Z$go.alis.build/common/alis/open/agentb\x06proto3"
 
 var (
 	file_alis_open_agent_v1_agent_proto_rawDescOnce sync.Once
