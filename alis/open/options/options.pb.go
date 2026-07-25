@@ -536,7 +536,7 @@ const file_alis_open_options_v1_options_proto_rawDesc = "" +
 	"\x0f_max_properties:T\n" +
 	"\x04file\x12\x1c.google.protobuf.FileOptions\x18\xe9\a \x01(\v2!.alis.open.options.v1.FileOptionsR\x04file:`\n" +
 	"\amessage\x12\x1f.google.protobuf.MessageOptions\x18\xe9\a \x01(\v2$.alis.open.options.v1.MessageOptionsR\amessage:X\n" +
-	"\x05field\x12\x1d.google.protobuf.FieldOptions\x18\xe9\a \x01(\v2\".alis.open.options.v1.FieldOptionsR\x05fieldB3Z1github.com/alis-build/public-go/alis/open/optionsb\x06proto3"
+	"\x05field\x12\x1d.google.protobuf.FieldOptions\x18\xe9\a \x01(\v2\".alis.open.options.v1.FieldOptionsR\x05fieldB(Z&go.alis.build/common/alis/open/optionsb\x06proto3"
 
 var (
 	file_alis_open_options_v1_options_proto_rawDescOnce sync.Once

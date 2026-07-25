@@ -1,4 +1,4 @@
-module github.com/alis-build/public-go/alis/open/options
+module go.alis.build/common/alis/open/options
 go 1.26
 
 require ()
