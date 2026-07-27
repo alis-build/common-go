@@ -3,7 +3,7 @@
 // Source: alis/a2a/extension/history/v1/history.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-07-02 09:22:52 UTC
+// Generated on: 2026-07-27 12:26:26 UTC
 
 package history
 
@@ -32,4 +32,6 @@ const (
 	ThreadService_ListThreadEvents_FullMethodDescription = ""
 	// ThreadService_StreamThreadEvents_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.StreamThreadEvents method.
 	ThreadService_StreamThreadEvents_FullMethodDescription = ""
+	// ThreadService_SetThreadDisplayName_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.SetThreadDisplayName method.
+	ThreadService_SetThreadDisplayName_FullMethodDescription = ""
 )

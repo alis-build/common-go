@@ -8,7 +8,7 @@ package history
 
 import (
 	context "context"
-	v11 "github.com/alis-build/public-go/alis/iam/v1"
+	iam "github.com/alis-build/public-go/alis/iam"
 	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -34,6 +34,7 @@ const (
 	ThreadService_UpdateUserThreadState_FullMethodName = "/alis.a2a.extension.history.v1.ThreadService/UpdateUserThreadState"
 	ThreadService_ListThreadEvents_FullMethodName      = "/alis.a2a.extension.history.v1.ThreadService/ListThreadEvents"
 	ThreadService_StreamThreadEvents_FullMethodName    = "/alis.a2a.extension.history.v1.ThreadService/StreamThreadEvents"
+	ThreadService_SetThreadDisplayName_FullMethodName  = "/alis.a2a.extension.history.v1.ThreadService/SetThreadDisplayName"
 )
 
 // ThreadServiceClient is the client API for ThreadService service.
@@ -42,8 +43,8 @@ const (
 type ThreadServiceClient interface {
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
-	AddIamBindings(ctx context.Context, in *v11.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
-	RemoveIamBindings(ctx context.Context, in *v11.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
 	ListThreads(ctx context.Context, in *ListThreadsRequest, opts ...grpc.CallOption) (*ListThreadsResponse, error)
 	GetThread(ctx context.Context, in *GetThreadRequest, opts ...grpc.CallOption) (*Thread, error)
 	DeleteThread(ctx context.Context, in *DeleteThreadRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -52,6 +53,7 @@ type ThreadServiceClient interface {
 	UpdateUserThreadState(ctx context.Context, in *UpdateUserThreadStateRequest, opts ...grpc.CallOption) (*UserThreadState, error)
 	ListThreadEvents(ctx context.Context, in *ListThreadEventsRequest, opts ...grpc.CallOption) (*ListThreadEventsResponse, error)
 	StreamThreadEvents(ctx context.Context, in *StreamThreadEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ThreadEvent], error)
+	SetThreadDisplayName(ctx context.Context, in *SetThreadDisplayNameRequest, opts ...grpc.CallOption) (*Thread, error)
 }
 
 type threadServiceClient struct {
@@ -82,7 +84,7 @@ func (c *threadServiceClient) SetIamPolicy(ctx context.Context, in *v1.SetIamPol
 	return out, nil
 }
 
-func (c *threadServiceClient) AddIamBindings(ctx context.Context, in *v11.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
+func (c *threadServiceClient) AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.Policy)
 	err := c.cc.Invoke(ctx, ThreadService_AddIamBindings_FullMethodName, in, out, cOpts...)
@@ -92,7 +94,7 @@ func (c *threadServiceClient) AddIamBindings(ctx context.Context, in *v11.AddIam
 	return out, nil
 }
 
-func (c *threadServiceClient) RemoveIamBindings(ctx context.Context, in *v11.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
+func (c *threadServiceClient) RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.Policy)
 	err := c.cc.Invoke(ctx, ThreadService_RemoveIamBindings_FullMethodName, in, out, cOpts...)
@@ -191,14 +193,24 @@ func (c *threadServiceClient) StreamThreadEvents(ctx context.Context, in *Stream
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ThreadService_StreamThreadEventsClient = grpc.ServerStreamingClient[ThreadEvent]
 
+func (c *threadServiceClient) SetThreadDisplayName(ctx context.Context, in *SetThreadDisplayNameRequest, opts ...grpc.CallOption) (*Thread, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Thread)
+	err := c.cc.Invoke(ctx, ThreadService_SetThreadDisplayName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ThreadServiceServer is the server API for ThreadService service.
 // All implementations must embed UnimplementedThreadServiceServer
 // for forward compatibility.
 type ThreadServiceServer interface {
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
-	AddIamBindings(context.Context, *v11.AddIamBindingsRequest) (*v1.Policy, error)
-	RemoveIamBindings(context.Context, *v11.RemoveIamBindingsRequest) (*v1.Policy, error)
+	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
 	ListThreads(context.Context, *ListThreadsRequest) (*ListThreadsResponse, error)
 	GetThread(context.Context, *GetThreadRequest) (*Thread, error)
 	DeleteThread(context.Context, *DeleteThreadRequest) (*emptypb.Empty, error)
@@ -207,6 +219,7 @@ type ThreadServiceServer interface {
 	UpdateUserThreadState(context.Context, *UpdateUserThreadStateRequest) (*UserThreadState, error)
 	ListThreadEvents(context.Context, *ListThreadEventsRequest) (*ListThreadEventsResponse, error)
 	StreamThreadEvents(*StreamThreadEventsRequest, grpc.ServerStreamingServer[ThreadEvent]) error
+	SetThreadDisplayName(context.Context, *SetThreadDisplayNameRequest) (*Thread, error)
 	mustEmbedUnimplementedThreadServiceServer()
 }
 
@@ -223,10 +236,10 @@ func (UnimplementedThreadServiceServer) GetIamPolicy(context.Context, *v1.GetIam
 func (UnimplementedThreadServiceServer) SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetIamPolicy not implemented")
 }
-func (UnimplementedThreadServiceServer) AddIamBindings(context.Context, *v11.AddIamBindingsRequest) (*v1.Policy, error) {
+func (UnimplementedThreadServiceServer) AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method AddIamBindings not implemented")
 }
-func (UnimplementedThreadServiceServer) RemoveIamBindings(context.Context, *v11.RemoveIamBindingsRequest) (*v1.Policy, error) {
+func (UnimplementedThreadServiceServer) RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method RemoveIamBindings not implemented")
 }
 func (UnimplementedThreadServiceServer) ListThreads(context.Context, *ListThreadsRequest) (*ListThreadsResponse, error) {
@@ -252,6 +265,9 @@ func (UnimplementedThreadServiceServer) ListThreadEvents(context.Context, *ListT
 }
 func (UnimplementedThreadServiceServer) StreamThreadEvents(*StreamThreadEventsRequest, grpc.ServerStreamingServer[ThreadEvent]) error {
 	return status.Error(codes.Unimplemented, "method StreamThreadEvents not implemented")
+}
+func (UnimplementedThreadServiceServer) SetThreadDisplayName(context.Context, *SetThreadDisplayNameRequest) (*Thread, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetThreadDisplayName not implemented")
 }
 func (UnimplementedThreadServiceServer) mustEmbedUnimplementedThreadServiceServer() {}
 func (UnimplementedThreadServiceServer) testEmbeddedByValue()                       {}
@@ -311,7 +327,7 @@ func _ThreadService_SetIamPolicy_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _ThreadService_AddIamBindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.AddIamBindingsRequest)
+	in := new(iam.AddIamBindingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -323,13 +339,13 @@ func _ThreadService_AddIamBindings_Handler(srv interface{}, ctx context.Context,
 		FullMethod: ThreadService_AddIamBindings_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadServiceServer).AddIamBindings(ctx, req.(*v11.AddIamBindingsRequest))
+		return srv.(ThreadServiceServer).AddIamBindings(ctx, req.(*iam.AddIamBindingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ThreadService_RemoveIamBindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.RemoveIamBindingsRequest)
+	in := new(iam.RemoveIamBindingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -341,7 +357,7 @@ func _ThreadService_RemoveIamBindings_Handler(srv interface{}, ctx context.Conte
 		FullMethod: ThreadService_RemoveIamBindings_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ThreadServiceServer).RemoveIamBindings(ctx, req.(*v11.RemoveIamBindingsRequest))
+		return srv.(ThreadServiceServer).RemoveIamBindings(ctx, req.(*iam.RemoveIamBindingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -483,6 +499,24 @@ func _ThreadService_StreamThreadEvents_Handler(srv interface{}, stream grpc.Serv
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ThreadService_StreamThreadEventsServer = grpc.ServerStreamingServer[ThreadEvent]
 
+func _ThreadService_SetThreadDisplayName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetThreadDisplayNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadServiceServer).SetThreadDisplayName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ThreadService_SetThreadDisplayName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadServiceServer).SetThreadDisplayName(ctx, req.(*SetThreadDisplayNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ThreadService_ServiceDesc is the grpc.ServiceDesc for ThreadService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -533,6 +567,10 @@ var ThreadService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListThreadEvents",
 			Handler:    _ThreadService_ListThreadEvents_Handler,
+		},
+		{
+			MethodName: "SetThreadDisplayName",
+			Handler:    _ThreadService_SetThreadDisplayName_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
