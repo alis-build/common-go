@@ -1,4 +1,4 @@
-module github.com/alis-build/public-go/alis/adk/sessions
+module go.alis.build/common/alis/adk/sessions
 go 1.26
 
 require ()
