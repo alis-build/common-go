@@ -726,7 +726,7 @@ const file_alis_a2a_extension_scheduler_v1_scheduler_proto_rawDesc = "" +
 	"UpdateCron\x122.alis.a2a.extension.scheduler.v1.UpdateCronRequest\x1a%.alis.a2a.extension.scheduler.v1.Cron\"\x00\x12Z\n" +
 	"\n" +
 	"DeleteCron\x122.alis.a2a.extension.scheduler.v1.DeleteCronRequest\x1a\x16.google.protobuf.Empty\"\x00\x12n\n" +
-	"\aRunCron\x12/.alis.a2a.extension.scheduler.v1.RunCronRequest\x1a0.alis.a2a.extension.scheduler.v1.RunCronResponse\"\x00B>Z<github.com/alis-build/public-go/alis/a2a/extension/schedulerb\x06proto3"
+	"\aRunCron\x12/.alis.a2a.extension.scheduler.v1.RunCronRequest\x1a0.alis.a2a.extension.scheduler.v1.RunCronResponse\"\x00B3Z1go.alis.build/common/alis/a2a/extension/schedulerb\x06proto3"
 
 var (
 	file_alis_a2a_extension_scheduler_v1_scheduler_proto_rawDescOnce sync.Once
