@@ -1,4 +1,4 @@
-module github.com/alis-build/public-go/alis/iam
+module go.alis.build/common/alis/iam
 go 1.26
 
 require ()

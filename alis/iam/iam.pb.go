@@ -322,7 +322,7 @@ const file_alis_iam_v1_iam_proto_rawDesc = "" +
 	"\x14resource_permissions\x18\x01 \x03(\v2@.alis.iam.v1.BatchTestIamPermissionsResponse.ResourcePermissionsR\x13resourcePermissions\x1aS\n" +
 	"\x13ResourcePermissions\x12\x1a\n" +
 	"\bresource\x18\x01 \x01(\tR\bresource\x12 \n" +
-	"\vpermissions\x18\x02 \x03(\tR\vpermissionsB*Z(github.com/alis-build/public-go/alis/iamb\x06proto3"
+	"\vpermissions\x18\x02 \x03(\tR\vpermissionsB\x1fZ\x1dgo.alis.build/common/alis/iamb\x06proto3"
 
 var (
 	file_alis_iam_v1_iam_proto_rawDescOnce sync.Once
