@@ -678,7 +678,7 @@ const file_alis_agui_history_v1_history_proto_rawDesc = "" +
 	"\tGetThread\x12&.alis.agui.history.v1.GetThreadRequest\x1a\x1c.alis.agui.history.v1.Thread\"\x00\x12S\n" +
 	"\fDeleteThread\x12).alis.agui.history.v1.DeleteThreadRequest\x1a\x16.google.protobuf.Empty\"\x00\x12n\n" +
 	"\x12GetUserThreadState\x12/.alis.agui.history.v1.GetUserThreadStateRequest\x1a%.alis.agui.history.v1.UserThreadState\"\x00\x12t\n" +
-	"\x15UpdateUserThreadState\x122.alis.agui.history.v1.UpdateUserThreadStateRequest\x1a%.alis.agui.history.v1.UserThreadState\"\x00B3Z1github.com/alis-build/public-go/alis/agui/historyb\x06proto3"
+	"\x15UpdateUserThreadState\x122.alis.agui.history.v1.UpdateUserThreadStateRequest\x1a%.alis.agui.history.v1.UserThreadState\"\x00B(Z&go.alis.build/common/alis/agui/historyb\x06proto3"
 
 var (
 	file_alis_agui_history_v1_history_proto_rawDescOnce sync.Once
