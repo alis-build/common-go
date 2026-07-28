@@ -3,7 +3,7 @@
 // Source: alis/agui/history/v1/history.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-07-27 12:28:02 UTC
+// Generated on: 2026-07-28 15:18:24 UTC
 
 package history
 
@@ -26,4 +26,6 @@ const (
 	ThreadService_GetUserThreadState_FullMethodDescription = ""
 	// ThreadService_UpdateUserThreadState_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.UpdateUserThreadState method.
 	ThreadService_UpdateUserThreadState_FullMethodDescription = ""
+	// ThreadService_UpdateThread_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.UpdateThread method.
+	ThreadService_UpdateThread_FullMethodDescription = ""
 )

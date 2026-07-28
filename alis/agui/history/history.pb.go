@@ -7,7 +7,7 @@
 package history
 
 import (
-	iam "github.com/alis-build/public-go/alis/iam"
+	iam "go.alis.build/common/alis/iam"
 	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -510,6 +510,58 @@ func (x *DeleteThreadRequest) GetName() string {
 	return ""
 }
 
+type UpdateThreadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Thread        *Thread                `protobuf:"bytes,1,opt,name=thread,proto3" json:"thread,omitempty"`
+	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateThreadRequest) Reset() {
+	*x = UpdateThreadRequest{}
+	mi := &file_alis_agui_history_v1_history_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateThreadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateThreadRequest) ProtoMessage() {}
+
+func (x *UpdateThreadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_alis_agui_history_v1_history_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateThreadRequest.ProtoReflect.Descriptor instead.
+func (*UpdateThreadRequest) Descriptor() ([]byte, []int) {
+	return file_alis_agui_history_v1_history_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *UpdateThreadRequest) GetThread() *Thread {
+	if x != nil {
+		return x.Thread
+	}
+	return nil
+}
+
+func (x *UpdateThreadRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
 type GetUserThreadStateRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -520,7 +572,7 @@ type GetUserThreadStateRequest struct {
 
 func (x *GetUserThreadStateRequest) Reset() {
 	*x = GetUserThreadStateRequest{}
-	mi := &file_alis_agui_history_v1_history_proto_msgTypes[7]
+	mi := &file_alis_agui_history_v1_history_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -532,7 +584,7 @@ func (x *GetUserThreadStateRequest) String() string {
 func (*GetUserThreadStateRequest) ProtoMessage() {}
 
 func (x *GetUserThreadStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_agui_history_v1_history_proto_msgTypes[7]
+	mi := &file_alis_agui_history_v1_history_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -545,7 +597,7 @@ func (x *GetUserThreadStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserThreadStateRequest.ProtoReflect.Descriptor instead.
 func (*GetUserThreadStateRequest) Descriptor() ([]byte, []int) {
-	return file_alis_agui_history_v1_history_proto_rawDescGZIP(), []int{7}
+	return file_alis_agui_history_v1_history_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetUserThreadStateRequest) GetName() string {
@@ -572,7 +624,7 @@ type UpdateUserThreadStateRequest struct {
 
 func (x *UpdateUserThreadStateRequest) Reset() {
 	*x = UpdateUserThreadStateRequest{}
-	mi := &file_alis_agui_history_v1_history_proto_msgTypes[8]
+	mi := &file_alis_agui_history_v1_history_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -584,7 +636,7 @@ func (x *UpdateUserThreadStateRequest) String() string {
 func (*UpdateUserThreadStateRequest) ProtoMessage() {}
 
 func (x *UpdateUserThreadStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_agui_history_v1_history_proto_msgTypes[8]
+	mi := &file_alis_agui_history_v1_history_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -597,7 +649,7 @@ func (x *UpdateUserThreadStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserThreadStateRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserThreadStateRequest) Descriptor() ([]byte, []int) {
-	return file_alis_agui_history_v1_history_proto_rawDescGZIP(), []int{8}
+	return file_alis_agui_history_v1_history_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateUserThreadStateRequest) GetUserThreadState() *UserThreadState {
@@ -661,14 +713,18 @@ const file_alis_agui_history_v1_history_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x127\n" +
 	"\tread_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\breadMask\")\n" +
 	"\x13DeleteThreadRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"h\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\x88\x01\n" +
+	"\x13UpdateThreadRequest\x124\n" +
+	"\x06thread\x18\x01 \x01(\v2\x1c.alis.agui.history.v1.ThreadR\x06thread\x12;\n" +
+	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
+	"updateMask\"h\n" +
 	"\x19GetUserThreadStateRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x127\n" +
 	"\tread_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\breadMask\"\xae\x01\n" +
 	"\x1cUpdateUserThreadStateRequest\x12Q\n" +
 	"\x11user_thread_state\x18\x01 \x01(\v2%.alis.agui.history.v1.UserThreadStateR\x0fuserThreadState\x12;\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask2\xc3\x06\n" +
+	"updateMask2\x9e\a\n" +
 	"\rThreadService\x12K\n" +
 	"\fGetIamPolicy\x12\".google.iam.v1.GetIamPolicyRequest\x1a\x15.google.iam.v1.Policy\"\x00\x12K\n" +
 	"\fSetIamPolicy\x12\".google.iam.v1.SetIamPolicyRequest\x1a\x15.google.iam.v1.Policy\"\x00\x12M\n" +
@@ -678,7 +734,8 @@ const file_alis_agui_history_v1_history_proto_rawDesc = "" +
 	"\tGetThread\x12&.alis.agui.history.v1.GetThreadRequest\x1a\x1c.alis.agui.history.v1.Thread\"\x00\x12S\n" +
 	"\fDeleteThread\x12).alis.agui.history.v1.DeleteThreadRequest\x1a\x16.google.protobuf.Empty\"\x00\x12n\n" +
 	"\x12GetUserThreadState\x12/.alis.agui.history.v1.GetUserThreadStateRequest\x1a%.alis.agui.history.v1.UserThreadState\"\x00\x12t\n" +
-	"\x15UpdateUserThreadState\x122.alis.agui.history.v1.UpdateUserThreadStateRequest\x1a%.alis.agui.history.v1.UserThreadState\"\x00B(Z&go.alis.build/common/alis/agui/historyb\x06proto3"
+	"\x15UpdateUserThreadState\x122.alis.agui.history.v1.UpdateUserThreadStateRequest\x1a%.alis.agui.history.v1.UserThreadState\"\x00\x12Y\n" +
+	"\fUpdateThread\x12).alis.agui.history.v1.UpdateThreadRequest\x1a\x1c.alis.agui.history.v1.Thread\"\x00B(Z&go.alis.build/common/alis/agui/historyb\x06proto3"
 
 var (
 	file_alis_agui_history_v1_history_proto_rawDescOnce sync.Once
@@ -692,7 +749,7 @@ func file_alis_agui_history_v1_history_proto_rawDescGZIP() []byte {
 	return file_alis_agui_history_v1_history_proto_rawDescData
 }
 
-var file_alis_agui_history_v1_history_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_alis_agui_history_v1_history_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_alis_agui_history_v1_history_proto_goTypes = []any{
 	(*Thread)(nil),                       // 0: alis.agui.history.v1.Thread
 	(*UserThreadState)(nil),              // 1: alis.agui.history.v1.UserThreadState
@@ -701,54 +758,59 @@ var file_alis_agui_history_v1_history_proto_goTypes = []any{
 	(*ListThreadsResponse)(nil),          // 4: alis.agui.history.v1.ListThreadsResponse
 	(*GetThreadRequest)(nil),             // 5: alis.agui.history.v1.GetThreadRequest
 	(*DeleteThreadRequest)(nil),          // 6: alis.agui.history.v1.DeleteThreadRequest
-	(*GetUserThreadStateRequest)(nil),    // 7: alis.agui.history.v1.GetUserThreadStateRequest
-	(*UpdateUserThreadStateRequest)(nil), // 8: alis.agui.history.v1.UpdateUserThreadStateRequest
-	(*timestamppb.Timestamp)(nil),        // 9: google.protobuf.Timestamp
-	(*fieldmaskpb.FieldMask)(nil),        // 10: google.protobuf.FieldMask
-	(*v1.GetIamPolicyRequest)(nil),       // 11: google.iam.v1.GetIamPolicyRequest
-	(*v1.SetIamPolicyRequest)(nil),       // 12: google.iam.v1.SetIamPolicyRequest
-	(*iam.AddIamBindingsRequest)(nil),    // 13: alis.iam.v1.AddIamBindingsRequest
-	(*iam.RemoveIamBindingsRequest)(nil), // 14: alis.iam.v1.RemoveIamBindingsRequest
-	(*v1.Policy)(nil),                    // 15: google.iam.v1.Policy
-	(*emptypb.Empty)(nil),                // 16: google.protobuf.Empty
+	(*UpdateThreadRequest)(nil),          // 7: alis.agui.history.v1.UpdateThreadRequest
+	(*GetUserThreadStateRequest)(nil),    // 8: alis.agui.history.v1.GetUserThreadStateRequest
+	(*UpdateUserThreadStateRequest)(nil), // 9: alis.agui.history.v1.UpdateUserThreadStateRequest
+	(*timestamppb.Timestamp)(nil),        // 10: google.protobuf.Timestamp
+	(*fieldmaskpb.FieldMask)(nil),        // 11: google.protobuf.FieldMask
+	(*v1.GetIamPolicyRequest)(nil),       // 12: google.iam.v1.GetIamPolicyRequest
+	(*v1.SetIamPolicyRequest)(nil),       // 13: google.iam.v1.SetIamPolicyRequest
+	(*iam.AddIamBindingsRequest)(nil),    // 14: alis.iam.v1.AddIamBindingsRequest
+	(*iam.RemoveIamBindingsRequest)(nil), // 15: alis.iam.v1.RemoveIamBindingsRequest
+	(*v1.Policy)(nil),                    // 16: google.iam.v1.Policy
+	(*emptypb.Empty)(nil),                // 17: google.protobuf.Empty
 }
 var file_alis_agui_history_v1_history_proto_depIdxs = []int32{
-	9,  // 0: alis.agui.history.v1.Thread.last_activity_time:type_name -> google.protobuf.Timestamp
-	9,  // 1: alis.agui.history.v1.Thread.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 2: alis.agui.history.v1.UserThreadState.last_read_time:type_name -> google.protobuf.Timestamp
-	9,  // 3: alis.agui.history.v1.UserThreadState.pinned_time:type_name -> google.protobuf.Timestamp
-	9,  // 4: alis.agui.history.v1.UserThreadState.update_time:type_name -> google.protobuf.Timestamp
+	10, // 0: alis.agui.history.v1.Thread.last_activity_time:type_name -> google.protobuf.Timestamp
+	10, // 1: alis.agui.history.v1.Thread.create_time:type_name -> google.protobuf.Timestamp
+	10, // 2: alis.agui.history.v1.UserThreadState.last_read_time:type_name -> google.protobuf.Timestamp
+	10, // 3: alis.agui.history.v1.UserThreadState.pinned_time:type_name -> google.protobuf.Timestamp
+	10, // 4: alis.agui.history.v1.UserThreadState.update_time:type_name -> google.protobuf.Timestamp
 	0,  // 5: alis.agui.history.v1.ThreadView.thread:type_name -> alis.agui.history.v1.Thread
-	9,  // 6: alis.agui.history.v1.ThreadView.pinned_time:type_name -> google.protobuf.Timestamp
-	10, // 7: alis.agui.history.v1.ListThreadsRequest.read_mask:type_name -> google.protobuf.FieldMask
+	10, // 6: alis.agui.history.v1.ThreadView.pinned_time:type_name -> google.protobuf.Timestamp
+	11, // 7: alis.agui.history.v1.ListThreadsRequest.read_mask:type_name -> google.protobuf.FieldMask
 	2,  // 8: alis.agui.history.v1.ListThreadsResponse.threads:type_name -> alis.agui.history.v1.ThreadView
-	10, // 9: alis.agui.history.v1.GetThreadRequest.read_mask:type_name -> google.protobuf.FieldMask
-	10, // 10: alis.agui.history.v1.GetUserThreadStateRequest.read_mask:type_name -> google.protobuf.FieldMask
-	1,  // 11: alis.agui.history.v1.UpdateUserThreadStateRequest.user_thread_state:type_name -> alis.agui.history.v1.UserThreadState
-	10, // 12: alis.agui.history.v1.UpdateUserThreadStateRequest.update_mask:type_name -> google.protobuf.FieldMask
-	11, // 13: alis.agui.history.v1.ThreadService.GetIamPolicy:input_type -> google.iam.v1.GetIamPolicyRequest
-	12, // 14: alis.agui.history.v1.ThreadService.SetIamPolicy:input_type -> google.iam.v1.SetIamPolicyRequest
-	13, // 15: alis.agui.history.v1.ThreadService.AddIamBindings:input_type -> alis.iam.v1.AddIamBindingsRequest
-	14, // 16: alis.agui.history.v1.ThreadService.RemoveIamBindings:input_type -> alis.iam.v1.RemoveIamBindingsRequest
-	3,  // 17: alis.agui.history.v1.ThreadService.ListThreads:input_type -> alis.agui.history.v1.ListThreadsRequest
-	5,  // 18: alis.agui.history.v1.ThreadService.GetThread:input_type -> alis.agui.history.v1.GetThreadRequest
-	6,  // 19: alis.agui.history.v1.ThreadService.DeleteThread:input_type -> alis.agui.history.v1.DeleteThreadRequest
-	7,  // 20: alis.agui.history.v1.ThreadService.GetUserThreadState:input_type -> alis.agui.history.v1.GetUserThreadStateRequest
-	8,  // 21: alis.agui.history.v1.ThreadService.UpdateUserThreadState:input_type -> alis.agui.history.v1.UpdateUserThreadStateRequest
-	15, // 22: alis.agui.history.v1.ThreadService.GetIamPolicy:output_type -> google.iam.v1.Policy
-	15, // 23: alis.agui.history.v1.ThreadService.SetIamPolicy:output_type -> google.iam.v1.Policy
-	15, // 24: alis.agui.history.v1.ThreadService.AddIamBindings:output_type -> google.iam.v1.Policy
-	15, // 25: alis.agui.history.v1.ThreadService.RemoveIamBindings:output_type -> google.iam.v1.Policy
-	4,  // 26: alis.agui.history.v1.ThreadService.ListThreads:output_type -> alis.agui.history.v1.ListThreadsResponse
-	0,  // 27: alis.agui.history.v1.ThreadService.GetThread:output_type -> alis.agui.history.v1.Thread
-	16, // 28: alis.agui.history.v1.ThreadService.DeleteThread:output_type -> google.protobuf.Empty
-	1,  // 29: alis.agui.history.v1.ThreadService.GetUserThreadState:output_type -> alis.agui.history.v1.UserThreadState
-	1,  // 30: alis.agui.history.v1.ThreadService.UpdateUserThreadState:output_type -> alis.agui.history.v1.UserThreadState
-	22, // [22:31] is the sub-list for method output_type
-	13, // [13:22] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	11, // 9: alis.agui.history.v1.GetThreadRequest.read_mask:type_name -> google.protobuf.FieldMask
+	0,  // 10: alis.agui.history.v1.UpdateThreadRequest.thread:type_name -> alis.agui.history.v1.Thread
+	11, // 11: alis.agui.history.v1.UpdateThreadRequest.update_mask:type_name -> google.protobuf.FieldMask
+	11, // 12: alis.agui.history.v1.GetUserThreadStateRequest.read_mask:type_name -> google.protobuf.FieldMask
+	1,  // 13: alis.agui.history.v1.UpdateUserThreadStateRequest.user_thread_state:type_name -> alis.agui.history.v1.UserThreadState
+	11, // 14: alis.agui.history.v1.UpdateUserThreadStateRequest.update_mask:type_name -> google.protobuf.FieldMask
+	12, // 15: alis.agui.history.v1.ThreadService.GetIamPolicy:input_type -> google.iam.v1.GetIamPolicyRequest
+	13, // 16: alis.agui.history.v1.ThreadService.SetIamPolicy:input_type -> google.iam.v1.SetIamPolicyRequest
+	14, // 17: alis.agui.history.v1.ThreadService.AddIamBindings:input_type -> alis.iam.v1.AddIamBindingsRequest
+	15, // 18: alis.agui.history.v1.ThreadService.RemoveIamBindings:input_type -> alis.iam.v1.RemoveIamBindingsRequest
+	3,  // 19: alis.agui.history.v1.ThreadService.ListThreads:input_type -> alis.agui.history.v1.ListThreadsRequest
+	5,  // 20: alis.agui.history.v1.ThreadService.GetThread:input_type -> alis.agui.history.v1.GetThreadRequest
+	6,  // 21: alis.agui.history.v1.ThreadService.DeleteThread:input_type -> alis.agui.history.v1.DeleteThreadRequest
+	8,  // 22: alis.agui.history.v1.ThreadService.GetUserThreadState:input_type -> alis.agui.history.v1.GetUserThreadStateRequest
+	9,  // 23: alis.agui.history.v1.ThreadService.UpdateUserThreadState:input_type -> alis.agui.history.v1.UpdateUserThreadStateRequest
+	7,  // 24: alis.agui.history.v1.ThreadService.UpdateThread:input_type -> alis.agui.history.v1.UpdateThreadRequest
+	16, // 25: alis.agui.history.v1.ThreadService.GetIamPolicy:output_type -> google.iam.v1.Policy
+	16, // 26: alis.agui.history.v1.ThreadService.SetIamPolicy:output_type -> google.iam.v1.Policy
+	16, // 27: alis.agui.history.v1.ThreadService.AddIamBindings:output_type -> google.iam.v1.Policy
+	16, // 28: alis.agui.history.v1.ThreadService.RemoveIamBindings:output_type -> google.iam.v1.Policy
+	4,  // 29: alis.agui.history.v1.ThreadService.ListThreads:output_type -> alis.agui.history.v1.ListThreadsResponse
+	0,  // 30: alis.agui.history.v1.ThreadService.GetThread:output_type -> alis.agui.history.v1.Thread
+	17, // 31: alis.agui.history.v1.ThreadService.DeleteThread:output_type -> google.protobuf.Empty
+	1,  // 32: alis.agui.history.v1.ThreadService.GetUserThreadState:output_type -> alis.agui.history.v1.UserThreadState
+	1,  // 33: alis.agui.history.v1.ThreadService.UpdateUserThreadState:output_type -> alis.agui.history.v1.UserThreadState
+	0,  // 34: alis.agui.history.v1.ThreadService.UpdateThread:output_type -> alis.agui.history.v1.Thread
+	25, // [25:35] is the sub-list for method output_type
+	15, // [15:25] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_alis_agui_history_v1_history_proto_init() }
@@ -762,7 +824,7 @@ func file_alis_agui_history_v1_history_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_alis_agui_history_v1_history_proto_rawDesc), len(file_alis_agui_history_v1_history_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

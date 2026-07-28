@@ -8,7 +8,7 @@ package history
 
 import (
 	context "context"
-	iam "github.com/alis-build/public-go/alis/iam"
+	iam "go.alis.build/common/alis/iam"
 	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -31,6 +31,7 @@ const (
 	ThreadService_DeleteThread_FullMethodName          = "/alis.agui.history.v1.ThreadService/DeleteThread"
 	ThreadService_GetUserThreadState_FullMethodName    = "/alis.agui.history.v1.ThreadService/GetUserThreadState"
 	ThreadService_UpdateUserThreadState_FullMethodName = "/alis.agui.history.v1.ThreadService/UpdateUserThreadState"
+	ThreadService_UpdateThread_FullMethodName          = "/alis.agui.history.v1.ThreadService/UpdateThread"
 )
 
 // ThreadServiceClient is the client API for ThreadService service.
@@ -46,6 +47,7 @@ type ThreadServiceClient interface {
 	DeleteThread(ctx context.Context, in *DeleteThreadRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserThreadState(ctx context.Context, in *GetUserThreadStateRequest, opts ...grpc.CallOption) (*UserThreadState, error)
 	UpdateUserThreadState(ctx context.Context, in *UpdateUserThreadStateRequest, opts ...grpc.CallOption) (*UserThreadState, error)
+	UpdateThread(ctx context.Context, in *UpdateThreadRequest, opts ...grpc.CallOption) (*Thread, error)
 }
 
 type threadServiceClient struct {
@@ -146,6 +148,16 @@ func (c *threadServiceClient) UpdateUserThreadState(ctx context.Context, in *Upd
 	return out, nil
 }
 
+func (c *threadServiceClient) UpdateThread(ctx context.Context, in *UpdateThreadRequest, opts ...grpc.CallOption) (*Thread, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Thread)
+	err := c.cc.Invoke(ctx, ThreadService_UpdateThread_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ThreadServiceServer is the server API for ThreadService service.
 // All implementations must embed UnimplementedThreadServiceServer
 // for forward compatibility.
@@ -159,6 +171,7 @@ type ThreadServiceServer interface {
 	DeleteThread(context.Context, *DeleteThreadRequest) (*emptypb.Empty, error)
 	GetUserThreadState(context.Context, *GetUserThreadStateRequest) (*UserThreadState, error)
 	UpdateUserThreadState(context.Context, *UpdateUserThreadStateRequest) (*UserThreadState, error)
+	UpdateThread(context.Context, *UpdateThreadRequest) (*Thread, error)
 	mustEmbedUnimplementedThreadServiceServer()
 }
 
@@ -195,6 +208,9 @@ func (UnimplementedThreadServiceServer) GetUserThreadState(context.Context, *Get
 }
 func (UnimplementedThreadServiceServer) UpdateUserThreadState(context.Context, *UpdateUserThreadStateRequest) (*UserThreadState, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateUserThreadState not implemented")
+}
+func (UnimplementedThreadServiceServer) UpdateThread(context.Context, *UpdateThreadRequest) (*Thread, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateThread not implemented")
 }
 func (UnimplementedThreadServiceServer) mustEmbedUnimplementedThreadServiceServer() {}
 func (UnimplementedThreadServiceServer) testEmbeddedByValue()                       {}
@@ -379,6 +395,24 @@ func _ThreadService_UpdateUserThreadState_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ThreadService_UpdateThread_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateThreadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreadServiceServer).UpdateThread(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ThreadService_UpdateThread_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreadServiceServer).UpdateThread(ctx, req.(*UpdateThreadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ThreadService_ServiceDesc is the grpc.ServiceDesc for ThreadService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -421,6 +455,10 @@ var ThreadService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUserThreadState",
 			Handler:    _ThreadService_UpdateUserThreadState_Handler,
+		},
+		{
+			MethodName: "UpdateThread",
+			Handler:    _ThreadService_UpdateThread_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
