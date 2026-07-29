@@ -3623,7 +3623,7 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"\fRunAgentEval\x12\".alis.evals.v1.RunAgentEvalRequest\x1a\x1d.google.longrunning.Operation\"/\xcaA,\n" +
 	"\x14RunAgentEvalResponse\x12\x14RunAgentEvalMetadata\x12\x9e\x01\n" +
 	"\x13RunInfraObservation\x12).alis.evals.v1.RunInfraObservationRequest\x1a\x1d.google.longrunning.Operation\"=\xcaA:\n" +
-	"\x1bRunInfraObservationResponse\x12\x1bRunInfraObservationMetadataB,Z*github.com/alis-build/public-go/alis/evalsb\x06proto3"
+	"\x1bRunInfraObservationResponse\x12\x1bRunInfraObservationMetadataB!Z\x1fgo.alis.build/common/alis/evalsb\x06proto3"
 
 var (
 	file_alis_evals_v1_evaluation_proto_rawDescOnce sync.Once
