@@ -7,7 +7,7 @@
 package config
 
 import (
-	v1 "github.com/alis-build/public-go/alis/open/iam/v1"
+	iam "go.alis.build/common/alis/open/iam"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -28,7 +28,7 @@ type ProductConfig struct {
 	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	ProjectId     string                 `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 	ProjectNumber string                 `protobuf:"bytes,4,opt,name=project_number,json=projectNumber,proto3" json:"project_number,omitempty"`
-	Roles         []*v1.Role             `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
+	Roles         []*iam.Role            `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -91,7 +91,7 @@ func (x *ProductConfig) GetProjectNumber() string {
 	return ""
 }
 
-func (x *ProductConfig) GetRoles() []*v1.Role {
+func (x *ProductConfig) GetRoles() []*iam.Role {
 	if x != nil {
 		return x.Roles
 	}
@@ -109,7 +109,7 @@ const file_alis_open_config_v1_config_proto_rawDesc = "" +
 	"\n" +
 	"project_id\x18\x03 \x01(\tR\tprojectId\x12%\n" +
 	"\x0eproject_number\x18\x04 \x01(\tR\rprojectNumber\x12,\n" +
-	"\x05roles\x18\x05 \x03(\v2\x16.alis.open.iam.v1.RoleR\x05rolesB2Z0github.com/alis-build/public-go/alis/open/configb\x06proto3"
+	"\x05roles\x18\x05 \x03(\v2\x16.alis.open.iam.v1.RoleR\x05rolesB'Z%go.alis.build/common/alis/open/configb\x06proto3"
 
 var (
 	file_alis_open_config_v1_config_proto_rawDescOnce sync.Once
@@ -126,7 +126,7 @@ func file_alis_open_config_v1_config_proto_rawDescGZIP() []byte {
 var file_alis_open_config_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_alis_open_config_v1_config_proto_goTypes = []any{
 	(*ProductConfig)(nil), // 0: alis.open.config.v1.ProductConfig
-	(*v1.Role)(nil),       // 1: alis.open.iam.v1.Role
+	(*iam.Role)(nil),      // 1: alis.open.iam.v1.Role
 }
 var file_alis_open_config_v1_config_proto_depIdxs = []int32{
 	1, // 0: alis.open.config.v1.ProductConfig.roles:type_name -> alis.open.iam.v1.Role
