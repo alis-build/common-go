@@ -2236,7 +2236,7 @@ const file_alis_open_cx_v1_cx_proto_rawDesc = "" +
 	"\n" +
 	"\x06GLOBAL\x10\x01\x12\n" +
 	"\n" +
-	"\x06CUSTOM\x10\x02B.Z,github.com/alis-build/public-go/alis/open/cxb\x06proto3"
+	"\x06CUSTOM\x10\x02B#Z!go.alis.build/common/alis/open/cxb\x06proto3"
 
 var (
 	file_alis_open_cx_v1_cx_proto_rawDescOnce sync.Once
