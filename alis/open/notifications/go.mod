@@ -1,4 +1,4 @@
-module github.com/alis-build/public-go/alis/open/notifications
+module go.alis.build/common/alis/open/notifications
 go 1.26
 
 require ()

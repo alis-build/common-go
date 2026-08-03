@@ -8,9 +8,9 @@ package notifications
 
 import (
 	context "context"
-	iam "github.com/alis-build/public-go/alis/open/iam"
-	v1 "github.com/alis-build/public-go/alis/open/validation/v1"
-	v11 "google.golang.org/genproto/googleapis/iam/v1"
+	iam "go.alis.build/common/alis/open/iam"
+	validation "go.alis.build/common/alis/open/validation"
+	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -40,13 +40,13 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DevicesServiceClient interface {
-	ValidateMessage(ctx context.Context, in *v1.ValidateMessageRequest, opts ...grpc.CallOption) (*v1.ValidateMessageResponse, error)
-	RetrieveRules(ctx context.Context, in *v1.RetrieveRulesRequest, opts ...grpc.CallOption) (*v1.RetrieveRulesResponse, error)
-	GetIamPolicy(ctx context.Context, in *v11.GetIamPolicyRequest, opts ...grpc.CallOption) (*v11.Policy, error)
-	SetIamPolicy(ctx context.Context, in *v11.SetIamPolicyRequest, opts ...grpc.CallOption) (*v11.Policy, error)
-	TestIamPermissions(ctx context.Context, in *v11.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v11.TestIamPermissionsResponse, error)
-	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v11.Policy, error)
-	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v11.Policy, error)
+	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error)
+	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
 	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*RegisterDeviceResponse, error)
 	GetDevice(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*Device, error)
 	ListDevices(ctx context.Context, in *ListDevicesRequest, opts ...grpc.CallOption) (*ListDevicesResponse, error)
@@ -61,9 +61,9 @@ func NewDevicesServiceClient(cc grpc.ClientConnInterface) DevicesServiceClient {
 	return &devicesServiceClient{cc}
 }
 
-func (c *devicesServiceClient) ValidateMessage(ctx context.Context, in *v1.ValidateMessageRequest, opts ...grpc.CallOption) (*v1.ValidateMessageResponse, error) {
+func (c *devicesServiceClient) ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.ValidateMessageResponse)
+	out := new(validation.ValidateMessageResponse)
 	err := c.cc.Invoke(ctx, DevicesService_ValidateMessage_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -71,9 +71,9 @@ func (c *devicesServiceClient) ValidateMessage(ctx context.Context, in *v1.Valid
 	return out, nil
 }
 
-func (c *devicesServiceClient) RetrieveRules(ctx context.Context, in *v1.RetrieveRulesRequest, opts ...grpc.CallOption) (*v1.RetrieveRulesResponse, error) {
+func (c *devicesServiceClient) RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.RetrieveRulesResponse)
+	out := new(validation.RetrieveRulesResponse)
 	err := c.cc.Invoke(ctx, DevicesService_RetrieveRules_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -81,9 +81,9 @@ func (c *devicesServiceClient) RetrieveRules(ctx context.Context, in *v1.Retriev
 	return out, nil
 }
 
-func (c *devicesServiceClient) GetIamPolicy(ctx context.Context, in *v11.GetIamPolicyRequest, opts ...grpc.CallOption) (*v11.Policy, error) {
+func (c *devicesServiceClient) GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.Policy)
+	out := new(v1.Policy)
 	err := c.cc.Invoke(ctx, DevicesService_GetIamPolicy_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -91,9 +91,9 @@ func (c *devicesServiceClient) GetIamPolicy(ctx context.Context, in *v11.GetIamP
 	return out, nil
 }
 
-func (c *devicesServiceClient) SetIamPolicy(ctx context.Context, in *v11.SetIamPolicyRequest, opts ...grpc.CallOption) (*v11.Policy, error) {
+func (c *devicesServiceClient) SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.Policy)
+	out := new(v1.Policy)
 	err := c.cc.Invoke(ctx, DevicesService_SetIamPolicy_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -101,9 +101,9 @@ func (c *devicesServiceClient) SetIamPolicy(ctx context.Context, in *v11.SetIamP
 	return out, nil
 }
 
-func (c *devicesServiceClient) TestIamPermissions(ctx context.Context, in *v11.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v11.TestIamPermissionsResponse, error) {
+func (c *devicesServiceClient) TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.TestIamPermissionsResponse)
+	out := new(v1.TestIamPermissionsResponse)
 	err := c.cc.Invoke(ctx, DevicesService_TestIamPermissions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -111,9 +111,9 @@ func (c *devicesServiceClient) TestIamPermissions(ctx context.Context, in *v11.T
 	return out, nil
 }
 
-func (c *devicesServiceClient) AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v11.Policy, error) {
+func (c *devicesServiceClient) AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.Policy)
+	out := new(v1.Policy)
 	err := c.cc.Invoke(ctx, DevicesService_AddIamBindings_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -121,9 +121,9 @@ func (c *devicesServiceClient) AddIamBindings(ctx context.Context, in *iam.AddIa
 	return out, nil
 }
 
-func (c *devicesServiceClient) RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v11.Policy, error) {
+func (c *devicesServiceClient) RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.Policy)
+	out := new(v1.Policy)
 	err := c.cc.Invoke(ctx, DevicesService_RemoveIamBindings_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -175,13 +175,13 @@ func (c *devicesServiceClient) DeleteDevice(ctx context.Context, in *DeleteDevic
 // All implementations must embed UnimplementedDevicesServiceServer
 // for forward compatibility.
 type DevicesServiceServer interface {
-	ValidateMessage(context.Context, *v1.ValidateMessageRequest) (*v1.ValidateMessageResponse, error)
-	RetrieveRules(context.Context, *v1.RetrieveRulesRequest) (*v1.RetrieveRulesResponse, error)
-	GetIamPolicy(context.Context, *v11.GetIamPolicyRequest) (*v11.Policy, error)
-	SetIamPolicy(context.Context, *v11.SetIamPolicyRequest) (*v11.Policy, error)
-	TestIamPermissions(context.Context, *v11.TestIamPermissionsRequest) (*v11.TestIamPermissionsResponse, error)
-	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v11.Policy, error)
-	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v11.Policy, error)
+	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error)
+	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
 	RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceResponse, error)
 	GetDevice(context.Context, *GetDeviceRequest) (*Device, error)
 	ListDevices(context.Context, *ListDevicesRequest) (*ListDevicesResponse, error)
@@ -196,25 +196,25 @@ type DevicesServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedDevicesServiceServer struct{}
 
-func (UnimplementedDevicesServiceServer) ValidateMessage(context.Context, *v1.ValidateMessageRequest) (*v1.ValidateMessageResponse, error) {
+func (UnimplementedDevicesServiceServer) ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ValidateMessage not implemented")
 }
-func (UnimplementedDevicesServiceServer) RetrieveRules(context.Context, *v1.RetrieveRulesRequest) (*v1.RetrieveRulesResponse, error) {
+func (UnimplementedDevicesServiceServer) RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RetrieveRules not implemented")
 }
-func (UnimplementedDevicesServiceServer) GetIamPolicy(context.Context, *v11.GetIamPolicyRequest) (*v11.Policy, error) {
+func (UnimplementedDevicesServiceServer) GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetIamPolicy not implemented")
 }
-func (UnimplementedDevicesServiceServer) SetIamPolicy(context.Context, *v11.SetIamPolicyRequest) (*v11.Policy, error) {
+func (UnimplementedDevicesServiceServer) SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetIamPolicy not implemented")
 }
-func (UnimplementedDevicesServiceServer) TestIamPermissions(context.Context, *v11.TestIamPermissionsRequest) (*v11.TestIamPermissionsResponse, error) {
+func (UnimplementedDevicesServiceServer) TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method TestIamPermissions not implemented")
 }
-func (UnimplementedDevicesServiceServer) AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v11.Policy, error) {
+func (UnimplementedDevicesServiceServer) AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method AddIamBindings not implemented")
 }
-func (UnimplementedDevicesServiceServer) RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v11.Policy, error) {
+func (UnimplementedDevicesServiceServer) RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error) {
 	return nil, status.Error(codes.Unimplemented, "method RemoveIamBindings not implemented")
 }
 func (UnimplementedDevicesServiceServer) RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceResponse, error) {
@@ -251,7 +251,7 @@ func RegisterDevicesServiceServer(s grpc.ServiceRegistrar, srv DevicesServiceSer
 }
 
 func _DevicesService_ValidateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.ValidateMessageRequest)
+	in := new(validation.ValidateMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -263,13 +263,13 @@ func _DevicesService_ValidateMessage_Handler(srv interface{}, ctx context.Contex
 		FullMethod: DevicesService_ValidateMessage_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevicesServiceServer).ValidateMessage(ctx, req.(*v1.ValidateMessageRequest))
+		return srv.(DevicesServiceServer).ValidateMessage(ctx, req.(*validation.ValidateMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _DevicesService_RetrieveRules_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.RetrieveRulesRequest)
+	in := new(validation.RetrieveRulesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -281,13 +281,13 @@ func _DevicesService_RetrieveRules_Handler(srv interface{}, ctx context.Context,
 		FullMethod: DevicesService_RetrieveRules_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevicesServiceServer).RetrieveRules(ctx, req.(*v1.RetrieveRulesRequest))
+		return srv.(DevicesServiceServer).RetrieveRules(ctx, req.(*validation.RetrieveRulesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _DevicesService_GetIamPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.GetIamPolicyRequest)
+	in := new(v1.GetIamPolicyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -299,13 +299,13 @@ func _DevicesService_GetIamPolicy_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: DevicesService_GetIamPolicy_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevicesServiceServer).GetIamPolicy(ctx, req.(*v11.GetIamPolicyRequest))
+		return srv.(DevicesServiceServer).GetIamPolicy(ctx, req.(*v1.GetIamPolicyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _DevicesService_SetIamPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.SetIamPolicyRequest)
+	in := new(v1.SetIamPolicyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -317,13 +317,13 @@ func _DevicesService_SetIamPolicy_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: DevicesService_SetIamPolicy_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevicesServiceServer).SetIamPolicy(ctx, req.(*v11.SetIamPolicyRequest))
+		return srv.(DevicesServiceServer).SetIamPolicy(ctx, req.(*v1.SetIamPolicyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _DevicesService_TestIamPermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.TestIamPermissionsRequest)
+	in := new(v1.TestIamPermissionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -335,7 +335,7 @@ func _DevicesService_TestIamPermissions_Handler(srv interface{}, ctx context.Con
 		FullMethod: DevicesService_TestIamPermissions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DevicesServiceServer).TestIamPermissions(ctx, req.(*v11.TestIamPermissionsRequest))
+		return srv.(DevicesServiceServer).TestIamPermissions(ctx, req.(*v1.TestIamPermissionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

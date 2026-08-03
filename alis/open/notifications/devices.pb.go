@@ -7,9 +7,9 @@
 package notifications
 
 import (
-	iam "github.com/alis-build/public-go/alis/open/iam"
-	v1 "github.com/alis-build/public-go/alis/open/validation/v1"
-	v11 "google.golang.org/genproto/googleapis/iam/v1"
+	iam "go.alis.build/common/alis/open/iam"
+	validation "go.alis.build/common/alis/open/validation"
+	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -449,7 +449,7 @@ const file_alis_open_notifications_v1_devices_proto_rawDesc = "" +
 	"\x0eRegisterDevice\x121.alis.open.notifications.v1.RegisterDeviceRequest\x1a2.alis.open.notifications.v1.RegisterDeviceResponse\"\x00\x12_\n" +
 	"\tGetDevice\x12,.alis.open.notifications.v1.GetDeviceRequest\x1a\".alis.open.notifications.v1.Device\"\x00\x12p\n" +
 	"\vListDevices\x12..alis.open.notifications.v1.ListDevicesRequest\x1a/.alis.open.notifications.v1.ListDevicesResponse\"\x00\x12Y\n" +
-	"\fDeleteDevice\x12/.alis.open.notifications.v1.DeleteDeviceRequest\x1a\x16.google.protobuf.Empty\"\x00B9Z7github.com/alis-build/public-go/alis/open/notificationsb\x06proto3"
+	"\fDeleteDevice\x12/.alis.open.notifications.v1.DeleteDeviceRequest\x1a\x16.google.protobuf.Empty\"\x00B.Z,go.alis.build/common/alis/open/notificationsb\x06proto3"
 
 var (
 	file_alis_open_notifications_v1_devices_proto_rawDescOnce sync.Once
@@ -465,27 +465,27 @@ func file_alis_open_notifications_v1_devices_proto_rawDescGZIP() []byte {
 
 var file_alis_open_notifications_v1_devices_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_alis_open_notifications_v1_devices_proto_goTypes = []any{
-	(*Device)(nil),                         // 0: alis.open.notifications.v1.Device
-	(*GetDeviceRequest)(nil),               // 1: alis.open.notifications.v1.GetDeviceRequest
-	(*ListDevicesRequest)(nil),             // 2: alis.open.notifications.v1.ListDevicesRequest
-	(*ListDevicesResponse)(nil),            // 3: alis.open.notifications.v1.ListDevicesResponse
-	(*DeleteDeviceRequest)(nil),            // 4: alis.open.notifications.v1.DeleteDeviceRequest
-	(*RegisterDeviceRequest)(nil),          // 5: alis.open.notifications.v1.RegisterDeviceRequest
-	(*RegisterDeviceResponse)(nil),         // 6: alis.open.notifications.v1.RegisterDeviceResponse
-	(*timestamppb.Timestamp)(nil),          // 7: google.protobuf.Timestamp
-	(*fieldmaskpb.FieldMask)(nil),          // 8: google.protobuf.FieldMask
-	(*v1.ValidateMessageRequest)(nil),      // 9: alis.open.validation.v1.ValidateMessageRequest
-	(*v1.RetrieveRulesRequest)(nil),        // 10: alis.open.validation.v1.RetrieveRulesRequest
-	(*v11.GetIamPolicyRequest)(nil),        // 11: google.iam.v1.GetIamPolicyRequest
-	(*v11.SetIamPolicyRequest)(nil),        // 12: google.iam.v1.SetIamPolicyRequest
-	(*v11.TestIamPermissionsRequest)(nil),  // 13: google.iam.v1.TestIamPermissionsRequest
-	(*iam.AddIamBindingsRequest)(nil),      // 14: alis.open.iam.v1.AddIamBindingsRequest
-	(*iam.RemoveIamBindingsRequest)(nil),   // 15: alis.open.iam.v1.RemoveIamBindingsRequest
-	(*v1.ValidateMessageResponse)(nil),     // 16: alis.open.validation.v1.ValidateMessageResponse
-	(*v1.RetrieveRulesResponse)(nil),       // 17: alis.open.validation.v1.RetrieveRulesResponse
-	(*v11.Policy)(nil),                     // 18: google.iam.v1.Policy
-	(*v11.TestIamPermissionsResponse)(nil), // 19: google.iam.v1.TestIamPermissionsResponse
-	(*emptypb.Empty)(nil),                  // 20: google.protobuf.Empty
+	(*Device)(nil),                             // 0: alis.open.notifications.v1.Device
+	(*GetDeviceRequest)(nil),                   // 1: alis.open.notifications.v1.GetDeviceRequest
+	(*ListDevicesRequest)(nil),                 // 2: alis.open.notifications.v1.ListDevicesRequest
+	(*ListDevicesResponse)(nil),                // 3: alis.open.notifications.v1.ListDevicesResponse
+	(*DeleteDeviceRequest)(nil),                // 4: alis.open.notifications.v1.DeleteDeviceRequest
+	(*RegisterDeviceRequest)(nil),              // 5: alis.open.notifications.v1.RegisterDeviceRequest
+	(*RegisterDeviceResponse)(nil),             // 6: alis.open.notifications.v1.RegisterDeviceResponse
+	(*timestamppb.Timestamp)(nil),              // 7: google.protobuf.Timestamp
+	(*fieldmaskpb.FieldMask)(nil),              // 8: google.protobuf.FieldMask
+	(*validation.ValidateMessageRequest)(nil),  // 9: alis.open.validation.v1.ValidateMessageRequest
+	(*validation.RetrieveRulesRequest)(nil),    // 10: alis.open.validation.v1.RetrieveRulesRequest
+	(*v1.GetIamPolicyRequest)(nil),             // 11: google.iam.v1.GetIamPolicyRequest
+	(*v1.SetIamPolicyRequest)(nil),             // 12: google.iam.v1.SetIamPolicyRequest
+	(*v1.TestIamPermissionsRequest)(nil),       // 13: google.iam.v1.TestIamPermissionsRequest
+	(*iam.AddIamBindingsRequest)(nil),          // 14: alis.open.iam.v1.AddIamBindingsRequest
+	(*iam.RemoveIamBindingsRequest)(nil),       // 15: alis.open.iam.v1.RemoveIamBindingsRequest
+	(*validation.ValidateMessageResponse)(nil), // 16: alis.open.validation.v1.ValidateMessageResponse
+	(*validation.RetrieveRulesResponse)(nil),   // 17: alis.open.validation.v1.RetrieveRulesResponse
+	(*v1.Policy)(nil),                          // 18: google.iam.v1.Policy
+	(*v1.TestIamPermissionsResponse)(nil),      // 19: google.iam.v1.TestIamPermissionsResponse
+	(*emptypb.Empty)(nil),                      // 20: google.protobuf.Empty
 }
 var file_alis_open_notifications_v1_devices_proto_depIdxs = []int32{
 	7,  // 0: alis.open.notifications.v1.Device.create_time:type_name -> google.protobuf.Timestamp

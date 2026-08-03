@@ -8,8 +8,8 @@ package notifications
 
 import (
 	context "context"
-	v1 "github.com/alis-build/public-go/alis/open/validation/v1"
-	v11 "google.golang.org/genproto/googleapis/iam/v1"
+	validation "go.alis.build/common/alis/open/validation"
+	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -32,9 +32,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotificationsServiceClient interface {
-	ValidateMessage(ctx context.Context, in *v1.ValidateMessageRequest, opts ...grpc.CallOption) (*v1.ValidateMessageResponse, error)
-	RetrieveRules(ctx context.Context, in *v1.RetrieveRulesRequest, opts ...grpc.CallOption) (*v1.RetrieveRulesResponse, error)
-	TestIamPermissions(ctx context.Context, in *v11.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v11.TestIamPermissionsResponse, error)
+	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error)
 	SendFcmMessage(ctx context.Context, in *SendFcmMessageRequest, opts ...grpc.CallOption) (*SendFcmMessageResponse, error)
 	BatchSendFcmMessages(ctx context.Context, in *BatchSendFcmMessagesRequest, opts ...grpc.CallOption) (*BatchSendFcmMessagesResponse, error)
 }
@@ -47,9 +47,9 @@ func NewNotificationsServiceClient(cc grpc.ClientConnInterface) NotificationsSer
 	return &notificationsServiceClient{cc}
 }
 
-func (c *notificationsServiceClient) ValidateMessage(ctx context.Context, in *v1.ValidateMessageRequest, opts ...grpc.CallOption) (*v1.ValidateMessageResponse, error) {
+func (c *notificationsServiceClient) ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.ValidateMessageResponse)
+	out := new(validation.ValidateMessageResponse)
 	err := c.cc.Invoke(ctx, NotificationsService_ValidateMessage_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -57,9 +57,9 @@ func (c *notificationsServiceClient) ValidateMessage(ctx context.Context, in *v1
 	return out, nil
 }
 
-func (c *notificationsServiceClient) RetrieveRules(ctx context.Context, in *v1.RetrieveRulesRequest, opts ...grpc.CallOption) (*v1.RetrieveRulesResponse, error) {
+func (c *notificationsServiceClient) RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.RetrieveRulesResponse)
+	out := new(validation.RetrieveRulesResponse)
 	err := c.cc.Invoke(ctx, NotificationsService_RetrieveRules_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -67,9 +67,9 @@ func (c *notificationsServiceClient) RetrieveRules(ctx context.Context, in *v1.R
 	return out, nil
 }
 
-func (c *notificationsServiceClient) TestIamPermissions(ctx context.Context, in *v11.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v11.TestIamPermissionsResponse, error) {
+func (c *notificationsServiceClient) TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.TestIamPermissionsResponse)
+	out := new(v1.TestIamPermissionsResponse)
 	err := c.cc.Invoke(ctx, NotificationsService_TestIamPermissions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -101,9 +101,9 @@ func (c *notificationsServiceClient) BatchSendFcmMessages(ctx context.Context, i
 // All implementations must embed UnimplementedNotificationsServiceServer
 // for forward compatibility.
 type NotificationsServiceServer interface {
-	ValidateMessage(context.Context, *v1.ValidateMessageRequest) (*v1.ValidateMessageResponse, error)
-	RetrieveRules(context.Context, *v1.RetrieveRulesRequest) (*v1.RetrieveRulesResponse, error)
-	TestIamPermissions(context.Context, *v11.TestIamPermissionsRequest) (*v11.TestIamPermissionsResponse, error)
+	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error)
 	SendFcmMessage(context.Context, *SendFcmMessageRequest) (*SendFcmMessageResponse, error)
 	BatchSendFcmMessages(context.Context, *BatchSendFcmMessagesRequest) (*BatchSendFcmMessagesResponse, error)
 	mustEmbedUnimplementedNotificationsServiceServer()
@@ -116,13 +116,13 @@ type NotificationsServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedNotificationsServiceServer struct{}
 
-func (UnimplementedNotificationsServiceServer) ValidateMessage(context.Context, *v1.ValidateMessageRequest) (*v1.ValidateMessageResponse, error) {
+func (UnimplementedNotificationsServiceServer) ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ValidateMessage not implemented")
 }
-func (UnimplementedNotificationsServiceServer) RetrieveRules(context.Context, *v1.RetrieveRulesRequest) (*v1.RetrieveRulesResponse, error) {
+func (UnimplementedNotificationsServiceServer) RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RetrieveRules not implemented")
 }
-func (UnimplementedNotificationsServiceServer) TestIamPermissions(context.Context, *v11.TestIamPermissionsRequest) (*v11.TestIamPermissionsResponse, error) {
+func (UnimplementedNotificationsServiceServer) TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method TestIamPermissions not implemented")
 }
 func (UnimplementedNotificationsServiceServer) SendFcmMessage(context.Context, *SendFcmMessageRequest) (*SendFcmMessageResponse, error) {
@@ -153,7 +153,7 @@ func RegisterNotificationsServiceServer(s grpc.ServiceRegistrar, srv Notificatio
 }
 
 func _NotificationsService_ValidateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.ValidateMessageRequest)
+	in := new(validation.ValidateMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -165,13 +165,13 @@ func _NotificationsService_ValidateMessage_Handler(srv interface{}, ctx context.
 		FullMethod: NotificationsService_ValidateMessage_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationsServiceServer).ValidateMessage(ctx, req.(*v1.ValidateMessageRequest))
+		return srv.(NotificationsServiceServer).ValidateMessage(ctx, req.(*validation.ValidateMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _NotificationsService_RetrieveRules_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.RetrieveRulesRequest)
+	in := new(validation.RetrieveRulesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -183,13 +183,13 @@ func _NotificationsService_RetrieveRules_Handler(srv interface{}, ctx context.Co
 		FullMethod: NotificationsService_RetrieveRules_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationsServiceServer).RetrieveRules(ctx, req.(*v1.RetrieveRulesRequest))
+		return srv.(NotificationsServiceServer).RetrieveRules(ctx, req.(*validation.RetrieveRulesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _NotificationsService_TestIamPermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.TestIamPermissionsRequest)
+	in := new(v1.TestIamPermissionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func _NotificationsService_TestIamPermissions_Handler(srv interface{}, ctx conte
 		FullMethod: NotificationsService_TestIamPermissions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationsServiceServer).TestIamPermissions(ctx, req.(*v11.TestIamPermissionsRequest))
+		return srv.(NotificationsServiceServer).TestIamPermissions(ctx, req.(*v1.TestIamPermissionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

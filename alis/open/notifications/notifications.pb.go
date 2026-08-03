@@ -7,8 +7,8 @@
 package notifications
 
 import (
-	v1 "github.com/alis-build/public-go/alis/open/validation/v1"
-	v11 "google.golang.org/genproto/googleapis/iam/v1"
+	validation "go.alis.build/common/alis/open/validation"
+	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -290,7 +290,7 @@ const file_alis_open_notifications_v1_notifications_proto_rawDesc = "" +
 	"\rRetrieveRules\x12-.alis.open.validation.v1.RetrieveRulesRequest\x1a..alis.open.validation.v1.RetrieveRulesResponse\"\x00\x12k\n" +
 	"\x12TestIamPermissions\x12(.google.iam.v1.TestIamPermissionsRequest\x1a).google.iam.v1.TestIamPermissionsResponse\"\x00\x12y\n" +
 	"\x0eSendFcmMessage\x121.alis.open.notifications.v1.SendFcmMessageRequest\x1a2.alis.open.notifications.v1.SendFcmMessageResponse\"\x00\x12\x8b\x01\n" +
-	"\x14BatchSendFcmMessages\x127.alis.open.notifications.v1.BatchSendFcmMessagesRequest\x1a8.alis.open.notifications.v1.BatchSendFcmMessagesResponse\"\x00B9Z7github.com/alis-build/public-go/alis/open/notificationsb\x06proto3"
+	"\x14BatchSendFcmMessages\x127.alis.open.notifications.v1.BatchSendFcmMessagesRequest\x1a8.alis.open.notifications.v1.BatchSendFcmMessagesResponse\"\x00B.Z,go.alis.build/common/alis/open/notificationsb\x06proto3"
 
 var (
 	file_alis_open_notifications_v1_notifications_proto_rawDescOnce sync.Once
@@ -306,17 +306,17 @@ func file_alis_open_notifications_v1_notifications_proto_rawDescGZIP() []byte {
 
 var file_alis_open_notifications_v1_notifications_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_alis_open_notifications_v1_notifications_proto_goTypes = []any{
-	(*SendFcmMessageRequest)(nil),          // 0: alis.open.notifications.v1.SendFcmMessageRequest
-	(*SendFcmMessageResponse)(nil),         // 1: alis.open.notifications.v1.SendFcmMessageResponse
-	(*BatchSendFcmMessagesRequest)(nil),    // 2: alis.open.notifications.v1.BatchSendFcmMessagesRequest
-	(*BatchSendFcmMessagesResponse)(nil),   // 3: alis.open.notifications.v1.BatchSendFcmMessagesResponse
-	nil,                                    // 4: alis.open.notifications.v1.SendFcmMessageRequest.DataEntry
-	(*v1.ValidateMessageRequest)(nil),      // 5: alis.open.validation.v1.ValidateMessageRequest
-	(*v1.RetrieveRulesRequest)(nil),        // 6: alis.open.validation.v1.RetrieveRulesRequest
-	(*v11.TestIamPermissionsRequest)(nil),  // 7: google.iam.v1.TestIamPermissionsRequest
-	(*v1.ValidateMessageResponse)(nil),     // 8: alis.open.validation.v1.ValidateMessageResponse
-	(*v1.RetrieveRulesResponse)(nil),       // 9: alis.open.validation.v1.RetrieveRulesResponse
-	(*v11.TestIamPermissionsResponse)(nil), // 10: google.iam.v1.TestIamPermissionsResponse
+	(*SendFcmMessageRequest)(nil),              // 0: alis.open.notifications.v1.SendFcmMessageRequest
+	(*SendFcmMessageResponse)(nil),             // 1: alis.open.notifications.v1.SendFcmMessageResponse
+	(*BatchSendFcmMessagesRequest)(nil),        // 2: alis.open.notifications.v1.BatchSendFcmMessagesRequest
+	(*BatchSendFcmMessagesResponse)(nil),       // 3: alis.open.notifications.v1.BatchSendFcmMessagesResponse
+	nil,                                        // 4: alis.open.notifications.v1.SendFcmMessageRequest.DataEntry
+	(*validation.ValidateMessageRequest)(nil),  // 5: alis.open.validation.v1.ValidateMessageRequest
+	(*validation.RetrieveRulesRequest)(nil),    // 6: alis.open.validation.v1.RetrieveRulesRequest
+	(*v1.TestIamPermissionsRequest)(nil),       // 7: google.iam.v1.TestIamPermissionsRequest
+	(*validation.ValidateMessageResponse)(nil), // 8: alis.open.validation.v1.ValidateMessageResponse
+	(*validation.RetrieveRulesResponse)(nil),   // 9: alis.open.validation.v1.RetrieveRulesResponse
+	(*v1.TestIamPermissionsResponse)(nil),      // 10: google.iam.v1.TestIamPermissionsResponse
 }
 var file_alis_open_notifications_v1_notifications_proto_depIdxs = []int32{
 	4,  // 0: alis.open.notifications.v1.SendFcmMessageRequest.data:type_name -> alis.open.notifications.v1.SendFcmMessageRequest.DataEntry
