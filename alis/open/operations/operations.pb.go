@@ -308,7 +308,7 @@ const file_alis_open_operations_v1_operations_proto_rawDesc = "" +
 	"\vtarget_host\x18\x05 \x01(\tR\n" +
 	"targetHostB\b\n" +
 	"\x06resultB\b\n" +
-	"\x06runnerJ\x04\b\a\x10\bJ\x04\b\b\x10\tB6Z4github.com/alis-build/public-go/alis/open/operationsb\x06proto3"
+	"\x06runnerJ\x04\b\a\x10\bJ\x04\b\b\x10\tB+Z)go.alis.build/common/alis/open/operationsb\x06proto3"
 
 var (
 	file_alis_open_operations_v1_operations_proto_rawDescOnce sync.Once
