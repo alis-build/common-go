@@ -3,7 +3,7 @@
 // Source: alis/open/iam/v1/role.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-03 06:05:43 UTC
+// Generated on: 2026-08-03 17:31:40 UTC
 
 package iam
 
