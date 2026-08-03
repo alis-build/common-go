@@ -8,7 +8,7 @@ package flows
 
 import (
 	context "context"
-	v1 "github.com/alis-build/public-go/alis/open/pubsub/v1"
+	pubsub "github.com/alis-build/public-go/alis/open/pubsub"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -37,8 +37,8 @@ type FlowsServiceClient interface {
 	ListFlows(ctx context.Context, in *ListFlowsRequest, opts ...grpc.CallOption) (*ListFlowsResponse, error)
 	StreamFlows(ctx context.Context, in *StreamFlowsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Flow], error)
 	GenerateFlowTree(ctx context.Context, in *GenerateFlowTreeRequest, opts ...grpc.CallOption) (*GenerateFlowTreeResponse, error)
-	HandleEvent(ctx context.Context, in *v1.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	HandleDeadLetter(ctx context.Context, in *v1.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	HandleEvent(ctx context.Context, in *pubsub.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	HandleDeadLetter(ctx context.Context, in *pubsub.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type flowsServiceClient struct {
@@ -98,7 +98,7 @@ func (c *flowsServiceClient) GenerateFlowTree(ctx context.Context, in *GenerateF
 	return out, nil
 }
 
-func (c *flowsServiceClient) HandleEvent(ctx context.Context, in *v1.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *flowsServiceClient) HandleEvent(ctx context.Context, in *pubsub.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, FlowsService_HandleEvent_FullMethodName, in, out, cOpts...)
@@ -108,7 +108,7 @@ func (c *flowsServiceClient) HandleEvent(ctx context.Context, in *v1.PubSubMessa
 	return out, nil
 }
 
-func (c *flowsServiceClient) HandleDeadLetter(ctx context.Context, in *v1.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *flowsServiceClient) HandleDeadLetter(ctx context.Context, in *pubsub.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, FlowsService_HandleDeadLetter_FullMethodName, in, out, cOpts...)
@@ -126,8 +126,8 @@ type FlowsServiceServer interface {
 	ListFlows(context.Context, *ListFlowsRequest) (*ListFlowsResponse, error)
 	StreamFlows(*StreamFlowsRequest, grpc.ServerStreamingServer[Flow]) error
 	GenerateFlowTree(context.Context, *GenerateFlowTreeRequest) (*GenerateFlowTreeResponse, error)
-	HandleEvent(context.Context, *v1.PubSubMessage) (*emptypb.Empty, error)
-	HandleDeadLetter(context.Context, *v1.PubSubMessage) (*emptypb.Empty, error)
+	HandleEvent(context.Context, *pubsub.PubSubMessage) (*emptypb.Empty, error)
+	HandleDeadLetter(context.Context, *pubsub.PubSubMessage) (*emptypb.Empty, error)
 	mustEmbedUnimplementedFlowsServiceServer()
 }
 
@@ -150,10 +150,10 @@ func (UnimplementedFlowsServiceServer) StreamFlows(*StreamFlowsRequest, grpc.Ser
 func (UnimplementedFlowsServiceServer) GenerateFlowTree(context.Context, *GenerateFlowTreeRequest) (*GenerateFlowTreeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GenerateFlowTree not implemented")
 }
-func (UnimplementedFlowsServiceServer) HandleEvent(context.Context, *v1.PubSubMessage) (*emptypb.Empty, error) {
+func (UnimplementedFlowsServiceServer) HandleEvent(context.Context, *pubsub.PubSubMessage) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method HandleEvent not implemented")
 }
-func (UnimplementedFlowsServiceServer) HandleDeadLetter(context.Context, *v1.PubSubMessage) (*emptypb.Empty, error) {
+func (UnimplementedFlowsServiceServer) HandleDeadLetter(context.Context, *pubsub.PubSubMessage) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method HandleDeadLetter not implemented")
 }
 func (UnimplementedFlowsServiceServer) mustEmbedUnimplementedFlowsServiceServer() {}
@@ -243,7 +243,7 @@ func _FlowsService_GenerateFlowTree_Handler(srv interface{}, ctx context.Context
 }
 
 func _FlowsService_HandleEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.PubSubMessage)
+	in := new(pubsub.PubSubMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -255,13 +255,13 @@ func _FlowsService_HandleEvent_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: FlowsService_HandleEvent_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowsServiceServer).HandleEvent(ctx, req.(*v1.PubSubMessage))
+		return srv.(FlowsServiceServer).HandleEvent(ctx, req.(*pubsub.PubSubMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _FlowsService_HandleDeadLetter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.PubSubMessage)
+	in := new(pubsub.PubSubMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -273,7 +273,7 @@ func _FlowsService_HandleDeadLetter_Handler(srv interface{}, ctx context.Context
 		FullMethod: FlowsService_HandleDeadLetter_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowsServiceServer).HandleDeadLetter(ctx, req.(*v1.PubSubMessage))
+		return srv.(FlowsServiceServer).HandleDeadLetter(ctx, req.(*pubsub.PubSubMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }

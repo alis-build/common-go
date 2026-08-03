@@ -7,7 +7,7 @@
 package flows
 
 import (
-	v1 "github.com/alis-build/public-go/alis/open/pubsub/v1"
+	pubsub "github.com/alis-build/public-go/alis/open/pubsub"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -743,7 +743,7 @@ const file_alis_open_flows_v1_flows_proto_rawDesc = "" +
 	"\vStreamFlows\x12&.alis.open.flows.v1.StreamFlowsRequest\x1a\x18.alis.open.flows.v1.Flow\"\x000\x01\x12o\n" +
 	"\x10GenerateFlowTree\x12+.alis.open.flows.v1.GenerateFlowTreeRequest\x1a,.alis.open.flows.v1.GenerateFlowTreeResponse\"\x00\x12K\n" +
 	"\vHandleEvent\x12\".alis.open.pubsub.v1.PubSubMessage\x1a\x16.google.protobuf.Empty\"\x00\x12P\n" +
-	"\x10HandleDeadLetter\x12\".alis.open.pubsub.v1.PubSubMessage\x1a\x16.google.protobuf.Empty\"\x00B1Z/github.com/alis-build/public-go/alis/open/flowsb\x06proto3"
+	"\x10HandleDeadLetter\x12\".alis.open.pubsub.v1.PubSubMessage\x1a\x16.google.protobuf.Empty\"\x00B&Z$go.alis.build/common/alis/open/flowsb\x06proto3"
 
 var (
 	file_alis_open_flows_v1_flows_proto_rawDescOnce sync.Once
@@ -772,7 +772,7 @@ var file_alis_open_flows_v1_flows_proto_goTypes = []any{
 	(*GenerateFlowTreeResponse_StepChildren)(nil), // 9: alis.open.flows.v1.GenerateFlowTreeResponse.StepChildren
 	(*timestamppb.Timestamp)(nil),                 // 10: google.protobuf.Timestamp
 	(*fieldmaskpb.FieldMask)(nil),                 // 11: google.protobuf.FieldMask
-	(*v1.PubSubMessage)(nil),                      // 12: alis.open.pubsub.v1.PubSubMessage
+	(*pubsub.PubSubMessage)(nil),                  // 12: alis.open.pubsub.v1.PubSubMessage
 	(*emptypb.Empty)(nil),                         // 13: google.protobuf.Empty
 }
 var file_alis_open_flows_v1_flows_proto_depIdxs = []int32{
