@@ -8,7 +8,7 @@ package history
 
 import (
 	context "context"
-	iam "github.com/alis-build/public-go/alis/iam"
+	iam "go.alis.build/common/alis/iam"
 	v1 "google.golang.org/genproto/googleapis/iam/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"

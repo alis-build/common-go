@@ -8,7 +8,7 @@ package history
 
 import (
 	v1 "github.com/a2aproject/a2a-go/v2/a2apb/v1"
-	iam "github.com/alis-build/public-go/alis/iam"
+	iam "go.alis.build/common/alis/iam"
 	v11 "google.golang.org/genproto/googleapis/iam/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
