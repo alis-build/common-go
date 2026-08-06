@@ -8,7 +8,7 @@ package flows
 
 import (
 	context "context"
-	pubsub "github.com/alis-build/public-go/alis/open/pubsub"
+	pubsub "go.alis.build/common/alis/open/pubsub"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

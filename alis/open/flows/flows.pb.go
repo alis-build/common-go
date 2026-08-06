@@ -7,7 +7,7 @@
 package flows
 
 import (
-	pubsub "github.com/alis-build/public-go/alis/open/pubsub"
+	pubsub "go.alis.build/common/alis/open/pubsub"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
