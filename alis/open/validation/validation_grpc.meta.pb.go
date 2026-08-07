@@ -3,7 +3,7 @@
 // Source: alis/open/validation/v1/validation.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-06 08:43:44 UTC
+// Generated on: 2026-08-07 07:59:16 UTC
 
 package validation
 
