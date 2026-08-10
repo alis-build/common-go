@@ -12,6 +12,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -1748,6 +1749,7 @@ func (x *RunLoadTestResponse) GetRuns() []string {
 type RunAgentEvalRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CaseIds       []string               `protobuf:"bytes,1,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
+	SessionState  *structpb.Struct       `protobuf:"bytes,2,opt,name=session_state,json=sessionState,proto3" json:"session_state,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1785,6 +1787,13 @@ func (*RunAgentEvalRequest) Descriptor() ([]byte, []int) {
 func (x *RunAgentEvalRequest) GetCaseIds() []string {
 	if x != nil {
 		return x.CaseIds
+	}
+	return nil
+}
+
+func (x *RunAgentEvalRequest) GetSessionState() *structpb.Struct {
+	if x != nil {
+		return x.SessionState
 	}
 	return nil
 }
@@ -3301,7 +3310,7 @@ var File_alis_evals_v1_evaluation_proto protoreflect.FileDescriptor
 
 const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"\n" +
-	"\x1ealis/evals/v1/evaluation.proto\x12\ralis.evals.v1\x1a#google/longrunning/operations.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto\"\xf8\x06\n" +
+	"\x1ealis/evals/v1/evaluation.proto\x12\ralis.evals.v1\x1a#google/longrunning/operations.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto\"\xf8\x06\n" +
 	"\x03Run\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1e\n" +
 	"\bbatch_id\x18\x03 \x01(\tH\x01R\abatchId\x88\x01\x01\x12+\n" +
@@ -3560,9 +3569,10 @@ const file_alis_evals_v1_evaluation_proto_rawDesc = "" +
 	"suiteCount\x122\n" +
 	"\x15completed_suite_count\x18\x04 \x01(\x05R\x13completedSuiteCount\")\n" +
 	"\x13RunLoadTestResponse\x12\x12\n" +
-	"\x04runs\x18\x01 \x03(\tR\x04runs\"0\n" +
+	"\x04runs\x18\x01 \x03(\tR\x04runs\"n\n" +
 	"\x13RunAgentEvalRequest\x12\x19\n" +
-	"\bcase_ids\x18\x01 \x03(\tR\acaseIds\"\xbc\x01\n" +
+	"\bcase_ids\x18\x01 \x03(\tR\acaseIds\x12<\n" +
+	"\rsession_state\x18\x02 \x01(\v2\x17.google.protobuf.StructR\fsessionState\"\xbc\x01\n" +
 	"\x14RunAgentEvalMetadata\x12\x1d\n" +
 	"\n" +
 	"case_count\x18\x01 \x01(\x05R\tcaseCount\x120\n" +
@@ -3689,8 +3699,9 @@ var file_alis_evals_v1_evaluation_proto_goTypes = []any{
 	(*InfraObservationResults_Case)(nil),             // 46: alis.evals.v1.InfraObservationResults.Case
 	(*timestamppb.Timestamp)(nil),                    // 47: google.protobuf.Timestamp
 	(*status.Status)(nil),                            // 48: google.rpc.Status
-	(*durationpb.Duration)(nil),                      // 49: google.protobuf.Duration
-	(*longrunning.Operation)(nil),                    // 50: google.longrunning.Operation
+	(*structpb.Struct)(nil),                          // 49: google.protobuf.Struct
+	(*durationpb.Duration)(nil),                      // 50: google.protobuf.Duration
+	(*longrunning.Operation)(nil),                    // 51: google.longrunning.Operation
 }
 var file_alis_evals_v1_evaluation_proto_depIdxs = []int32{
 	4,  // 0: alis.evals.v1.Run.type:type_name -> alis.evals.v1.Run.Type
@@ -3726,61 +3737,62 @@ var file_alis_evals_v1_evaluation_proto_depIdxs = []int32{
 	3,  // 30: alis.evals.v1.InfraSloCheck.status:type_name -> alis.evals.v1.Status
 	46, // 31: alis.evals.v1.InfraObservationResults.cases:type_name -> alis.evals.v1.InfraObservationResults.Case
 	5,  // 32: alis.evals.v1.RunLoadTestRequest.mode:type_name -> alis.evals.v1.RunLoadTestRequest.Mode
-	49, // 33: alis.evals.v1.RunInfraObservationRequest.lookback:type_name -> google.protobuf.Duration
-	3,  // 34: alis.evals.v1.Validation.status:type_name -> alis.evals.v1.Status
-	6,  // 35: alis.evals.v1.RunPublishedEvent.run:type_name -> alis.evals.v1.Run
-	3,  // 36: alis.evals.v1.IntegrationTestResults.Case.status:type_name -> alis.evals.v1.Status
-	34, // 37: alis.evals.v1.IntegrationTestResults.Case.checks:type_name -> alis.evals.v1.IntegrationTestResults.Case.Check
-	49, // 38: alis.evals.v1.IntegrationTestResults.Case.duration:type_name -> google.protobuf.Duration
-	3,  // 39: alis.evals.v1.IntegrationTestResults.Case.Check.status:type_name -> alis.evals.v1.Status
-	3,  // 40: alis.evals.v1.LoadTestResults.Case.status:type_name -> alis.evals.v1.Status
-	38, // 41: alis.evals.v1.LoadTestResults.Case.summary:type_name -> alis.evals.v1.LoadTestResults.Summary
-	41, // 42: alis.evals.v1.LoadTestResults.Case.checks:type_name -> alis.evals.v1.LoadTestResults.SloCheck
-	35, // 43: alis.evals.v1.LoadTestResults.Case.tags:type_name -> alis.evals.v1.LoadTestResults.StringEntry
-	15, // 44: alis.evals.v1.LoadTestResults.Case.cloud_run:type_name -> alis.evals.v1.CloudRunTargetSnapshot
-	16, // 45: alis.evals.v1.LoadTestResults.Case.spanner:type_name -> alis.evals.v1.SpannerTargetSnapshot
-	17, // 46: alis.evals.v1.LoadTestResults.Case.infra_checks:type_name -> alis.evals.v1.InfraSloCheck
-	31, // 47: alis.evals.v1.LoadTestResults.Case.validations:type_name -> alis.evals.v1.Validation
-	5,  // 48: alis.evals.v1.LoadTestResults.Summary.mode:type_name -> alis.evals.v1.RunLoadTestRequest.Mode
-	49, // 49: alis.evals.v1.LoadTestResults.Summary.duration:type_name -> google.protobuf.Duration
-	8,  // 50: alis.evals.v1.LoadTestResults.Summary.latency:type_name -> alis.evals.v1.LatencyPercentiles
-	36, // 51: alis.evals.v1.LoadTestResults.Summary.errors_by_code:type_name -> alis.evals.v1.LoadTestResults.Int64Entry
-	40, // 52: alis.evals.v1.LoadTestResults.Summary.stream:type_name -> alis.evals.v1.LoadTestResults.StreamSummary
-	39, // 53: alis.evals.v1.LoadTestResults.Summary.qps_stages:type_name -> alis.evals.v1.LoadTestResults.LoadStage
-	39, // 54: alis.evals.v1.LoadTestResults.Summary.concurrency_stages:type_name -> alis.evals.v1.LoadTestResults.LoadStage
-	49, // 55: alis.evals.v1.LoadTestResults.LoadStage.duration:type_name -> google.protobuf.Duration
-	8,  // 56: alis.evals.v1.LoadTestResults.StreamSummary.ttfb:type_name -> alis.evals.v1.LatencyPercentiles
-	8,  // 57: alis.evals.v1.LoadTestResults.StreamSummary.response_latency:type_name -> alis.evals.v1.LatencyPercentiles
-	8,  // 58: alis.evals.v1.LoadTestResults.StreamSummary.total_duration:type_name -> alis.evals.v1.LatencyPercentiles
-	3,  // 59: alis.evals.v1.LoadTestResults.SloCheck.status:type_name -> alis.evals.v1.Status
-	3,  // 60: alis.evals.v1.AgentEvalResults.Case.status:type_name -> alis.evals.v1.Status
-	49, // 61: alis.evals.v1.AgentEvalResults.Case.duration:type_name -> google.protobuf.Duration
-	44, // 62: alis.evals.v1.AgentEvalResults.Case.metrics:type_name -> alis.evals.v1.AgentEvalResults.Case.Metric
-	31, // 63: alis.evals.v1.AgentEvalResults.Case.validations:type_name -> alis.evals.v1.Validation
-	3,  // 64: alis.evals.v1.AgentEvalResults.Case.Metric.status:type_name -> alis.evals.v1.Status
-	45, // 65: alis.evals.v1.AgentEvalResults.Case.Metric.rubric:type_name -> alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore
-	3,  // 66: alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore.status:type_name -> alis.evals.v1.Status
-	3,  // 67: alis.evals.v1.InfraObservationResults.Case.status:type_name -> alis.evals.v1.Status
-	49, // 68: alis.evals.v1.InfraObservationResults.Case.lookback:type_name -> google.protobuf.Duration
-	47, // 69: alis.evals.v1.InfraObservationResults.Case.window_start:type_name -> google.protobuf.Timestamp
-	47, // 70: alis.evals.v1.InfraObservationResults.Case.window_end:type_name -> google.protobuf.Timestamp
-	15, // 71: alis.evals.v1.InfraObservationResults.Case.cloud_run:type_name -> alis.evals.v1.CloudRunTargetSnapshot
-	16, // 72: alis.evals.v1.InfraObservationResults.Case.spanner:type_name -> alis.evals.v1.SpannerTargetSnapshot
-	17, // 73: alis.evals.v1.InfraObservationResults.Case.infra_checks:type_name -> alis.evals.v1.InfraSloCheck
-	31, // 74: alis.evals.v1.InfraObservationResults.Case.validations:type_name -> alis.evals.v1.Validation
-	19, // 75: alis.evals.v1.TestService.RunIntegrationTest:input_type -> alis.evals.v1.RunIntegrationTestRequest
-	22, // 76: alis.evals.v1.TestService.RunLoadTest:input_type -> alis.evals.v1.RunLoadTestRequest
-	25, // 77: alis.evals.v1.TestService.RunAgentEval:input_type -> alis.evals.v1.RunAgentEvalRequest
-	28, // 78: alis.evals.v1.TestService.RunInfraObservation:input_type -> alis.evals.v1.RunInfraObservationRequest
-	50, // 79: alis.evals.v1.TestService.RunIntegrationTest:output_type -> google.longrunning.Operation
-	50, // 80: alis.evals.v1.TestService.RunLoadTest:output_type -> google.longrunning.Operation
-	50, // 81: alis.evals.v1.TestService.RunAgentEval:output_type -> google.longrunning.Operation
-	50, // 82: alis.evals.v1.TestService.RunInfraObservation:output_type -> google.longrunning.Operation
-	79, // [79:83] is the sub-list for method output_type
-	75, // [75:79] is the sub-list for method input_type
-	75, // [75:75] is the sub-list for extension type_name
-	75, // [75:75] is the sub-list for extension extendee
-	0,  // [0:75] is the sub-list for field type_name
+	49, // 33: alis.evals.v1.RunAgentEvalRequest.session_state:type_name -> google.protobuf.Struct
+	50, // 34: alis.evals.v1.RunInfraObservationRequest.lookback:type_name -> google.protobuf.Duration
+	3,  // 35: alis.evals.v1.Validation.status:type_name -> alis.evals.v1.Status
+	6,  // 36: alis.evals.v1.RunPublishedEvent.run:type_name -> alis.evals.v1.Run
+	3,  // 37: alis.evals.v1.IntegrationTestResults.Case.status:type_name -> alis.evals.v1.Status
+	34, // 38: alis.evals.v1.IntegrationTestResults.Case.checks:type_name -> alis.evals.v1.IntegrationTestResults.Case.Check
+	50, // 39: alis.evals.v1.IntegrationTestResults.Case.duration:type_name -> google.protobuf.Duration
+	3,  // 40: alis.evals.v1.IntegrationTestResults.Case.Check.status:type_name -> alis.evals.v1.Status
+	3,  // 41: alis.evals.v1.LoadTestResults.Case.status:type_name -> alis.evals.v1.Status
+	38, // 42: alis.evals.v1.LoadTestResults.Case.summary:type_name -> alis.evals.v1.LoadTestResults.Summary
+	41, // 43: alis.evals.v1.LoadTestResults.Case.checks:type_name -> alis.evals.v1.LoadTestResults.SloCheck
+	35, // 44: alis.evals.v1.LoadTestResults.Case.tags:type_name -> alis.evals.v1.LoadTestResults.StringEntry
+	15, // 45: alis.evals.v1.LoadTestResults.Case.cloud_run:type_name -> alis.evals.v1.CloudRunTargetSnapshot
+	16, // 46: alis.evals.v1.LoadTestResults.Case.spanner:type_name -> alis.evals.v1.SpannerTargetSnapshot
+	17, // 47: alis.evals.v1.LoadTestResults.Case.infra_checks:type_name -> alis.evals.v1.InfraSloCheck
+	31, // 48: alis.evals.v1.LoadTestResults.Case.validations:type_name -> alis.evals.v1.Validation
+	5,  // 49: alis.evals.v1.LoadTestResults.Summary.mode:type_name -> alis.evals.v1.RunLoadTestRequest.Mode
+	50, // 50: alis.evals.v1.LoadTestResults.Summary.duration:type_name -> google.protobuf.Duration
+	8,  // 51: alis.evals.v1.LoadTestResults.Summary.latency:type_name -> alis.evals.v1.LatencyPercentiles
+	36, // 52: alis.evals.v1.LoadTestResults.Summary.errors_by_code:type_name -> alis.evals.v1.LoadTestResults.Int64Entry
+	40, // 53: alis.evals.v1.LoadTestResults.Summary.stream:type_name -> alis.evals.v1.LoadTestResults.StreamSummary
+	39, // 54: alis.evals.v1.LoadTestResults.Summary.qps_stages:type_name -> alis.evals.v1.LoadTestResults.LoadStage
+	39, // 55: alis.evals.v1.LoadTestResults.Summary.concurrency_stages:type_name -> alis.evals.v1.LoadTestResults.LoadStage
+	50, // 56: alis.evals.v1.LoadTestResults.LoadStage.duration:type_name -> google.protobuf.Duration
+	8,  // 57: alis.evals.v1.LoadTestResults.StreamSummary.ttfb:type_name -> alis.evals.v1.LatencyPercentiles
+	8,  // 58: alis.evals.v1.LoadTestResults.StreamSummary.response_latency:type_name -> alis.evals.v1.LatencyPercentiles
+	8,  // 59: alis.evals.v1.LoadTestResults.StreamSummary.total_duration:type_name -> alis.evals.v1.LatencyPercentiles
+	3,  // 60: alis.evals.v1.LoadTestResults.SloCheck.status:type_name -> alis.evals.v1.Status
+	3,  // 61: alis.evals.v1.AgentEvalResults.Case.status:type_name -> alis.evals.v1.Status
+	50, // 62: alis.evals.v1.AgentEvalResults.Case.duration:type_name -> google.protobuf.Duration
+	44, // 63: alis.evals.v1.AgentEvalResults.Case.metrics:type_name -> alis.evals.v1.AgentEvalResults.Case.Metric
+	31, // 64: alis.evals.v1.AgentEvalResults.Case.validations:type_name -> alis.evals.v1.Validation
+	3,  // 65: alis.evals.v1.AgentEvalResults.Case.Metric.status:type_name -> alis.evals.v1.Status
+	45, // 66: alis.evals.v1.AgentEvalResults.Case.Metric.rubric:type_name -> alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore
+	3,  // 67: alis.evals.v1.AgentEvalResults.Case.Metric.RubricScore.status:type_name -> alis.evals.v1.Status
+	3,  // 68: alis.evals.v1.InfraObservationResults.Case.status:type_name -> alis.evals.v1.Status
+	50, // 69: alis.evals.v1.InfraObservationResults.Case.lookback:type_name -> google.protobuf.Duration
+	47, // 70: alis.evals.v1.InfraObservationResults.Case.window_start:type_name -> google.protobuf.Timestamp
+	47, // 71: alis.evals.v1.InfraObservationResults.Case.window_end:type_name -> google.protobuf.Timestamp
+	15, // 72: alis.evals.v1.InfraObservationResults.Case.cloud_run:type_name -> alis.evals.v1.CloudRunTargetSnapshot
+	16, // 73: alis.evals.v1.InfraObservationResults.Case.spanner:type_name -> alis.evals.v1.SpannerTargetSnapshot
+	17, // 74: alis.evals.v1.InfraObservationResults.Case.infra_checks:type_name -> alis.evals.v1.InfraSloCheck
+	31, // 75: alis.evals.v1.InfraObservationResults.Case.validations:type_name -> alis.evals.v1.Validation
+	19, // 76: alis.evals.v1.TestService.RunIntegrationTest:input_type -> alis.evals.v1.RunIntegrationTestRequest
+	22, // 77: alis.evals.v1.TestService.RunLoadTest:input_type -> alis.evals.v1.RunLoadTestRequest
+	25, // 78: alis.evals.v1.TestService.RunAgentEval:input_type -> alis.evals.v1.RunAgentEvalRequest
+	28, // 79: alis.evals.v1.TestService.RunInfraObservation:input_type -> alis.evals.v1.RunInfraObservationRequest
+	51, // 80: alis.evals.v1.TestService.RunIntegrationTest:output_type -> google.longrunning.Operation
+	51, // 81: alis.evals.v1.TestService.RunLoadTest:output_type -> google.longrunning.Operation
+	51, // 82: alis.evals.v1.TestService.RunAgentEval:output_type -> google.longrunning.Operation
+	51, // 83: alis.evals.v1.TestService.RunInfraObservation:output_type -> google.longrunning.Operation
+	80, // [80:84] is the sub-list for method output_type
+	76, // [76:80] is the sub-list for method input_type
+	76, // [76:76] is the sub-list for extension type_name
+	76, // [76:76] is the sub-list for extension extendee
+	0,  // [0:76] is the sub-list for field type_name
 }
 
 func init() { file_alis_evals_v1_evaluation_proto_init() }
