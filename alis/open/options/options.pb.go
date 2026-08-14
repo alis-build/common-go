@@ -199,8 +199,9 @@ func (x *FileOptions_JsonSchema) GetGenerate() bool {
 }
 
 type MessageOptions_JsonSchema struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Generate      bool                   `protobuf:"varint,1,opt,name=generate,proto3" json:"generate,omitempty"`
+	state         protoimpl.MessageState             `protogen:"open.v1"`
+	Generate      bool                               `protobuf:"varint,1,opt,name=generate,proto3" json:"generate,omitempty"`
+	Oneof         []*MessageOptions_JsonSchema_Oneof `protobuf:"bytes,2,rep,name=oneof,proto3" json:"oneof,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -242,6 +243,65 @@ func (x *MessageOptions_JsonSchema) GetGenerate() bool {
 	return false
 }
 
+func (x *MessageOptions_JsonSchema) GetOneof() []*MessageOptions_JsonSchema_Oneof {
+	if x != nil {
+		return x.Oneof
+	}
+	return nil
+}
+
+type MessageOptions_JsonSchema_Oneof struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Fields        []string               `protobuf:"bytes,1,rep,name=fields,proto3" json:"fields,omitempty"`
+	Required      *bool                  `protobuf:"varint,2,opt,name=required,proto3,oneof" json:"required,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MessageOptions_JsonSchema_Oneof) Reset() {
+	*x = MessageOptions_JsonSchema_Oneof{}
+	mi := &file_alis_open_options_v1_options_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MessageOptions_JsonSchema_Oneof) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MessageOptions_JsonSchema_Oneof) ProtoMessage() {}
+
+func (x *MessageOptions_JsonSchema_Oneof) ProtoReflect() protoreflect.Message {
+	mi := &file_alis_open_options_v1_options_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MessageOptions_JsonSchema_Oneof.ProtoReflect.Descriptor instead.
+func (*MessageOptions_JsonSchema_Oneof) Descriptor() ([]byte, []int) {
+	return file_alis_open_options_v1_options_proto_rawDescGZIP(), []int{1, 0, 0}
+}
+
+func (x *MessageOptions_JsonSchema_Oneof) GetFields() []string {
+	if x != nil {
+		return x.Fields
+	}
+	return nil
+}
+
+func (x *MessageOptions_JsonSchema_Oneof) GetRequired() bool {
+	if x != nil && x.Required != nil {
+		return *x.Required
+	}
+	return false
+}
+
 type FieldOptions_JsonSchema struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Title            *string                `protobuf:"bytes,1,opt,name=title,proto3,oneof" json:"title,omitempty"`
@@ -262,13 +322,27 @@ type FieldOptions_JsonSchema struct {
 	UniqueItems      *bool                  `protobuf:"varint,16,opt,name=unique_items,json=uniqueItems,proto3,oneof" json:"unique_items,omitempty"`
 	MinProperties    *int64                 `protobuf:"varint,17,opt,name=min_properties,json=minProperties,proto3,oneof" json:"min_properties,omitempty"`
 	MaxProperties    *int64                 `protobuf:"varint,18,opt,name=max_properties,json=maxProperties,proto3,oneof" json:"max_properties,omitempty"`
+	EnumString       []string               `protobuf:"bytes,19,rep,name=enum_string,json=enumString,proto3" json:"enum_string,omitempty"`
+	EnumInt          []int64                `protobuf:"varint,20,rep,packed,name=enum_int,json=enumInt,proto3" json:"enum_int,omitempty"`
+	EnumNumber       []float64              `protobuf:"fixed64,21,rep,packed,name=enum_number,json=enumNumber,proto3" json:"enum_number,omitempty"`
+	Deprecated       *bool                  `protobuf:"varint,22,opt,name=deprecated,proto3,oneof" json:"deprecated,omitempty"`
+	ReadOnly         *bool                  `protobuf:"varint,23,opt,name=read_only,json=readOnly,proto3,oneof" json:"read_only,omitempty"`
+	WriteOnly        *bool                  `protobuf:"varint,24,opt,name=write_only,json=writeOnly,proto3,oneof" json:"write_only,omitempty"`
+	MultipleOf       *float64               `protobuf:"fixed64,25,opt,name=multiple_of,json=multipleOf,proto3,oneof" json:"multiple_of,omitempty"`
+	DefaultString    *string                `protobuf:"bytes,26,opt,name=default_string,json=defaultString,proto3,oneof" json:"default_string,omitempty"`
+	DefaultInt       *int64                 `protobuf:"varint,27,opt,name=default_int,json=defaultInt,proto3,oneof" json:"default_int,omitempty"`
+	DefaultNumber    *float64               `protobuf:"fixed64,28,opt,name=default_number,json=defaultNumber,proto3,oneof" json:"default_number,omitempty"`
+	DefaultBool      *bool                  `protobuf:"varint,29,opt,name=default_bool,json=defaultBool,proto3,oneof" json:"default_bool,omitempty"`
+	ExamplesString   []string               `protobuf:"bytes,30,rep,name=examples_string,json=examplesString,proto3" json:"examples_string,omitempty"`
+	ExamplesInt      []int64                `protobuf:"varint,31,rep,packed,name=examples_int,json=examplesInt,proto3" json:"examples_int,omitempty"`
+	ExamplesNumber   []float64              `protobuf:"fixed64,32,rep,packed,name=examples_number,json=examplesNumber,proto3" json:"examples_number,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
 
 func (x *FieldOptions_JsonSchema) Reset() {
 	*x = FieldOptions_JsonSchema{}
-	mi := &file_alis_open_options_v1_options_proto_msgTypes[5]
+	mi := &file_alis_open_options_v1_options_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -280,7 +354,7 @@ func (x *FieldOptions_JsonSchema) String() string {
 func (*FieldOptions_JsonSchema) ProtoMessage() {}
 
 func (x *FieldOptions_JsonSchema) ProtoReflect() protoreflect.Message {
-	mi := &file_alis_open_options_v1_options_proto_msgTypes[5]
+	mi := &file_alis_open_options_v1_options_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -422,6 +496,104 @@ func (x *FieldOptions_JsonSchema) GetMaxProperties() int64 {
 	return 0
 }
 
+func (x *FieldOptions_JsonSchema) GetEnumString() []string {
+	if x != nil {
+		return x.EnumString
+	}
+	return nil
+}
+
+func (x *FieldOptions_JsonSchema) GetEnumInt() []int64 {
+	if x != nil {
+		return x.EnumInt
+	}
+	return nil
+}
+
+func (x *FieldOptions_JsonSchema) GetEnumNumber() []float64 {
+	if x != nil {
+		return x.EnumNumber
+	}
+	return nil
+}
+
+func (x *FieldOptions_JsonSchema) GetDeprecated() bool {
+	if x != nil && x.Deprecated != nil {
+		return *x.Deprecated
+	}
+	return false
+}
+
+func (x *FieldOptions_JsonSchema) GetReadOnly() bool {
+	if x != nil && x.ReadOnly != nil {
+		return *x.ReadOnly
+	}
+	return false
+}
+
+func (x *FieldOptions_JsonSchema) GetWriteOnly() bool {
+	if x != nil && x.WriteOnly != nil {
+		return *x.WriteOnly
+	}
+	return false
+}
+
+func (x *FieldOptions_JsonSchema) GetMultipleOf() float64 {
+	if x != nil && x.MultipleOf != nil {
+		return *x.MultipleOf
+	}
+	return 0
+}
+
+func (x *FieldOptions_JsonSchema) GetDefaultString() string {
+	if x != nil && x.DefaultString != nil {
+		return *x.DefaultString
+	}
+	return ""
+}
+
+func (x *FieldOptions_JsonSchema) GetDefaultInt() int64 {
+	if x != nil && x.DefaultInt != nil {
+		return *x.DefaultInt
+	}
+	return 0
+}
+
+func (x *FieldOptions_JsonSchema) GetDefaultNumber() float64 {
+	if x != nil && x.DefaultNumber != nil {
+		return *x.DefaultNumber
+	}
+	return 0
+}
+
+func (x *FieldOptions_JsonSchema) GetDefaultBool() bool {
+	if x != nil && x.DefaultBool != nil {
+		return *x.DefaultBool
+	}
+	return false
+}
+
+func (x *FieldOptions_JsonSchema) GetExamplesString() []string {
+	if x != nil {
+		return x.ExamplesString
+	}
+	return nil
+}
+
+func (x *FieldOptions_JsonSchema) GetExamplesInt() []int64 {
+	if x != nil {
+		return x.ExamplesInt
+	}
+	return nil
+}
+
+func (x *FieldOptions_JsonSchema) GetExamplesNumber() []float64 {
+	if x != nil {
+		return x.ExamplesNumber
+	}
+	return nil
+}
+
 var file_alis_open_options_v1_options_proto_extTypes = []protoimpl.ExtensionInfo{
 	{
 		ExtendedType:  (*descriptorpb.FileOptions)(nil),
@@ -477,16 +649,21 @@ const file_alis_open_options_v1_options_proto_rawDesc = "" +
 	"jsonSchema\x1a(\n" +
 	"\n" +
 	"JsonSchema\x12\x1a\n" +
-	"\bgenerate\x18\x01 \x01(\bR\bgenerate\"\x8c\x01\n" +
+	"\bgenerate\x18\x01 \x01(\bR\bgenerate\"\xa9\x02\n" +
 	"\x0eMessageOptions\x12P\n" +
 	"\vjson_schema\x18\x01 \x01(\v2/.alis.open.options.v1.MessageOptions.JsonSchemaR\n" +
-	"jsonSchema\x1a(\n" +
+	"jsonSchema\x1a\xc4\x01\n" +
 	"\n" +
 	"JsonSchema\x12\x1a\n" +
-	"\bgenerate\x18\x01 \x01(\bR\bgenerate\"\xb6\b\n" +
+	"\bgenerate\x18\x01 \x01(\bR\bgenerate\x12K\n" +
+	"\x05oneof\x18\x02 \x03(\v25.alis.open.options.v1.MessageOptions.JsonSchema.OneofR\x05oneof\x1aM\n" +
+	"\x05Oneof\x12\x16\n" +
+	"\x06fields\x18\x01 \x03(\tR\x06fields\x12\x1f\n" +
+	"\brequired\x18\x02 \x01(\bH\x00R\brequired\x88\x01\x01B\v\n" +
+	"\t_required\"\xc2\r\n" +
 	"\fFieldOptions\x12N\n" +
 	"\vjson_schema\x18\x01 \x01(\v2-.alis.open.options.v1.FieldOptions.JsonSchemaR\n" +
-	"jsonSchema\x1a\xd5\a\n" +
+	"jsonSchema\x1a\xe1\f\n" +
 	"\n" +
 	"JsonSchema\x12\x19\n" +
 	"\x05title\x18\x01 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
@@ -510,7 +687,28 @@ const file_alis_open_options_v1_options_proto_rawDesc = "" +
 	"\tmax_items\x18\x0f \x01(\x03H\x0eR\bmaxItems\x88\x01\x01\x12&\n" +
 	"\funique_items\x18\x10 \x01(\bH\x0fR\vuniqueItems\x88\x01\x01\x12*\n" +
 	"\x0emin_properties\x18\x11 \x01(\x03H\x10R\rminProperties\x88\x01\x01\x12*\n" +
-	"\x0emax_properties\x18\x12 \x01(\x03H\x11R\rmaxProperties\x88\x01\x01B\b\n" +
+	"\x0emax_properties\x18\x12 \x01(\x03H\x11R\rmaxProperties\x88\x01\x01\x12\x1f\n" +
+	"\venum_string\x18\x13 \x03(\tR\n" +
+	"enumString\x12\x19\n" +
+	"\benum_int\x18\x14 \x03(\x03R\aenumInt\x12\x1f\n" +
+	"\venum_number\x18\x15 \x03(\x01R\n" +
+	"enumNumber\x12#\n" +
+	"\n" +
+	"deprecated\x18\x16 \x01(\bH\x12R\n" +
+	"deprecated\x88\x01\x01\x12 \n" +
+	"\tread_only\x18\x17 \x01(\bH\x13R\breadOnly\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"write_only\x18\x18 \x01(\bH\x14R\twriteOnly\x88\x01\x01\x12$\n" +
+	"\vmultiple_of\x18\x19 \x01(\x01H\x15R\n" +
+	"multipleOf\x88\x01\x01\x12*\n" +
+	"\x0edefault_string\x18\x1a \x01(\tH\x16R\rdefaultString\x88\x01\x01\x12$\n" +
+	"\vdefault_int\x18\x1b \x01(\x03H\x17R\n" +
+	"defaultInt\x88\x01\x01\x12*\n" +
+	"\x0edefault_number\x18\x1c \x01(\x01H\x18R\rdefaultNumber\x88\x01\x01\x12&\n" +
+	"\fdefault_bool\x18\x1d \x01(\bH\x19R\vdefaultBool\x88\x01\x01\x12'\n" +
+	"\x0fexamples_string\x18\x1e \x03(\tR\x0eexamplesString\x12!\n" +
+	"\fexamples_int\x18\x1f \x03(\x03R\vexamplesInt\x12'\n" +
+	"\x0fexamples_number\x18  \x03(\x01R\x0eexamplesNumberB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\t\n" +
 	"\a_ignoreB\n" +
@@ -533,7 +731,16 @@ const file_alis_open_options_v1_options_proto_rawDesc = "" +
 	"_max_itemsB\x0f\n" +
 	"\r_unique_itemsB\x11\n" +
 	"\x0f_min_propertiesB\x11\n" +
-	"\x0f_max_properties:T\n" +
+	"\x0f_max_propertiesB\r\n" +
+	"\v_deprecatedB\f\n" +
+	"\n" +
+	"_read_onlyB\r\n" +
+	"\v_write_onlyB\x0e\n" +
+	"\f_multiple_ofB\x11\n" +
+	"\x0f_default_stringB\x0e\n" +
+	"\f_default_intB\x11\n" +
+	"\x0f_default_numberB\x0f\n" +
+	"\r_default_bool:T\n" +
 	"\x04file\x12\x1c.google.protobuf.FileOptions\x18\xe9\a \x01(\v2!.alis.open.options.v1.FileOptionsR\x04file:`\n" +
 	"\amessage\x12\x1f.google.protobuf.MessageOptions\x18\xe9\a \x01(\v2$.alis.open.options.v1.MessageOptionsR\amessage:X\n" +
 	"\x05field\x12\x1d.google.protobuf.FieldOptions\x18\xe9\a \x01(\v2\".alis.open.options.v1.FieldOptionsR\x05fieldB(Z&go.alis.build/common/alis/open/optionsb\x06proto3"
@@ -550,33 +757,35 @@ func file_alis_open_options_v1_options_proto_rawDescGZIP() []byte {
 	return file_alis_open_options_v1_options_proto_rawDescData
 }
 
-var file_alis_open_options_v1_options_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_alis_open_options_v1_options_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_alis_open_options_v1_options_proto_goTypes = []any{
-	(*FileOptions)(nil),                 // 0: alis.open.options.v1.FileOptions
-	(*MessageOptions)(nil),              // 1: alis.open.options.v1.MessageOptions
-	(*FieldOptions)(nil),                // 2: alis.open.options.v1.FieldOptions
-	(*FileOptions_JsonSchema)(nil),      // 3: alis.open.options.v1.FileOptions.JsonSchema
-	(*MessageOptions_JsonSchema)(nil),   // 4: alis.open.options.v1.MessageOptions.JsonSchema
-	(*FieldOptions_JsonSchema)(nil),     // 5: alis.open.options.v1.FieldOptions.JsonSchema
-	(*descriptorpb.FileOptions)(nil),    // 6: google.protobuf.FileOptions
-	(*descriptorpb.MessageOptions)(nil), // 7: google.protobuf.MessageOptions
-	(*descriptorpb.FieldOptions)(nil),   // 8: google.protobuf.FieldOptions
+	(*FileOptions)(nil),                     // 0: alis.open.options.v1.FileOptions
+	(*MessageOptions)(nil),                  // 1: alis.open.options.v1.MessageOptions
+	(*FieldOptions)(nil),                    // 2: alis.open.options.v1.FieldOptions
+	(*FileOptions_JsonSchema)(nil),          // 3: alis.open.options.v1.FileOptions.JsonSchema
+	(*MessageOptions_JsonSchema)(nil),       // 4: alis.open.options.v1.MessageOptions.JsonSchema
+	(*MessageOptions_JsonSchema_Oneof)(nil), // 5: alis.open.options.v1.MessageOptions.JsonSchema.Oneof
+	(*FieldOptions_JsonSchema)(nil),         // 6: alis.open.options.v1.FieldOptions.JsonSchema
+	(*descriptorpb.FileOptions)(nil),        // 7: google.protobuf.FileOptions
+	(*descriptorpb.MessageOptions)(nil),     // 8: google.protobuf.MessageOptions
+	(*descriptorpb.FieldOptions)(nil),       // 9: google.protobuf.FieldOptions
 }
 var file_alis_open_options_v1_options_proto_depIdxs = []int32{
-	3, // 0: alis.open.options.v1.FileOptions.json_schema:type_name -> alis.open.options.v1.FileOptions.JsonSchema
-	4, // 1: alis.open.options.v1.MessageOptions.json_schema:type_name -> alis.open.options.v1.MessageOptions.JsonSchema
-	5, // 2: alis.open.options.v1.FieldOptions.json_schema:type_name -> alis.open.options.v1.FieldOptions.JsonSchema
-	6, // 3: alis.open.options.v1.file:extendee -> google.protobuf.FileOptions
-	7, // 4: alis.open.options.v1.message:extendee -> google.protobuf.MessageOptions
-	8, // 5: alis.open.options.v1.field:extendee -> google.protobuf.FieldOptions
-	0, // 6: alis.open.options.v1.file:type_name -> alis.open.options.v1.FileOptions
-	1, // 7: alis.open.options.v1.message:type_name -> alis.open.options.v1.MessageOptions
-	2, // 8: alis.open.options.v1.field:type_name -> alis.open.options.v1.FieldOptions
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	6, // [6:9] is the sub-list for extension type_name
-	3, // [3:6] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	3,  // 0: alis.open.options.v1.FileOptions.json_schema:type_name -> alis.open.options.v1.FileOptions.JsonSchema
+	4,  // 1: alis.open.options.v1.MessageOptions.json_schema:type_name -> alis.open.options.v1.MessageOptions.JsonSchema
+	6,  // 2: alis.open.options.v1.FieldOptions.json_schema:type_name -> alis.open.options.v1.FieldOptions.JsonSchema
+	5,  // 3: alis.open.options.v1.MessageOptions.JsonSchema.oneof:type_name -> alis.open.options.v1.MessageOptions.JsonSchema.Oneof
+	7,  // 4: alis.open.options.v1.file:extendee -> google.protobuf.FileOptions
+	8,  // 5: alis.open.options.v1.message:extendee -> google.protobuf.MessageOptions
+	9,  // 6: alis.open.options.v1.field:extendee -> google.protobuf.FieldOptions
+	0,  // 7: alis.open.options.v1.file:type_name -> alis.open.options.v1.FileOptions
+	1,  // 8: alis.open.options.v1.message:type_name -> alis.open.options.v1.MessageOptions
+	2,  // 9: alis.open.options.v1.field:type_name -> alis.open.options.v1.FieldOptions
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	7,  // [7:10] is the sub-list for extension type_name
+	4,  // [4:7] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_alis_open_options_v1_options_proto_init() }
@@ -585,13 +794,14 @@ func file_alis_open_options_v1_options_proto_init() {
 		return
 	}
 	file_alis_open_options_v1_options_proto_msgTypes[5].OneofWrappers = []any{}
+	file_alis_open_options_v1_options_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_alis_open_options_v1_options_proto_rawDesc), len(file_alis_open_options_v1_options_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 3,
 			NumServices:   0,
 		},

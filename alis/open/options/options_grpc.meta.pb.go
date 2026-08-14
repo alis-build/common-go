@@ -3,7 +3,7 @@
 // Source: alis/open/options/v1/options.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-07 08:00:02 UTC
+// Generated on: 2026-08-14 10:30:08 UTC
 
 package options
 
