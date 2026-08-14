@@ -200,7 +200,7 @@ func (x *FileOptions_JsonSchema) GetGenerate() bool {
 
 type MessageOptions_JsonSchema struct {
 	state         protoimpl.MessageState             `protogen:"open.v1"`
-	Generate      bool                               `protobuf:"varint,1,opt,name=generate,proto3" json:"generate,omitempty"`
+	Generate      *bool                              `protobuf:"varint,1,opt,name=generate,proto3,oneof" json:"generate,omitempty"`
 	Oneof         []*MessageOptions_JsonSchema_Oneof `protobuf:"bytes,2,rep,name=oneof,proto3" json:"oneof,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -237,8 +237,8 @@ func (*MessageOptions_JsonSchema) Descriptor() ([]byte, []int) {
 }
 
 func (x *MessageOptions_JsonSchema) GetGenerate() bool {
-	if x != nil {
-		return x.Generate
+	if x != nil && x.Generate != nil {
+		return *x.Generate
 	}
 	return false
 }
@@ -649,18 +649,19 @@ const file_alis_open_options_v1_options_proto_rawDesc = "" +
 	"jsonSchema\x1a(\n" +
 	"\n" +
 	"JsonSchema\x12\x1a\n" +
-	"\bgenerate\x18\x01 \x01(\bR\bgenerate\"\xa9\x02\n" +
+	"\bgenerate\x18\x01 \x01(\bR\bgenerate\"\xbb\x02\n" +
 	"\x0eMessageOptions\x12P\n" +
 	"\vjson_schema\x18\x01 \x01(\v2/.alis.open.options.v1.MessageOptions.JsonSchemaR\n" +
-	"jsonSchema\x1a\xc4\x01\n" +
+	"jsonSchema\x1a\xd6\x01\n" +
 	"\n" +
-	"JsonSchema\x12\x1a\n" +
-	"\bgenerate\x18\x01 \x01(\bR\bgenerate\x12K\n" +
+	"JsonSchema\x12\x1f\n" +
+	"\bgenerate\x18\x01 \x01(\bH\x00R\bgenerate\x88\x01\x01\x12K\n" +
 	"\x05oneof\x18\x02 \x03(\v25.alis.open.options.v1.MessageOptions.JsonSchema.OneofR\x05oneof\x1aM\n" +
 	"\x05Oneof\x12\x16\n" +
 	"\x06fields\x18\x01 \x03(\tR\x06fields\x12\x1f\n" +
 	"\brequired\x18\x02 \x01(\bH\x00R\brequired\x88\x01\x01B\v\n" +
-	"\t_required\"\xc2\r\n" +
+	"\t_requiredB\v\n" +
+	"\t_generate\"\xc2\r\n" +
 	"\fFieldOptions\x12N\n" +
 	"\vjson_schema\x18\x01 \x01(\v2-.alis.open.options.v1.FieldOptions.JsonSchemaR\n" +
 	"jsonSchema\x1a\xe1\f\n" +
@@ -793,6 +794,7 @@ func file_alis_open_options_v1_options_proto_init() {
 	if File_alis_open_options_v1_options_proto != nil {
 		return
 	}
+	file_alis_open_options_v1_options_proto_msgTypes[4].OneofWrappers = []any{}
 	file_alis_open_options_v1_options_proto_msgTypes[5].OneofWrappers = []any{}
 	file_alis_open_options_v1_options_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
