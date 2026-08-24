@@ -3,7 +3,7 @@
 // Source: alis/iam/v1/iam.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-06 08:43:05 UTC
+// Generated on: 2026-08-24 16:10:45 UTC
 
 package iam
 
