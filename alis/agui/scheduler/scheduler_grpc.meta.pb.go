@@ -3,7 +3,7 @@
 // Source: alis/agui/scheduler/v1/scheduler.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-07-28 15:50:32 UTC
+// Generated on: 2026-08-24 16:22:17 UTC
 
 package scheduler
 
