@@ -3,7 +3,7 @@
 // Source: alis/open/support/v1/issuesubscriber.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-07 07:54:33 UTC
+// Generated on: 2026-08-24 16:39:03 UTC
 
 package support
 
