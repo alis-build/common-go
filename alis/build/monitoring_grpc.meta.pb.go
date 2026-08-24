@@ -3,7 +3,7 @@
 // Source: alis/build/v1/monitoring.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-06 08:43:03 UTC
+// Generated on: 2026-08-24 16:22:39 UTC
 
 package build
 
