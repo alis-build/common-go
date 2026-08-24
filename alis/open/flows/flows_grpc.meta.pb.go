@@ -3,7 +3,7 @@
 // Source: alis/open/flows/v1/flows.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-06 08:43:35 UTC
+// Generated on: 2026-08-24 16:37:34 UTC
 
 package flows
 
