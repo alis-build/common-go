@@ -3,7 +3,7 @@
 // Source: alis/evals/v1/evaluation.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-24 16:36:04 UTC
+// Generated on: 2026-09-01 07:53:28 UTC
 
 package evals
 
