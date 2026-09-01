@@ -3,7 +3,7 @@
 // Source: alis/open/operations/v1/operations.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-24 16:38:19 UTC
+// Generated on: 2026-09-01 07:54:10 UTC
 
 package operations
 
