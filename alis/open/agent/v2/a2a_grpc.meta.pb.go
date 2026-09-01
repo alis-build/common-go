@@ -3,7 +3,7 @@
 // Source: alis/open/agent/v2/a2a.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-01 07:53:32 UTC
+// Generated on: 2026-09-01 10:26:57 UTC
 
 package v2
 
