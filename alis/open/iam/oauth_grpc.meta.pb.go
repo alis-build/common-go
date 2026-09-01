@@ -3,7 +3,7 @@
 // Source: alis/open/iam/v1/oauth.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-01 07:54:16 UTC
+// Generated on: 2026-09-01 10:27:38 UTC
 
 package iam
 
