@@ -3,7 +3,7 @@
 // Source: alis/open/notifications/v1/devices.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-08-24 16:37:57 UTC
+// Generated on: 2026-09-01 10:27:40 UTC
 
 package notifications
 
