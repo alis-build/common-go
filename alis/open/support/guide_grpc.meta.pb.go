@@ -3,7 +3,7 @@
 // Source: alis/open/support/v1/guide.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-01 13:23:24 UTC
+// Generated on: 2026-09-02 16:41:00 UTC
 
 package support
 
