@@ -3,7 +3,7 @@
 // Source: alis/adk/sessions/v1/sessions.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 14:29:00 UTC
+// Generated on: 2026-09-02 16:27:45 UTC
 
 package sessions
 
