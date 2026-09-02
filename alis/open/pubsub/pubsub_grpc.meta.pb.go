@@ -3,7 +3,7 @@
 // Source: alis/open/pubsub/v1/pubsub.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-01 13:22:53 UTC
+// Generated on: 2026-09-02 16:32:59 UTC
 
 package pubsub
 
