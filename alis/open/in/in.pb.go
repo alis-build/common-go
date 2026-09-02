@@ -4,7 +4,7 @@
 // 	protoc        v3.21.12
 // source: alis/open/in/v1/in.proto
 
-package in
+package inpb
 
 import (
 	cx "go.alis.build/common/alis/open/cx"
@@ -1148,7 +1148,7 @@ const file_alis_open_in_v1_in_proto_rawDesc = "" +
 	"\n" +
 	"\x06ACTIVE\x10\x01\x12\f\n" +
 	"\bARCHIVED\x10\x02\x12\t\n" +
-	"\x05STALE\x10\x03B#Z!go.alis.build/common/alis/open/inb\x06proto3"
+	"\x05STALE\x10\x03B(Z&go.alis.build/common/alis/open/in;inpbb\x06proto3"
 
 var (
 	file_alis_open_in_v1_in_proto_rawDescOnce sync.Once
