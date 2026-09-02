@@ -3,7 +3,7 @@
 // Source: alis/usage/v1/usage.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-01 13:23:49 UTC
+// Generated on: 2026-09-02 16:34:24 UTC
 
 package usage
 
