@@ -3,7 +3,7 @@
 // Source: alis/open/px/v1/px.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-01 13:22:50 UTC
+// Generated on: 2026-09-02 16:33:02 UTC
 
 package px
 
