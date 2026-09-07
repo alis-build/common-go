@@ -3,25 +3,25 @@
 // Source: alis/adk/sessions/v1/sessions.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:27:45 UTC
+// Generated on: 2026-09-07 15:10:01 UTC
 
 package sessions
 
 const (
 	// SessionService_CreateSession_FullMethodDescription returns the description of the alis.adk.sessions.v1.SessionService.CreateSession method.
-	SessionService_CreateSession_FullMethodDescription = ""
+	SessionService_CreateSession_FullMethodDescription = "Creates a new session."
 	// SessionService_GetSession_FullMethodDescription returns the description of the alis.adk.sessions.v1.SessionService.GetSession method.
-	SessionService_GetSession_FullMethodDescription = ""
+	SessionService_GetSession_FullMethodDescription = "Gets details of a specific session."
 	// SessionService_ListSessions_FullMethodDescription returns the description of the alis.adk.sessions.v1.SessionService.ListSessions method.
-	SessionService_ListSessions_FullMethodDescription = ""
+	SessionService_ListSessions_FullMethodDescription = "Lists sessions with optional filtering and ordering."
 	// SessionService_UpdateSession_FullMethodDescription returns the description of the alis.adk.sessions.v1.SessionService.UpdateSession method.
-	SessionService_UpdateSession_FullMethodDescription = ""
+	SessionService_UpdateSession_FullMethodDescription = "Updates a specific session."
 	// SessionService_DeleteSession_FullMethodDescription returns the description of the alis.adk.sessions.v1.SessionService.DeleteSession method.
-	SessionService_DeleteSession_FullMethodDescription = ""
+	SessionService_DeleteSession_FullMethodDescription = "Deletes a specific session."
 	// SessionService_GetEvent_FullMethodDescription returns the description of the alis.adk.sessions.v1.SessionService.GetEvent method.
-	SessionService_GetEvent_FullMethodDescription = ""
+	SessionService_GetEvent_FullMethodDescription = "Gets a specific event from a session."
 	// SessionService_ListEvents_FullMethodDescription returns the description of the alis.adk.sessions.v1.SessionService.ListEvents method.
-	SessionService_ListEvents_FullMethodDescription = ""
+	SessionService_ListEvents_FullMethodDescription = "Lists events in a given session with optional filtering and ordering."
 	// SessionService_AppendEvent_FullMethodDescription returns the description of the alis.adk.sessions.v1.SessionService.AppendEvent method.
-	SessionService_AppendEvent_FullMethodDescription = ""
+	SessionService_AppendEvent_FullMethodDescription = "Appends an event to a given session."
 )

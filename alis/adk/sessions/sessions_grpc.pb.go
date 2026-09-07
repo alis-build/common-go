@@ -33,14 +33,24 @@ const (
 // SessionServiceClient is the client API for SessionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// SessionService manages agent sessions and session events.
 type SessionServiceClient interface {
+	// Creates a new session.
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*Session, error)
+	// Gets details of a specific session.
 	GetSession(ctx context.Context, in *GetSessionRequest, opts ...grpc.CallOption) (*Session, error)
+	// Lists sessions with optional filtering and ordering.
 	ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error)
+	// Updates a specific session.
 	UpdateSession(ctx context.Context, in *UpdateSessionRequest, opts ...grpc.CallOption) (*Session, error)
+	// Deletes a specific session.
 	DeleteSession(ctx context.Context, in *DeleteSessionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Gets a specific event from a session.
 	GetEvent(ctx context.Context, in *GetEventRequest, opts ...grpc.CallOption) (*SessionEvent, error)
+	// Lists events in a given session with optional filtering and ordering.
 	ListEvents(ctx context.Context, in *ListEventsRequest, opts ...grpc.CallOption) (*ListEventsResponse, error)
+	// Appends an event to a given session.
 	AppendEvent(ctx context.Context, in *AppendEventRequest, opts ...grpc.CallOption) (*AppendEventResponse, error)
 }
 
@@ -135,14 +145,24 @@ func (c *sessionServiceClient) AppendEvent(ctx context.Context, in *AppendEventR
 // SessionServiceServer is the server API for SessionService service.
 // All implementations must embed UnimplementedSessionServiceServer
 // for forward compatibility.
+//
+// SessionService manages agent sessions and session events.
 type SessionServiceServer interface {
+	// Creates a new session.
 	CreateSession(context.Context, *CreateSessionRequest) (*Session, error)
+	// Gets details of a specific session.
 	GetSession(context.Context, *GetSessionRequest) (*Session, error)
+	// Lists sessions with optional filtering and ordering.
 	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+	// Updates a specific session.
 	UpdateSession(context.Context, *UpdateSessionRequest) (*Session, error)
+	// Deletes a specific session.
 	DeleteSession(context.Context, *DeleteSessionRequest) (*emptypb.Empty, error)
+	// Gets a specific event from a session.
 	GetEvent(context.Context, *GetEventRequest) (*SessionEvent, error)
+	// Lists events in a given session with optional filtering and ordering.
 	ListEvents(context.Context, *ListEventsRequest) (*ListEventsResponse, error)
+	// Appends an event to a given session.
 	AppendEvent(context.Context, *AppendEventRequest) (*AppendEventResponse, error)
 	mustEmbedUnimplementedSessionServiceServer()
 }
