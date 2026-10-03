@@ -4,6 +4,26 @@
 // - protoc             v3.21.12
 // source: alis/build/v1/monitoring.proto
 
+// Manages the Git repositories of an Alis Build landing zone and searches
+// the logs of Google Cloud projects.
+//
+// The package has two services:
+//
+// - `Monitoring` searches the log entries of a Google Cloud project over a
+//   time range (`SearchLogs`). Entries follow the shape of a Cloud Logging
+//   `LogEntry`, and `SearchLogsRequest.Severity` uses the same levels and
+//   numbers as `google.logging.type.LogSeverity`.
+// - `Repos` works with the Git repositories of a landing zone: list
+//   repositories; create, list and delete branches; commit file changes; list
+//   commits and files; and read a file at a given ref.
+//
+// Repositories are identified as `{landing_zone_id}/{repo}`, e.g.
+// `alistest/proto`. `SearchLogs` paginates with page tokens, while
+// `ListBranches` and `ListCommits` take a `limit` and a 1-indexed `page`.
+//
+// Both files set `(alis.open.options.v1.file).json_schema.generate`, so a
+// JSON Schema is generated for every message in the package.
+
 package build
 
 import (
@@ -25,7 +45,13 @@ const (
 // MonitoringClient is the client API for Monitoring service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Searches the logs of Google Cloud projects.
 type MonitoringClient interface {
+	// Searches the log entries of a Google Cloud project within a time range,
+	// optionally filtered by severity. Entries are returned oldest to newest,
+	// one page at a time; pass `next_page_token` back as `page_token` to get
+	// the next page.
 	SearchLogs(ctx context.Context, in *SearchLogsRequest, opts ...grpc.CallOption) (*SearchLogsResponse, error)
 }
 
@@ -50,7 +76,13 @@ func (c *monitoringClient) SearchLogs(ctx context.Context, in *SearchLogsRequest
 // MonitoringServer is the server API for Monitoring service.
 // All implementations must embed UnimplementedMonitoringServer
 // for forward compatibility.
+//
+// Searches the logs of Google Cloud projects.
 type MonitoringServer interface {
+	// Searches the log entries of a Google Cloud project within a time range,
+	// optionally filtered by severity. Entries are returned oldest to newest,
+	// one page at a time; pass `next_page_token` back as `page_token` to get
+	// the next page.
 	SearchLogs(context.Context, *SearchLogsRequest) (*SearchLogsResponse, error)
 	mustEmbedUnimplementedMonitoringServer()
 }

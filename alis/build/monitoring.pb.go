@@ -4,6 +4,26 @@
 // 	protoc        v3.21.12
 // source: alis/build/v1/monitoring.proto
 
+// Manages the Git repositories of an Alis Build landing zone and searches
+// the logs of Google Cloud projects.
+//
+// The package has two services:
+//
+// - `Monitoring` searches the log entries of a Google Cloud project over a
+//   time range (`SearchLogs`). Entries follow the shape of a Cloud Logging
+//   `LogEntry`, and `SearchLogsRequest.Severity` uses the same levels and
+//   numbers as `google.logging.type.LogSeverity`.
+// - `Repos` works with the Git repositories of a landing zone: list
+//   repositories; create, list and delete branches; commit file changes; list
+//   commits and files; and read a file at a given ref.
+//
+// Repositories are identified as `{landing_zone_id}/{repo}`, e.g.
+// `alistest/proto`. `SearchLogs` paginates with page tokens, while
+// `ListBranches` and `ListCommits` take a `limit` and a 1-indexed `page`.
+//
+// Both files set `(alis.open.options.v1.file).json_schema.generate`, so a
+// JSON Schema is generated for every message in the package.
+
 package build
 
 import (
@@ -22,17 +42,29 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The severity level of a log entry. The values and their numbers match
+// `google.logging.type.LogSeverity`.
 type SearchLogsRequest_Severity int32
 
 const (
-	SearchLogsRequest_DEFAULT   SearchLogsRequest_Severity = 0
-	SearchLogsRequest_DEBUG     SearchLogsRequest_Severity = 100
-	SearchLogsRequest_INFO      SearchLogsRequest_Severity = 200
-	SearchLogsRequest_NOTICE    SearchLogsRequest_Severity = 300
-	SearchLogsRequest_WARNING   SearchLogsRequest_Severity = 400
-	SearchLogsRequest_ERROR     SearchLogsRequest_Severity = 500
-	SearchLogsRequest_CRITICAL  SearchLogsRequest_Severity = 600
-	SearchLogsRequest_ALERT     SearchLogsRequest_Severity = 700
+	// No assigned severity level. As the `severity` filter of a
+	// `SearchLogsRequest`, it means no severity filtering is done.
+	SearchLogsRequest_DEFAULT SearchLogsRequest_Severity = 0
+	// Information useful for debugging or tracing.
+	SearchLogsRequest_DEBUG SearchLogsRequest_Severity = 100
+	// Routine, expected status or performance information.
+	SearchLogsRequest_INFO SearchLogsRequest_Severity = 200
+	// Normal, but significant operational events (e.g., startups/shutdowns).
+	SearchLogsRequest_NOTICE SearchLogsRequest_Severity = 300
+	// Warning events that might escalate into problems.
+	SearchLogsRequest_WARNING SearchLogsRequest_Severity = 400
+	// Error events likely to cause problems or localized failures.
+	SearchLogsRequest_ERROR SearchLogsRequest_Severity = 500
+	// Severe problems, outages, or vulnerabilities.
+	SearchLogsRequest_CRITICAL SearchLogsRequest_Severity = 600
+	// Immediate human action and intervention is required.
+	SearchLogsRequest_ALERT SearchLogsRequest_Severity = 700
+	// Extreme critical event; one or more systems are entirely unusable.
 	SearchLogsRequest_EMERGENCY SearchLogsRequest_Severity = 800
 )
 
@@ -89,14 +121,24 @@ func (SearchLogsRequest_Severity) EnumDescriptor() ([]byte, []int) {
 	return file_alis_build_v1_monitoring_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// Request message for `SearchLogs`.
 type SearchLogsRequest struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	ProjectId     string                     `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	StartTime     string                     `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime       string                     `protobuf:"bytes,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	Severity      SearchLogsRequest_Severity `protobuf:"varint,4,opt,name=severity,proto3,enum=alis.build.v1.SearchLogsRequest_Severity" json:"severity,omitempty"`
-	PageSize      int32                      `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                     `protobuf:"bytes,6,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The google cloud project id.
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// The start time of the query in RFC3339 format.
+	// E.g. "2022-01-01T00:00:00Z"
+	StartTime string `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	// The end time of the query in RFC3339 format.
+	// E.g. "2022-01-02T00:00:00Z"
+	EndTime string `protobuf:"bytes,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	// The severity of logs to search for. If empty, no severity filtering is done.
+	Severity SearchLogsRequest_Severity `protobuf:"varint,4,opt,name=severity,proto3,enum=alis.build.v1.SearchLogsRequest_Severity" json:"severity,omitempty"`
+	// Maximum number of entries to return. If 0, the server picks a default.
+	PageSize int32 `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// The next_page_token from a previous response, to get the next page.
+	// All other fields must match that previous request.
+	PageToken     string `protobuf:"bytes,6,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -173,10 +215,13 @@ func (x *SearchLogsRequest) GetPageToken() string {
 	return ""
 }
 
+// Response message for `SearchLogs`.
 type SearchLogsResponse struct {
-	state         protoimpl.MessageState         `protogen:"open.v1"`
-	Entries       []*SearchLogsResponse_LogEntry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
-	NextPageToken string                         `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The matching log entries, ordered oldest to newest.
+	Entries []*SearchLogsResponse_LogEntry `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+	// Pass as page_token to get the next page. Empty if this is the last page.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -225,18 +270,36 @@ func (x *SearchLogsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// A single log entry that matched the search.
 type SearchLogsResponse_LogEntry struct {
-	state          protoimpl.MessageState                      `protogen:"open.v1"`
-	Timestamp      string                                      `protobuf:"bytes,1,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	Severity       SearchLogsRequest_Severity                  `protobuf:"varint,2,opt,name=severity,proto3,enum=alis.build.v1.SearchLogsRequest_Severity" json:"severity,omitempty"`
-	LogName        string                                      `protobuf:"bytes,3,opt,name=log_name,json=logName,proto3" json:"log_name,omitempty"`
-	Payload        string                                      `protobuf:"bytes,4,opt,name=payload,proto3" json:"payload,omitempty"`
-	Resource       *SearchLogsResponse_LogEntry_Resource       `protobuf:"bytes,5,opt,name=resource,proto3" json:"resource,omitempty"`
-	Labels         map[string]string                           `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Trace          string                                      `protobuf:"bytes,7,opt,name=trace,proto3" json:"trace,omitempty"`
-	SpanId         string                                      `protobuf:"bytes,8,opt,name=span_id,json=spanId,proto3" json:"span_id,omitempty"`
-	InsertId       string                                      `protobuf:"bytes,9,opt,name=insert_id,json=insertId,proto3" json:"insert_id,omitempty"`
-	HttpRequest    *SearchLogsResponse_LogEntry_HttpRequest    `protobuf:"bytes,10,opt,name=http_request,json=httpRequest,proto3" json:"http_request,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Time the event described by the entry occurred, RFC3339.
+	// E.g. "2022-01-01T00:00:00Z"
+	Timestamp string `protobuf:"bytes,1,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	// Severity of the entry. Empty means DEFAULT.
+	Severity SearchLogsRequest_Severity `protobuf:"varint,2,opt,name=severity,proto3,enum=alis.build.v1.SearchLogsRequest_Severity" json:"severity,omitempty"`
+	// The log this entry belongs to.
+	// E.g. "projects/my-project/logs/run.googleapis.com%2Fstderr"
+	LogName string `protobuf:"bytes,3,opt,name=log_name,json=logName,proto3" json:"log_name,omitempty"`
+	// The message. Either the plain text payload, or the JSON payload
+	// serialised as a JSON object string.
+	// E.g. "{\"message\":\"request failed\",\"code\":13}"
+	Payload string `protobuf:"bytes,4,opt,name=payload,proto3" json:"payload,omitempty"`
+	// The monitored resource that produced the entry.
+	Resource *SearchLogsResponse_LogEntry_Resource `protobuf:"bytes,5,opt,name=resource,proto3" json:"resource,omitempty"`
+	// Labels attached to the entry by the writer.
+	Labels map[string]string `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Trace this entry belongs to, used to group entries of one request.
+	// E.g. "projects/my-project/traces/06796866738c859f2f19b7cfb3214824"
+	Trace string `protobuf:"bytes,7,opt,name=trace,proto3" json:"trace,omitempty"`
+	// Span within the trace that produced this entry.
+	// E.g. "000000000000004a"
+	SpanId string `protobuf:"bytes,8,opt,name=span_id,json=spanId,proto3" json:"span_id,omitempty"`
+	// Unique id of the entry within its log_name, used for de-duplication.
+	InsertId string `protobuf:"bytes,9,opt,name=insert_id,json=insertId,proto3" json:"insert_id,omitempty"`
+	// Set when the entry describes an HTTP request.
+	HttpRequest *SearchLogsResponse_LogEntry_HttpRequest `protobuf:"bytes,10,opt,name=http_request,json=httpRequest,proto3" json:"http_request,omitempty"`
+	// Source location that produced the entry, when the writer supplied it.
 	SourceLocation *SearchLogsResponse_LogEntry_SourceLocation `protobuf:"bytes,11,opt,name=source_location,json=sourceLocation,proto3" json:"source_location,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -349,10 +412,16 @@ func (x *SearchLogsResponse_LogEntry) GetSourceLocation() *SearchLogsResponse_Lo
 	return nil
 }
 
+// The monitored resource that produced a log entry, identified by its
+// type and labels.
 type SearchLogsResponse_LogEntry_Resource struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	Labels        map[string]string      `protobuf:"bytes,2,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resource type.
+	// E.g. "cloud_run_revision", "gce_instance", "k8s_container"
+	Type string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	// Identifying labels for the resource.
+	// E.g. {"project_id": "my-project", "service_name": "my-service"}
+	Labels        map[string]string `protobuf:"bytes,2,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -401,16 +470,28 @@ func (x *SearchLogsResponse_LogEntry_Resource) GetLabels() map[string]string {
 	return nil
 }
 
+// The HTTP request that a log entry describes.
 type SearchLogsResponse_LogEntry_HttpRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Method        string                 `protobuf:"bytes,1,opt,name=method,proto3" json:"method,omitempty"`
-	Url           string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
-	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`
-	Latency       string                 `protobuf:"bytes,4,opt,name=latency,proto3" json:"latency,omitempty"`
-	RemoteIp      string                 `protobuf:"bytes,5,opt,name=remote_ip,json=remoteIp,proto3" json:"remote_ip,omitempty"`
-	UserAgent     string                 `protobuf:"bytes,6,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
-	RequestSize   int64                  `protobuf:"varint,7,opt,name=request_size,json=requestSize,proto3" json:"request_size,omitempty"`
-	ResponseSize  int64                  `protobuf:"varint,8,opt,name=response_size,json=responseSize,proto3" json:"response_size,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The HTTP request method.
+	// E.g. "GET", "POST"
+	Method string `protobuf:"bytes,1,opt,name=method,proto3" json:"method,omitempty"`
+	// Full request URL.
+	// E.g. "https://my-service.run.app/v1/books"
+	Url string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	// HTTP status returned. 0 if the response was never sent.
+	Status int32 `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`
+	// Time taken to serve the request.
+	// E.g. "1.230s"
+	Latency string `protobuf:"bytes,4,opt,name=latency,proto3" json:"latency,omitempty"`
+	// IP of the client that issued the request.
+	RemoteIp string `protobuf:"bytes,5,opt,name=remote_ip,json=remoteIp,proto3" json:"remote_ip,omitempty"`
+	// User agent sent by the client.
+	UserAgent string `protobuf:"bytes,6,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	// Size of the request body in bytes.
+	RequestSize int64 `protobuf:"varint,7,opt,name=request_size,json=requestSize,proto3" json:"request_size,omitempty"`
+	// Size of the response body in bytes.
+	ResponseSize  int64 `protobuf:"varint,8,opt,name=response_size,json=responseSize,proto3" json:"response_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -501,11 +582,17 @@ func (x *SearchLogsResponse_LogEntry_HttpRequest) GetResponseSize() int64 {
 	return 0
 }
 
+// The location in the source code that wrote a log entry.
 type SearchLogsResponse_LogEntry_SourceLocation struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	File          string                 `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
-	Line          int64                  `protobuf:"varint,2,opt,name=line,proto3" json:"line,omitempty"`
-	Function      string                 `protobuf:"bytes,3,opt,name=function,proto3" json:"function,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Source file name.
+	// E.g. "main.go"
+	File string `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
+	// Line within the file.
+	Line int64 `protobuf:"varint,2,opt,name=line,proto3" json:"line,omitempty"`
+	// Enclosing function.
+	// E.g. "main.(*Server).ListBooks"
+	Function      string `protobuf:"bytes,3,opt,name=function,proto3" json:"function,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

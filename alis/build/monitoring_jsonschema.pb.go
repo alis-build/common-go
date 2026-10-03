@@ -3,7 +3,7 @@
 // Source: alis/build/v1/monitoring.proto
 // Plugin version: v0.2.0
 //
-// Generated on: 2026-09-02 16:36:16 UTC
+// Generated on: 2026-10-03 14:50:34 UTC
 
 package build
 
@@ -26,8 +26,9 @@ func SearchLogsRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `SearchLogs`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"project_id",
 			"start_time",
@@ -43,19 +44,23 @@ func SearchLogsRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *
 	defs["alis.build.v1.SearchLogsRequest"] = schema
 
 	schema.Properties["project_id"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The google cloud project id.",
 	}
 
 	schema.Properties["start_time"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The start time of the query in RFC3339 format.\n E.g. \"2022-01-01T00:00:00Z\"",
 	}
 
 	schema.Properties["end_time"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The end time of the query in RFC3339 format.\n E.g. \"2022-01-02T00:00:00Z\"",
 	}
 
 	schema.Properties["severity"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "The severity of logs to search for. If empty, no severity filtering is done.",
 		Enum: []any{
 			0,
 			100,
@@ -70,11 +75,13 @@ func SearchLogsRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *
 	}
 
 	schema.Properties["page_size"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "Maximum number of entries to return. If 0, the server picks a default.",
 	}
 
 	schema.Properties["page_token"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The next_page_token from a previous response, to get the next page.\n All other fields must match that previous request.",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.SearchLogsRequest"}
@@ -95,8 +102,9 @@ func SearchLogsResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) 
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Response message for `SearchLogs`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"next_page_token",
 		},
@@ -107,12 +115,14 @@ func SearchLogsResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) 
 	defs["alis.build.v1.SearchLogsResponse"] = schema
 
 	schema.Properties["entries"] = &jsonschema.Schema{
-		Type:  "array",
-		Items: SearchLogsResponse_LogEntry_JsonSchema_WithDefs(defs),
+		Type:        "array",
+		Description: "The matching log entries, ordered oldest to newest.",
+		Items:       SearchLogsResponse_LogEntry_JsonSchema_WithDefs(defs),
 	}
 
 	schema.Properties["next_page_token"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Pass as page_token to get the next page. Empty if this is the last page.",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.SearchLogsResponse"}
@@ -133,8 +143,9 @@ func SearchLogsResponse_LogEntry_JsonSchema_WithDefs(defs map[string]*jsonschema
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "A single log entry that matched the search.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"timestamp",
 			"severity",
@@ -154,11 +165,13 @@ func SearchLogsResponse_LogEntry_JsonSchema_WithDefs(defs map[string]*jsonschema
 	defs["alis.build.v1.SearchLogsResponse.LogEntry"] = schema
 
 	schema.Properties["timestamp"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Time the event described by the entry occurred, RFC3339.\n E.g. \"2022-01-01T00:00:00Z\"",
 	}
 
 	schema.Properties["severity"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "Severity of the entry. Empty means DEFAULT.",
 		Enum: []any{
 			0,
 			100,
@@ -173,37 +186,46 @@ func SearchLogsResponse_LogEntry_JsonSchema_WithDefs(defs map[string]*jsonschema
 	}
 
 	schema.Properties["log_name"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The log this entry belongs to.\n E.g. \"projects/my-project/logs/run.googleapis.com%2Fstderr\"",
 	}
 
 	schema.Properties["payload"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The message. Either the plain text payload, or the JSON payload\n serialised as a JSON object string.\n E.g. \"{\\\"message\\\":\\\"request failed\\\",\\\"code\\\":13}\"",
 	}
 
 	schema.Properties["resource"] = SearchLogsResponse_LogEntry_Resource_JsonSchema_WithDefs(defs)
+	schema.Properties["resource"].Description = "The monitored resource that produced the entry."
 
 	schema.Properties["labels"] = &jsonschema.Schema{
-		Type: "object",
+		Type:        "object",
+		Description: "Labels attached to the entry by the writer.",
 		AdditionalProperties: &jsonschema.Schema{
 			Type: "string",
 		},
 	}
 
 	schema.Properties["trace"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Trace this entry belongs to, used to group entries of one request.\n E.g. \"projects/my-project/traces/06796866738c859f2f19b7cfb3214824\"",
 	}
 
 	schema.Properties["span_id"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Span within the trace that produced this entry.\n E.g. \"000000000000004a\"",
 	}
 
 	schema.Properties["insert_id"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Unique id of the entry within its log_name, used for de-duplication.",
 	}
 
 	schema.Properties["http_request"] = SearchLogsResponse_LogEntry_HttpRequest_JsonSchema_WithDefs(defs)
+	schema.Properties["http_request"].Description = "Set when the entry describes an HTTP request."
 
 	schema.Properties["source_location"] = SearchLogsResponse_LogEntry_SourceLocation_JsonSchema_WithDefs(defs)
+	schema.Properties["source_location"].Description = "Source location that produced the entry, when the writer supplied it."
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.SearchLogsResponse.LogEntry"}
 }
@@ -223,8 +245,9 @@ func SearchLogsResponse_LogEntry_Resource_JsonSchema_WithDefs(defs map[string]*j
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "The monitored resource that produced a log entry, identified by its\n type and labels.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"type",
 		},
@@ -235,11 +258,13 @@ func SearchLogsResponse_LogEntry_Resource_JsonSchema_WithDefs(defs map[string]*j
 	defs["alis.build.v1.SearchLogsResponse.LogEntry.Resource"] = schema
 
 	schema.Properties["type"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Resource type.\n E.g. \"cloud_run_revision\", \"gce_instance\", \"k8s_container\"",
 	}
 
 	schema.Properties["labels"] = &jsonschema.Schema{
-		Type: "object",
+		Type:        "object",
+		Description: "Identifying labels for the resource.\n E.g. {\"project_id\": \"my-project\", \"service_name\": \"my-service\"}",
 		AdditionalProperties: &jsonschema.Schema{
 			Type: "string",
 		},
@@ -263,8 +288,9 @@ func SearchLogsResponse_LogEntry_HttpRequest_JsonSchema_WithDefs(defs map[string
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "The HTTP request that a log entry describes.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"method",
 			"url",
@@ -282,35 +308,43 @@ func SearchLogsResponse_LogEntry_HttpRequest_JsonSchema_WithDefs(defs map[string
 	defs["alis.build.v1.SearchLogsResponse.LogEntry.HttpRequest"] = schema
 
 	schema.Properties["method"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The HTTP request method.\n E.g. \"GET\", \"POST\"",
 	}
 
 	schema.Properties["url"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Full request URL.\n E.g. \"https://my-service.run.app/v1/books\"",
 	}
 
 	schema.Properties["status"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "HTTP status returned. 0 if the response was never sent.",
 	}
 
 	schema.Properties["latency"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Time taken to serve the request.\n E.g. \"1.230s\"",
 	}
 
 	schema.Properties["remote_ip"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "IP of the client that issued the request.",
 	}
 
 	schema.Properties["user_agent"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "User agent sent by the client.",
 	}
 
 	schema.Properties["request_size"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "Size of the request body in bytes.",
 	}
 
 	schema.Properties["response_size"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "Size of the response body in bytes.",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.SearchLogsResponse.LogEntry.HttpRequest"}
@@ -331,8 +365,9 @@ func SearchLogsResponse_LogEntry_SourceLocation_JsonSchema_WithDefs(defs map[str
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "The location in the source code that wrote a log entry.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"file",
 			"line",
@@ -345,15 +380,18 @@ func SearchLogsResponse_LogEntry_SourceLocation_JsonSchema_WithDefs(defs map[str
 	defs["alis.build.v1.SearchLogsResponse.LogEntry.SourceLocation"] = schema
 
 	schema.Properties["file"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Source file name.\n E.g. \"main.go\"",
 	}
 
 	schema.Properties["line"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "Line within the file.",
 	}
 
 	schema.Properties["function"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Enclosing function.\n E.g. \"main.(*Server).ListBooks\"",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.SearchLogsResponse.LogEntry.SourceLocation"}

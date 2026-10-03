@@ -3,11 +3,11 @@
 // Source: alis/build/v1/monitoring.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:36:16 UTC
+// Generated on: 2026-10-03 14:50:34 UTC
 
 package build
 
 const (
 	// Monitoring_SearchLogs_FullMethodDescription returns the description of the alis.build.v1.Monitoring.SearchLogs method.
-	Monitoring_SearchLogs_FullMethodDescription = ""
+	Monitoring_SearchLogs_FullMethodDescription = "Searches the log entries of a Google Cloud project within a time range,\n optionally filtered by severity. Entries are returned oldest to newest,\n one page at a time; pass `next_page_token` back as `page_token` to get\n the next page."
 )

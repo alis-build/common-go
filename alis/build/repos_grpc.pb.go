@@ -32,14 +32,28 @@ const (
 // ReposClient is the client API for Repos service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Manages the Git repositories of a landing zone: their branches, commits
+// and files.
 type ReposClient interface {
+	// Lists the repositories in a landing zone.
 	ListRepos(ctx context.Context, in *ListReposRequest, opts ...grpc.CallOption) (*ListReposResponse, error)
+	// Creates a branch in a repository, starting from an existing ref.
 	CreateBranch(ctx context.Context, in *CreateBranchRequest, opts ...grpc.CallOption) (*Empty, error)
+	// Lists the branches of a repository. Paginated with `limit` and a
+	// 1-indexed `page`.
 	ListBranches(ctx context.Context, in *ListBranchesRequest, opts ...grpc.CallOption) (*ListBranchesResponse, error)
+	// Deletes a branch from a repository.
 	DeleteBranch(ctx context.Context, in *DeleteBranchRequest, opts ...grpc.CallOption) (*Empty, error)
+	// Creates a commit on a branch that creates, updates or deletes the files
+	// listed in `operations`.
 	CreateCommit(ctx context.Context, in *CreateCommitRequest, opts ...grpc.CallOption) (*Empty, error)
+	// Lists the commits of a repository starting from `start_ref`, optionally
+	// limited to a path. Paginated with `limit` and a 1-indexed `page`.
 	ListCommits(ctx context.Context, in *ListCommitsRequest, opts ...grpc.CallOption) (*ListCommitsResponse, error)
+	// Lists the files under a path of a repository at a given ref.
 	ListFiles(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error)
+	// Returns the content and SHA of a single file at a given ref.
 	ViewFile(ctx context.Context, in *ViewFileRequest, opts ...grpc.CallOption) (*ViewFileResponse, error)
 }
 
@@ -134,14 +148,28 @@ func (c *reposClient) ViewFile(ctx context.Context, in *ViewFileRequest, opts ..
 // ReposServer is the server API for Repos service.
 // All implementations must embed UnimplementedReposServer
 // for forward compatibility.
+//
+// Manages the Git repositories of a landing zone: their branches, commits
+// and files.
 type ReposServer interface {
+	// Lists the repositories in a landing zone.
 	ListRepos(context.Context, *ListReposRequest) (*ListReposResponse, error)
+	// Creates a branch in a repository, starting from an existing ref.
 	CreateBranch(context.Context, *CreateBranchRequest) (*Empty, error)
+	// Lists the branches of a repository. Paginated with `limit` and a
+	// 1-indexed `page`.
 	ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error)
+	// Deletes a branch from a repository.
 	DeleteBranch(context.Context, *DeleteBranchRequest) (*Empty, error)
+	// Creates a commit on a branch that creates, updates or deletes the files
+	// listed in `operations`.
 	CreateCommit(context.Context, *CreateCommitRequest) (*Empty, error)
+	// Lists the commits of a repository starting from `start_ref`, optionally
+	// limited to a path. Paginated with `limit` and a 1-indexed `page`.
 	ListCommits(context.Context, *ListCommitsRequest) (*ListCommitsResponse, error)
+	// Lists the files under a path of a repository at a given ref.
 	ListFiles(context.Context, *ListFilesRequest) (*ListFilesResponse, error)
+	// Returns the content and SHA of a single file at a given ref.
 	ViewFile(context.Context, *ViewFileRequest) (*ViewFileResponse, error)
 	mustEmbedUnimplementedReposServer()
 }

@@ -3,25 +3,25 @@
 // Source: alis/build/v1/repos.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:36:16 UTC
+// Generated on: 2026-10-03 14:50:34 UTC
 
 package build
 
 const (
 	// Repos_ListRepos_FullMethodDescription returns the description of the alis.build.v1.Repos.ListRepos method.
-	Repos_ListRepos_FullMethodDescription = ""
+	Repos_ListRepos_FullMethodDescription = "Lists the repositories in a landing zone."
 	// Repos_CreateBranch_FullMethodDescription returns the description of the alis.build.v1.Repos.CreateBranch method.
-	Repos_CreateBranch_FullMethodDescription = ""
+	Repos_CreateBranch_FullMethodDescription = "Creates a branch in a repository, starting from an existing ref."
 	// Repos_ListBranches_FullMethodDescription returns the description of the alis.build.v1.Repos.ListBranches method.
-	Repos_ListBranches_FullMethodDescription = ""
+	Repos_ListBranches_FullMethodDescription = "Lists the branches of a repository. Paginated with `limit` and a\n 1-indexed `page`."
 	// Repos_DeleteBranch_FullMethodDescription returns the description of the alis.build.v1.Repos.DeleteBranch method.
-	Repos_DeleteBranch_FullMethodDescription = ""
+	Repos_DeleteBranch_FullMethodDescription = "Deletes a branch from a repository."
 	// Repos_CreateCommit_FullMethodDescription returns the description of the alis.build.v1.Repos.CreateCommit method.
-	Repos_CreateCommit_FullMethodDescription = ""
+	Repos_CreateCommit_FullMethodDescription = "Creates a commit on a branch that creates, updates or deletes the files\n listed in `operations`."
 	// Repos_ListCommits_FullMethodDescription returns the description of the alis.build.v1.Repos.ListCommits method.
-	Repos_ListCommits_FullMethodDescription = ""
+	Repos_ListCommits_FullMethodDescription = "Lists the commits of a repository starting from `start_ref`, optionally\n limited to a path. Paginated with `limit` and a 1-indexed `page`."
 	// Repos_ListFiles_FullMethodDescription returns the description of the alis.build.v1.Repos.ListFiles method.
-	Repos_ListFiles_FullMethodDescription = ""
+	Repos_ListFiles_FullMethodDescription = "Lists the files under a path of a repository at a given ref."
 	// Repos_ViewFile_FullMethodDescription returns the description of the alis.build.v1.Repos.ViewFile method.
-	Repos_ViewFile_FullMethodDescription = ""
+	Repos_ViewFile_FullMethodDescription = "Returns the content and SHA of a single file at a given ref."
 )

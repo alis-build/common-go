@@ -3,7 +3,7 @@
 // Source: alis/build/v1/repos.proto
 // Plugin version: v0.2.0
 //
-// Generated on: 2026-09-02 16:36:16 UTC
+// Generated on: 2026-10-03 14:50:34 UTC
 
 package build
 
@@ -26,8 +26,9 @@ func Empty_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *jsonschema.S
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "An empty message, returned by RPCs that have no response data.",
+		Properties:  make(map[string]*jsonschema.Schema),
 	}
 
 	// Register schema BEFORE processing fields to handle self-references.
@@ -52,8 +53,9 @@ func ListReposRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *j
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `ListRepos`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"landing_zone_id",
 		},
@@ -64,7 +66,8 @@ func ListReposRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *j
 	defs["alis.build.v1.ListReposRequest"] = schema
 
 	schema.Properties["landing_zone_id"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The ID of the landing zone whose repositories to list.\n E.g. \"alistest\"",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListReposRequest"}
@@ -85,8 +88,9 @@ func ListReposResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Response message for `ListRepos`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 	}
 
 	// Register schema BEFORE processing fields to handle self-references.
@@ -94,8 +98,9 @@ func ListReposResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *
 	defs["alis.build.v1.ListReposResponse"] = schema
 
 	schema.Properties["repos"] = &jsonschema.Schema{
-		Type:  "array",
-		Items: Repo_JsonSchema_WithDefs(defs),
+		Type:        "array",
+		Description: "The repositories in the landing zone.",
+		Items:       Repo_JsonSchema_WithDefs(defs),
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListReposResponse"}
@@ -116,8 +121,9 @@ func Repo_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *jsonschema.Sc
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "A Git repository in a landing zone.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"name",
 		},
@@ -128,7 +134,8 @@ func Repo_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *jsonschema.Sc
 	defs["alis.build.v1.Repo"] = schema
 
 	schema.Properties["name"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Format: {landing_zone_id}/{repo}\n E.g. \"alistest/proto\"",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.Repo"}
@@ -149,8 +156,9 @@ func CreateBranchRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `CreateBranch`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"repo",
 			"branch",
@@ -163,15 +171,18 @@ func CreateBranchRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	defs["alis.build.v1.CreateBranchRequest"] = schema
 
 	schema.Properties["repo"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Format: {landing_zone_id}/{repo}\n E.g. \"alistest/proto\"",
 	}
 
 	schema.Properties["branch"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The name of the branch to create.\n E.g. \"feature-x\"",
 	}
 
 	schema.Properties["ref"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The reference to create the branch from, e.g. HEAD or a commit hash.",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.CreateBranchRequest"}
@@ -192,8 +203,9 @@ func ListBranchesRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `ListBranches`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"repo",
 			"limit",
@@ -206,15 +218,18 @@ func ListBranchesRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	defs["alis.build.v1.ListBranchesRequest"] = schema
 
 	schema.Properties["repo"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Format: {landing_zone_id}/{repo}\n E.g. \"alistest/proto\"",
 	}
 
 	schema.Properties["limit"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "The number of branches to return.",
 	}
 
 	schema.Properties["page"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "Which page to return (1-indexed).",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListBranchesRequest"}
@@ -235,8 +250,9 @@ func ListBranchesResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Response message for `ListBranches`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 	}
 
 	// Register schema BEFORE processing fields to handle self-references.
@@ -244,8 +260,9 @@ func ListBranchesResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema
 	defs["alis.build.v1.ListBranchesResponse"] = schema
 
 	schema.Properties["branches"] = &jsonschema.Schema{
-		Type:  "array",
-		Items: Branch_JsonSchema_WithDefs(defs),
+		Type:        "array",
+		Description: "The branches on the requested page.",
+		Items:       Branch_JsonSchema_WithDefs(defs),
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListBranchesResponse"}
@@ -266,8 +283,9 @@ func Branch_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *jsonschema.
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "A branch of a repository.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"name",
 		},
@@ -278,7 +296,8 @@ func Branch_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *jsonschema.
 	defs["alis.build.v1.Branch"] = schema
 
 	schema.Properties["name"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "E.g. \"feature-x\"",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.Branch"}
@@ -299,8 +318,9 @@ func DeleteBranchRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `DeleteBranch`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"repo",
 			"branch",
@@ -312,11 +332,13 @@ func DeleteBranchRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	defs["alis.build.v1.DeleteBranchRequest"] = schema
 
 	schema.Properties["repo"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Format: {landing_zone_id}/{repo}\n E.g. \"alistest/proto\"",
 	}
 
 	schema.Properties["branch"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The name of the branch to delete.\n E.g. \"feature-x\"",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.DeleteBranchRequest"}
@@ -337,8 +359,9 @@ func CreateCommitRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `CreateCommit`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"repo",
 			"branch",
@@ -351,20 +374,24 @@ func CreateCommitRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	defs["alis.build.v1.CreateCommitRequest"] = schema
 
 	schema.Properties["repo"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Format: {landing_zone_id}/{repo}\n E.g. \"alistest/proto\"",
 	}
 
 	schema.Properties["branch"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The branch to commit to.\n E.g. \"feature-x\"",
 	}
 
 	schema.Properties["message"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The commit message.\n E.g. \"feat: add a new feature\"",
 	}
 
 	schema.Properties["operations"] = &jsonschema.Schema{
-		Type:  "array",
-		Items: CreateCommitRequest_Operation_JsonSchema_WithDefs(defs),
+		Type:        "array",
+		Description: "The file changes the commit makes.",
+		Items:       CreateCommitRequest_Operation_JsonSchema_WithDefs(defs),
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.CreateCommitRequest"}
@@ -385,8 +412,9 @@ func CreateCommitRequest_Operation_JsonSchema_WithDefs(defs map[string]*jsonsche
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "A change to a single file in a commit.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"path",
 			"type",
@@ -400,11 +428,13 @@ func CreateCommitRequest_Operation_JsonSchema_WithDefs(defs map[string]*jsonsche
 	defs["alis.build.v1.CreateCommitRequest.Operation"] = schema
 
 	schema.Properties["path"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Path of the file relative to the repo root.",
 	}
 
 	schema.Properties["type"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "Type of operation to perform.",
 		Enum: []any{
 			0,
 			1,
@@ -414,11 +444,13 @@ func CreateCommitRequest_Operation_JsonSchema_WithDefs(defs map[string]*jsonsche
 	}
 
 	schema.Properties["content"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Content to create/update.",
 	}
 
 	schema.Properties["current_file_sha"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The current sha of the file (not the commit). Only used for UPDATE and DELETE",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.CreateCommitRequest.Operation"}
@@ -439,8 +471,9 @@ func ListCommitsRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) 
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `ListCommits`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"repo",
 			"start_ref",
@@ -455,23 +488,28 @@ func ListCommitsRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) 
 	defs["alis.build.v1.ListCommitsRequest"] = schema
 
 	schema.Properties["repo"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Format: {landing_zone_id}/{repo}\n E.g. \"alistest/proto\"",
 	}
 
 	schema.Properties["start_ref"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The commit or branch to start from, e.g. \"master\" or a commit hash.",
 	}
 
 	schema.Properties["path"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The repo path to list commits for.",
 	}
 
 	schema.Properties["limit"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "The number of commits to return.",
 	}
 
 	schema.Properties["page"] = &jsonschema.Schema{
-		Type: "integer",
+		Type:        "integer",
+		Description: "Which page to return (1-indexed).",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListCommitsRequest"}
@@ -492,8 +530,9 @@ func ListCommitsResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Response message for `ListCommits`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 	}
 
 	// Register schema BEFORE processing fields to handle self-references.
@@ -501,8 +540,9 @@ func ListCommitsResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema)
 	defs["alis.build.v1.ListCommitsResponse"] = schema
 
 	schema.Properties["commits"] = &jsonschema.Schema{
-		Type:  "array",
-		Items: Commit_JsonSchema_WithDefs(defs),
+		Type:        "array",
+		Description: "The commits on the requested page.",
+		Items:       Commit_JsonSchema_WithDefs(defs),
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListCommitsResponse"}
@@ -523,8 +563,9 @@ func Commit_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *jsonschema.
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "A commit in a repository.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"sha",
 			"committer_email",
@@ -538,24 +579,29 @@ func Commit_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *jsonschema.
 	defs["alis.build.v1.Commit"] = schema
 
 	schema.Properties["sha"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The commit SHA.",
 	}
 
 	schema.Properties["committer_email"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The email address of the committer.",
 	}
 
 	schema.Properties["created_at"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The time the commit was created.",
 	}
 
 	schema.Properties["message"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The commit message.",
 	}
 
 	schema.Properties["changes"] = &jsonschema.Schema{
-		Type:  "array",
-		Items: Commit_Change_JsonSchema_WithDefs(defs),
+		Type:        "array",
+		Description: "The files the commit changed.",
+		Items:       Commit_Change_JsonSchema_WithDefs(defs),
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.Commit"}
@@ -576,8 +622,9 @@ func Commit_Change_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *json
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "A file changed by a commit.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"path",
 			"status",
@@ -589,11 +636,13 @@ func Commit_Change_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *json
 	defs["alis.build.v1.Commit.Change"] = schema
 
 	schema.Properties["path"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Path of the file relative to the repo root.\n E.g. \"folder/file.proto\"",
 	}
 
 	schema.Properties["status"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "How the commit changed the file.\n E.g. added/modified/deleted",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.Commit.Change"}
@@ -614,8 +663,9 @@ func ListFilesRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *j
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `ListFiles`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"repo",
 			"ref",
@@ -628,15 +678,18 @@ func ListFilesRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *j
 	defs["alis.build.v1.ListFilesRequest"] = schema
 
 	schema.Properties["repo"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Format: {landing_zone_id}/{repo}\n E.g. \"alistest/proto\"",
 	}
 
 	schema.Properties["ref"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The branch or commit to list files for, e.g. HEAD or a commit hash.",
 	}
 
 	schema.Properties["path"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The repo path to list files for.",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListFilesRequest"}
@@ -657,8 +710,9 @@ func ListFilesResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Response message for `ListFiles`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 	}
 
 	// Register schema BEFORE processing fields to handle self-references.
@@ -666,8 +720,9 @@ func ListFilesResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *
 	defs["alis.build.v1.ListFilesResponse"] = schema
 
 	schema.Properties["files"] = &jsonschema.Schema{
-		Type:  "array",
-		Items: ListFilesResponse_File_JsonSchema_WithDefs(defs),
+		Type:        "array",
+		Description: "The files under the requested path.",
+		Items:       ListFilesResponse_File_JsonSchema_WithDefs(defs),
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListFilesResponse"}
@@ -688,8 +743,9 @@ func ListFilesResponse_File_JsonSchema_WithDefs(defs map[string]*jsonschema.Sche
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "A file in a repository.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"path",
 			"sha",
@@ -701,11 +757,13 @@ func ListFilesResponse_File_JsonSchema_WithDefs(defs map[string]*jsonschema.Sche
 	defs["alis.build.v1.ListFilesResponse.File"] = schema
 
 	schema.Properties["path"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Path of the file relative to the repo root.\n E.g. \"folder/file.proto\"",
 	}
 
 	schema.Properties["sha"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The sha of the file (not the commit).",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ListFilesResponse.File"}
@@ -726,8 +784,9 @@ func ViewFileRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *js
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Request message for `ViewFile`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"repo",
 			"ref",
@@ -740,15 +799,18 @@ func ViewFileRequest_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *js
 	defs["alis.build.v1.ViewFileRequest"] = schema
 
 	schema.Properties["repo"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Format: {landing_zone_id}/{repo}\n E.g. \"alistest/proto\"",
 	}
 
 	schema.Properties["ref"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The branch or commit at which to view the file for, e.g. HEAD or a commit hash.",
 	}
 
 	schema.Properties["path"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "Path of the file to view, relative to the repo root.\n E.g. \"folder/file.proto\"",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ViewFileRequest"}
@@ -769,8 +831,9 @@ func ViewFileResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *j
 	}
 
 	schema := &jsonschema.Schema{
-		Type:       "object",
-		Properties: make(map[string]*jsonschema.Schema),
+		Type:        "object",
+		Description: "Response message for `ViewFile`.",
+		Properties:  make(map[string]*jsonschema.Schema),
 		Required: []string{
 			"content",
 			"sha",
@@ -782,11 +845,13 @@ func ViewFileResponse_JsonSchema_WithDefs(defs map[string]*jsonschema.Schema) *j
 	defs["alis.build.v1.ViewFileResponse"] = schema
 
 	schema.Properties["content"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The actual file content.",
 	}
 
 	schema.Properties["sha"] = &jsonschema.Schema{
-		Type: "string",
+		Type:        "string",
+		Description: "The sha of the file (not the commit).",
 	}
 
 	return &jsonschema.Schema{Ref: "#/$defs/alis.build.v1.ViewFileResponse"}

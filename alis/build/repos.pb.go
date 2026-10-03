@@ -22,13 +22,18 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The kind of change an operation makes to a file.
 type CreateCommitRequest_Operation_Type int32
 
 const (
+	// Not set. The default value; should not be used.
 	CreateCommitRequest_Operation_UNSPECIFIED CreateCommitRequest_Operation_Type = 0
-	CreateCommitRequest_Operation_CREATE      CreateCommitRequest_Operation_Type = 1
-	CreateCommitRequest_Operation_UPDATE      CreateCommitRequest_Operation_Type = 2
-	CreateCommitRequest_Operation_DELETE      CreateCommitRequest_Operation_Type = 3
+	// Creates a new file at `path` with `content`.
+	CreateCommitRequest_Operation_CREATE CreateCommitRequest_Operation_Type = 1
+	// Replaces the content of the existing file at `path` with `content`.
+	CreateCommitRequest_Operation_UPDATE CreateCommitRequest_Operation_Type = 2
+	// Deletes the existing file at `path`.
+	CreateCommitRequest_Operation_DELETE CreateCommitRequest_Operation_Type = 3
 )
 
 // Enum value maps for CreateCommitRequest_Operation_Type.
@@ -74,6 +79,7 @@ func (CreateCommitRequest_Operation_Type) EnumDescriptor() ([]byte, []int) {
 	return file_alis_build_v1_repos_proto_rawDescGZIP(), []int{9, 0, 0}
 }
 
+// An empty message, returned by RPCs that have no response data.
 type Empty struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -110,9 +116,12 @@ func (*Empty) Descriptor() ([]byte, []int) {
 	return file_alis_build_v1_repos_proto_rawDescGZIP(), []int{0}
 }
 
+// Request message for `ListRepos`.
 type ListReposRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	LandingZoneId string                 `protobuf:"bytes,1,opt,name=landing_zone_id,json=landingZoneId,proto3" json:"landing_zone_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The ID of the landing zone whose repositories to list.
+	// E.g. "alistest"
+	LandingZoneId string `protobuf:"bytes,1,opt,name=landing_zone_id,json=landingZoneId,proto3" json:"landing_zone_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -154,9 +163,11 @@ func (x *ListReposRequest) GetLandingZoneId() string {
 	return ""
 }
 
+// Response message for `ListRepos`.
 type ListReposResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Repos         []*Repo                `protobuf:"bytes,1,rep,name=repos,proto3" json:"repos,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The repositories in the landing zone.
+	Repos         []*Repo `protobuf:"bytes,1,rep,name=repos,proto3" json:"repos,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -198,11 +209,17 @@ func (x *ListReposResponse) GetRepos() []*Repo {
 	return nil
 }
 
+// Request message for `CreateBranch`.
 type CreateBranchRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Repo          string                 `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
-	Branch        string                 `protobuf:"bytes,2,opt,name=branch,proto3" json:"branch,omitempty"`
-	Ref           string                 `protobuf:"bytes,3,opt,name=ref,proto3" json:"ref,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Format: {landing_zone_id}/{repo}
+	// E.g. "alistest/proto"
+	Repo string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
+	// The name of the branch to create.
+	// E.g. "feature-x"
+	Branch string `protobuf:"bytes,2,opt,name=branch,proto3" json:"branch,omitempty"`
+	// The reference to create the branch from, e.g. HEAD or a commit hash.
+	Ref           string `protobuf:"bytes,3,opt,name=ref,proto3" json:"ref,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -258,9 +275,12 @@ func (x *CreateBranchRequest) GetRef() string {
 	return ""
 }
 
+// A Git repository in a landing zone.
 type Repo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Format: {landing_zone_id}/{repo}
+	// E.g. "alistest/proto"
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -302,11 +322,16 @@ func (x *Repo) GetName() string {
 	return ""
 }
 
+// Request message for `ListBranches`.
 type ListBranchesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Repo          string                 `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
-	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Format: {landing_zone_id}/{repo}
+	// E.g. "alistest/proto"
+	Repo string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
+	// The number of branches to return.
+	Limit int32 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Which page to return (1-indexed).
+	Page          int32 `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -362,9 +387,11 @@ func (x *ListBranchesRequest) GetPage() int32 {
 	return 0
 }
 
+// Response message for `ListBranches`.
 type ListBranchesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Branches      []*Branch              `protobuf:"bytes,1,rep,name=branches,proto3" json:"branches,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The branches on the requested page.
+	Branches      []*Branch `protobuf:"bytes,1,rep,name=branches,proto3" json:"branches,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -406,9 +433,11 @@ func (x *ListBranchesResponse) GetBranches() []*Branch {
 	return nil
 }
 
+// A branch of a repository.
 type Branch struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// E.g. "feature-x"
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -450,10 +479,15 @@ func (x *Branch) GetName() string {
 	return ""
 }
 
+// Request message for `DeleteBranch`.
 type DeleteBranchRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Repo          string                 `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
-	Branch        string                 `protobuf:"bytes,2,opt,name=branch,proto3" json:"branch,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Format: {landing_zone_id}/{repo}
+	// E.g. "alistest/proto"
+	Repo string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
+	// The name of the branch to delete.
+	// E.g. "feature-x"
+	Branch        string `protobuf:"bytes,2,opt,name=branch,proto3" json:"branch,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -502,11 +536,19 @@ func (x *DeleteBranchRequest) GetBranch() string {
 	return ""
 }
 
+// Request message for `CreateCommit`.
 type CreateCommitRequest struct {
-	state         protoimpl.MessageState           `protogen:"open.v1"`
-	Repo          string                           `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
-	Branch        string                           `protobuf:"bytes,2,opt,name=branch,proto3" json:"branch,omitempty"`
-	Message       string                           `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Format: {landing_zone_id}/{repo}
+	// E.g. "alistest/proto"
+	Repo string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
+	// The branch to commit to.
+	// E.g. "feature-x"
+	Branch string `protobuf:"bytes,2,opt,name=branch,proto3" json:"branch,omitempty"`
+	// The commit message.
+	// E.g. "feat: add a new feature"
+	Message string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	// The file changes the commit makes.
 	Operations    []*CreateCommitRequest_Operation `protobuf:"bytes,4,rep,name=operations,proto3" json:"operations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -570,13 +612,20 @@ func (x *CreateCommitRequest) GetOperations() []*CreateCommitRequest_Operation {
 	return nil
 }
 
+// Request message for `ListCommits`.
 type ListCommitsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Repo          string                 `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
-	StartRef      string                 `protobuf:"bytes,2,opt,name=start_ref,json=startRef,proto3" json:"start_ref,omitempty"`
-	Path          string                 `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
-	Limit         int32                  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
-	Page          int32                  `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Format: {landing_zone_id}/{repo}
+	// E.g. "alistest/proto"
+	Repo string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
+	// The commit or branch to start from, e.g. "master" or a commit hash.
+	StartRef string `protobuf:"bytes,2,opt,name=start_ref,json=startRef,proto3" json:"start_ref,omitempty"`
+	// The repo path to list commits for.
+	Path string `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
+	// The number of commits to return.
+	Limit int32 `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Which page to return (1-indexed).
+	Page          int32 `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -646,9 +695,11 @@ func (x *ListCommitsRequest) GetPage() int32 {
 	return 0
 }
 
+// Response message for `ListCommits`.
 type ListCommitsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Commits       []*Commit              `protobuf:"bytes,1,rep,name=commits,proto3" json:"commits,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The commits on the requested page.
+	Commits       []*Commit `protobuf:"bytes,1,rep,name=commits,proto3" json:"commits,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -690,15 +741,21 @@ func (x *ListCommitsResponse) GetCommits() []*Commit {
 	return nil
 }
 
+// A commit in a repository.
 type Commit struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Sha            string                 `protobuf:"bytes,1,opt,name=sha,proto3" json:"sha,omitempty"`
-	CommitterEmail string                 `protobuf:"bytes,2,opt,name=committer_email,json=committerEmail,proto3" json:"committer_email,omitempty"`
-	CreatedAt      string                 `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	Message        string                 `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
-	Changes        []*Commit_Change       `protobuf:"bytes,5,rep,name=changes,proto3" json:"changes,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The commit SHA.
+	Sha string `protobuf:"bytes,1,opt,name=sha,proto3" json:"sha,omitempty"`
+	// The email address of the committer.
+	CommitterEmail string `protobuf:"bytes,2,opt,name=committer_email,json=committerEmail,proto3" json:"committer_email,omitempty"`
+	// The time the commit was created.
+	CreatedAt string `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// The commit message.
+	Message string `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
+	// The files the commit changed.
+	Changes       []*Commit_Change `protobuf:"bytes,5,rep,name=changes,proto3" json:"changes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Commit) Reset() {
@@ -766,11 +823,16 @@ func (x *Commit) GetChanges() []*Commit_Change {
 	return nil
 }
 
+// Request message for `ListFiles`.
 type ListFilesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Repo          string                 `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
-	Ref           string                 `protobuf:"bytes,2,opt,name=ref,proto3" json:"ref,omitempty"`
-	Path          string                 `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Format: {landing_zone_id}/{repo}
+	// E.g. "alistest/proto"
+	Repo string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
+	// The branch or commit to list files for, e.g. HEAD or a commit hash.
+	Ref string `protobuf:"bytes,2,opt,name=ref,proto3" json:"ref,omitempty"`
+	// The repo path to list files for.
+	Path          string `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -826,8 +888,10 @@ func (x *ListFilesRequest) GetPath() string {
 	return ""
 }
 
+// Response message for `ListFiles`.
 type ListFilesResponse struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The files under the requested path.
 	Files         []*ListFilesResponse_File `protobuf:"bytes,1,rep,name=files,proto3" json:"files,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -870,11 +934,17 @@ func (x *ListFilesResponse) GetFiles() []*ListFilesResponse_File {
 	return nil
 }
 
+// Request message for `ViewFile`.
 type ViewFileRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Repo          string                 `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
-	Ref           string                 `protobuf:"bytes,2,opt,name=ref,proto3" json:"ref,omitempty"`
-	Path          string                 `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Format: {landing_zone_id}/{repo}
+	// E.g. "alistest/proto"
+	Repo string `protobuf:"bytes,1,opt,name=repo,proto3" json:"repo,omitempty"`
+	// The branch or commit at which to view the file for, e.g. HEAD or a commit hash.
+	Ref string `protobuf:"bytes,2,opt,name=ref,proto3" json:"ref,omitempty"`
+	// Path of the file to view, relative to the repo root.
+	// E.g. "folder/file.proto"
+	Path          string `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -930,10 +1000,13 @@ func (x *ViewFileRequest) GetPath() string {
 	return ""
 }
 
+// Response message for `ViewFile`.
 type ViewFileResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Content       string                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
-	Sha           string                 `protobuf:"bytes,2,opt,name=sha,proto3" json:"sha,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The actual file content.
+	Content string `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+	// The sha of the file (not the commit).
+	Sha           string `protobuf:"bytes,2,opt,name=sha,proto3" json:"sha,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -982,12 +1055,17 @@ func (x *ViewFileResponse) GetSha() string {
 	return ""
 }
 
+// A change to a single file in a commit.
 type CreateCommitRequest_Operation struct {
-	state          protoimpl.MessageState             `protogen:"open.v1"`
-	Path           string                             `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
-	Type           CreateCommitRequest_Operation_Type `protobuf:"varint,2,opt,name=type,proto3,enum=alis.build.v1.CreateCommitRequest_Operation_Type" json:"type,omitempty"`
-	Content        string                             `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
-	CurrentFileSha string                             `protobuf:"bytes,4,opt,name=current_file_sha,json=currentFileSha,proto3" json:"current_file_sha,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Path of the file relative to the repo root.
+	Path string `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	// Type of operation to perform.
+	Type CreateCommitRequest_Operation_Type `protobuf:"varint,2,opt,name=type,proto3,enum=alis.build.v1.CreateCommitRequest_Operation_Type" json:"type,omitempty"`
+	// Content to create/update.
+	Content string `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
+	// The current sha of the file (not the commit). Only used for UPDATE and DELETE
+	CurrentFileSha string `protobuf:"bytes,4,opt,name=current_file_sha,json=currentFileSha,proto3" json:"current_file_sha,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1050,10 +1128,15 @@ func (x *CreateCommitRequest_Operation) GetCurrentFileSha() string {
 	return ""
 }
 
+// A file changed by a commit.
 type Commit_Change struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Path of the file relative to the repo root.
+	// E.g. "folder/file.proto"
+	Path string `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	// How the commit changed the file.
+	// E.g. added/modified/deleted
+	Status        string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1102,10 +1185,14 @@ func (x *Commit_Change) GetStatus() string {
 	return ""
 }
 
+// A file in a repository.
 type ListFilesResponse_File struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
-	Sha           string                 `protobuf:"bytes,2,opt,name=sha,proto3" json:"sha,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Path of the file relative to the repo root.
+	// E.g. "folder/file.proto"
+	Path string `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	// The sha of the file (not the commit).
+	Sha           string `protobuf:"bytes,2,opt,name=sha,proto3" json:"sha,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
