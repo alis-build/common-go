@@ -4,6 +4,28 @@
 // 	protoc        v3.21.12
 // source: alis/open/in/v1/in.proto
 
+// Defines the financial instrument resource of the IN domain: an instrument's
+// reference data, identifiers, and classifications, plus the engine-specific
+// details that Portfolio Exchange (PX) and Compliance Exchange (CX) attach to
+// it.
+//
+// The package defines no service. Its main types are:
+//
+// - `Instrument` (`instruments/{instrumentID}`, where the ID is a Bloomberg or
+//   custom FIGI): market sector, security type, exchange, currency, country,
+//   issuer, and display ticker, plus:
+//   - `classifications`: Bloomberg, GICS, ICB, Morningstar, and user-defined
+//     theme, sector, and industry classifications.
+//   - `external_ids`: identifiers in other systems, such as FIGI variants,
+//     ISIN, SEDOL, CUSIP, RIC, and Bloomberg ticker.
+//   - `exchange_identifiers`: MIC and vendor exchange codes.
+//   - `engines`: engine-specific details, `alis.open.px.v1.Instrument` and
+//     `alis.open.cx.v1.Instrument`.
+//   - `source_meta`: attribute-level `Source` and update time.
+// - `FigiType`: whether an instrument's FIGI is global or custom.
+// - `Source`: the data sources instrument attributes come from.
+// - `State`: an instrument's state (active, archived, or stale).
+
 package inpb
 
 import (
@@ -24,12 +46,16 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The FIGI type.
 type FigiType int32
 
 const (
+	// Figi Type is not provided
 	FigiType_FIGI_TYPE_UNSPECIFIED FigiType = 0
-	FigiType_GLOBAL                FigiType = 1
-	FigiType_CUSTOM                FigiType = 2
+	// Global FIGI
+	FigiType_GLOBAL FigiType = 1
+	// Custom generated figi, not available on www.openfigi.com, yet...
+	FigiType_CUSTOM FigiType = 2
 )
 
 // Enum value maps for FigiType.
@@ -73,19 +99,35 @@ func (FigiType) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_in_v1_in_proto_rawDescGZIP(), []int{0}
 }
 
+// Data sources of instrument attributes, recorded per attribute in
+// `Instrument.source_meta`.
 type Source int32
 
 const (
+	// Source not specified by the user.
 	Source_SOURCE_UNSPECIFIED Source = 0
-	Source_USER               Source = 1
-	Source_OPENFIGI           Source = 2
-	Source_PERMID             Source = 3
-	Source_DATASTREAM         Source = 4
-	Source_BLOOMBERG          Source = 5
-	Source_ORIGINATOR         Source = 6
-	Source_IEX                Source = 7
-	Source_MORNINGSTAR        Source = 8
-	Source_AI                 Source = 9
+	// The user record.  This is used for fields with no source dimension.
+	// All instruments will therefore have at least USER source entry.
+	Source_USER Source = 1
+	// Openfigi
+	Source_OPENFIGI Source = 2
+	// PermID
+	Source_PERMID Source = 3
+	// Datastream
+	Source_DATASTREAM Source = 4
+	// Bloomberg
+	Source_BLOOMBERG Source = 5
+	// The originator of the instrument
+	Source_ORIGINATOR Source = 6
+	// IEX
+	// https://iexcloud.io
+	Source_IEX Source = 7
+	// Morningstar
+	// https://edw.morningstar.com/Stock.aspx?ClientId=rezco
+	// https://equityapi.morningstar.com/DataCatalog.aspx
+	Source_MORNINGSTAR Source = 8
+	// Source that utilises the existing instrument dataset and Generative AI to populate reference data.
+	Source_AI Source = 9
 )
 
 // Enum value maps for Source.
@@ -143,13 +185,20 @@ func (Source) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_in_v1_in_proto_rawDescGZIP(), []int{1}
 }
 
+// The state of the instrument.
 type State int32
 
 const (
+	// State not specified by the user.
 	State_STATE_UNSPECIFIED State = 0
-	State_ACTIVE            State = 1
-	State_ARCHIVED          State = 2
-	State_STALE             State = 3
+	// The instrument is active.
+	State_ACTIVE State = 1
+	// The instrument is archived. This state is specified if a user
+	// has archived the instrument.
+	State_ARCHIVED State = 2
+	// The instrument is stale. This state is specified if IN
+	// has not received an update for the instrument in a while.
+	State_STALE State = 3
 )
 
 // Enum value maps for State.
@@ -195,20 +244,33 @@ func (State) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_in_v1_in_proto_rawDescGZIP(), []int{2}
 }
 
+// The instrument market sector
+// Consistent with the OpenFIGI definitions at https://www.openfigi.com/api/enumValues/v3/marketSecDes
 type Instrument_MarketSector int32
 
 const (
+	// Market Sector not specified
 	Instrument_MARKET_SECTOR_UNSPECIFIED Instrument_MarketSector = 0
-	Instrument_COMMODITY                 Instrument_MarketSector = 1
-	Instrument_CORPORATE                 Instrument_MarketSector = 2
-	Instrument_CURRENCY                  Instrument_MarketSector = 3
-	Instrument_EQUITY                    Instrument_MarketSector = 4
-	Instrument_INDEX                     Instrument_MarketSector = 5
-	Instrument_MONEY_MARKET              Instrument_MarketSector = 6
-	Instrument_GOVERNMENT                Instrument_MarketSector = 7
-	Instrument_MTGE                      Instrument_MarketSector = 8
-	Instrument_MUNI                      Instrument_MarketSector = 9
-	Instrument_PFD                       Instrument_MarketSector = 10
+	// Commodities
+	Instrument_COMMODITY Instrument_MarketSector = 1
+	// Corporate Bonds
+	Instrument_CORPORATE Instrument_MarketSector = 2
+	// Currency
+	Instrument_CURRENCY Instrument_MarketSector = 3
+	// Equity
+	Instrument_EQUITY Instrument_MarketSector = 4
+	// Market index
+	Instrument_INDEX Instrument_MarketSector = 5
+	// Money Market
+	Instrument_MONEY_MARKET Instrument_MarketSector = 6
+	// Government Bonds
+	Instrument_GOVERNMENT Instrument_MarketSector = 7
+	// Mortgage Backed
+	Instrument_MTGE Instrument_MarketSector = 8
+	// Municipal Bonds
+	Instrument_MUNI Instrument_MarketSector = 9
+	// Preferred Stock
+	Instrument_PFD Instrument_MarketSector = 10
 )
 
 // Enum value maps for Instrument_MarketSector.
@@ -268,31 +330,87 @@ func (Instrument_MarketSector) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_in_v1_in_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// Instrument defines a financial instrument
+// as a resource in the IN domain.
 type Instrument struct {
-	state               protoimpl.MessageState                `protogen:"open.v1"`
-	Name                string                                `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	FigiType            FigiType                              `protobuf:"varint,2,opt,name=figi_type,json=figiType,proto3,enum=alis.open.in.v1.FigiType" json:"figi_type,omitempty"`
-	DisplayName         string                                `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Description         string                                `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	MarketSector        Instrument_MarketSector               `protobuf:"varint,5,opt,name=market_sector,json=marketSector,proto3,enum=alis.open.in.v1.Instrument_MarketSector" json:"market_sector,omitempty"`
-	SecurityType        string                                `protobuf:"bytes,6,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
-	Classifications     *Instrument_Classifications           `protobuf:"bytes,7,opt,name=classifications,proto3" json:"classifications,omitempty"`
-	ExternalIds         *Instrument_ExternalIDs               `protobuf:"bytes,8,opt,name=external_ids,json=externalIds,proto3" json:"external_ids,omitempty"`
-	ExchCode            string                                `protobuf:"bytes,9,opt,name=exch_code,json=exchCode,proto3" json:"exch_code,omitempty"`
-	CurrencyCode        string                                `protobuf:"bytes,10,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
-	CountryCode         string                                `protobuf:"bytes,11,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
-	Issuer              string                                `protobuf:"bytes,12,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	Ticker              string                                `protobuf:"bytes,15,opt,name=ticker,proto3" json:"ticker,omitempty"`
-	WebsiteUri          string                                `protobuf:"bytes,17,opt,name=website_uri,json=websiteUri,proto3" json:"website_uri,omitempty"`
-	IsCompositeFigi     bool                                  `protobuf:"varint,18,opt,name=is_composite_figi,json=isCompositeFigi,proto3" json:"is_composite_figi,omitempty"`
-	IsShareClassFigi    bool                                  `protobuf:"varint,19,opt,name=is_share_class_figi,json=isShareClassFigi,proto3" json:"is_share_class_figi,omitempty"`
-	UpdateTime          *timestamppb.Timestamp                `protobuf:"bytes,20,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	ExchangeIdentifiers *Instrument_ExchangeIdentifiers       `protobuf:"bytes,22,opt,name=exchange_identifiers,json=exchangeIdentifiers,proto3" json:"exchange_identifiers,omitempty"`
-	Engines             *Instrument_Engines                   `protobuf:"bytes,23,opt,name=engines,proto3" json:"engines,omitempty"`
-	CustomAttributes    map[string]string                     `protobuf:"bytes,24,rep,name=custom_attributes,json=customAttributes,proto3" json:"custom_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	SourceMeta          map[string]*Instrument_SourceMetaData `protobuf:"bytes,99,rep,name=source_meta,json=sourceMeta,proto3" json:"source_meta,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Instrument name is the unique identifier
+	// across organisations. The Instrument ID must be a valid Bloomberg
+	// or custom FIGI, as defined by www.openfigi.com.
+	//
+	// Format: instruments/{instrumentID}
+	// Example: "instruments/BBG000B9XRY4"
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Figi Type. Either a global or custom FIGI,
+	// else set to unspecified
+	FigiType FigiType `protobuf:"varint,2,opt,name=figi_type,json=figiType,proto3,enum=alis.open.in.v1.FigiType" json:"figi_type,omitempty"`
+	// Human readable display name of the instrument.
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// Security Description of the instrument.
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// Market Sector
+	// The asset class/category of the particular instrument
+	// Format: EQUITY, MONEY_MARKET, etc.
+	MarketSector Instrument_MarketSector `protobuf:"varint,5,opt,name=market_sector,json=marketSector,proto3,enum=alis.open.in.v1.Instrument_MarketSector" json:"market_sector,omitempty"`
+	// Description of the specific instrument type within its market sector.
+	// This typically depends on the market sector and is fairly flexible
+	// Possible values defined at https://www.openfigi.com/api/enumValues/v3/securityType
+	SecurityType string `protobuf:"bytes,6,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
+	// Instrument classifications
+	Classifications *Instrument_Classifications `protobuf:"bytes,7,opt,name=classifications,proto3" json:"classifications,omitempty"`
+	// External identifiers for the instrument.
+	ExternalIds *Instrument_ExternalIDs `protobuf:"bytes,8,opt,name=external_ids,json=externalIds,proto3" json:"external_ids,omitempty"`
+	// Exchange Code
+	// Code for the trading venue or environment on which
+	// the instrument trades. If an exchange is specified,
+	// the code will be for the specified exchange.
+	// Format: US, UN, SJ etc.
+	ExchCode string `protobuf:"bytes,9,opt,name=exch_code,json=exchCode,proto3" json:"exch_code,omitempty"`
+	// Currency
+	// The 3-letter currency code defined in ISO 4217.
+	// Currency in which the security was issued.
+	// Equities: Trading currency for the security.
+	// Fixed Income: Provides the currency in which
+	// the bond was issued, not necessarily the currency
+	// in which the bond trades or pays its coupons.
+	CurrencyCode string `protobuf:"bytes,10,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
+	// The ISO country code
+	// (-- api-linter: core::0143::standardized-codes=disabled
+	//
+	//	aip.dev/not-precedent: 'Country' is a well defined attributes within Finance. --)
+	CountryCode string `protobuf:"bytes,11,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
+	// Name of the issuing entity of the security.
+	Issuer string `protobuf:"bytes,12,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	// Display Ticker
+	// Used for display purposes only
+	// For source specific tickers and identifiers refer to the external_ids attribute.
+	Ticker string `protobuf:"bytes,15,opt,name=ticker,proto3" json:"ticker,omitempty"`
+	// Website
+	WebsiteUri string `protobuf:"bytes,17,opt,name=website_uri,json=websiteUri,proto3" json:"website_uri,omitempty"`
+	// Boolean indicating whether the instrument has a Figi equal to its composite Figi
+	IsCompositeFigi bool `protobuf:"varint,18,opt,name=is_composite_figi,json=isCompositeFigi,proto3" json:"is_composite_figi,omitempty"`
+	// Boolean indicating whether the instrument has a Figi equal to its shareClass Figi
+	IsShareClassFigi bool `protobuf:"varint,19,opt,name=is_share_class_figi,json=isShareClassFigi,proto3" json:"is_share_class_figi,omitempty"`
+	// Time the Instrument was last updated
+	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	// Exchange identifiers
+	ExchangeIdentifiers *Instrument_ExchangeIdentifiers `protobuf:"bytes,22,opt,name=exchange_identifiers,json=exchangeIdentifiers,proto3" json:"exchange_identifiers,omitempty"`
+	// Engine-specific instrument details for Portfolio Exchange (PX) and
+	// Compliance Exchange (CX).
+	Engines *Instrument_Engines `protobuf:"bytes,23,opt,name=engines,proto3" json:"engines,omitempty"`
+	// Custom attributes
+	// USE WITH CAUTION.
+	// NB: There are no validations on this field, values are fully managed by the user.
+	// AN EXAMPLE:
+	// The usage of this field could be to capture custom classifications:
+	// The key of the map could be the classification group name (say "sets"), and the value could be the name of the   assigned element.
+	// An example map entry in this case would be:
+	// < "sets/rezco_asset_class", "sets/rezco_asset_class/elements/customEquity23">
+	CustomAttributes map[string]string `protobuf:"bytes,24,rep,name=custom_attributes,json=customAttributes,proto3" json:"custom_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Source Meta
+	SourceMeta    map[string]*Instrument_SourceMetaData `protobuf:"bytes,99,rep,name=source_meta,json=sourceMeta,proto3" json:"source_meta,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument) Reset() {
@@ -472,23 +590,61 @@ func (x *Instrument) GetSourceMeta() map[string]*Instrument_SourceMetaData {
 	return nil
 }
 
+// A set of classifications specific to the instrument.
 type Instrument_Classifications struct {
-	state                     protoimpl.MessageState `protogen:"open.v1"`
-	BloombergIndustrySector   string                 `protobuf:"bytes,1,opt,name=bloomberg_industry_sector,json=bloombergIndustrySector,proto3" json:"bloomberg_industry_sector,omitempty"`
-	BloombergIndustryGroup    string                 `protobuf:"bytes,2,opt,name=bloomberg_industry_group,json=bloombergIndustryGroup,proto3" json:"bloomberg_industry_group,omitempty"`
-	BloombergIndustrySubgroup string                 `protobuf:"bytes,3,opt,name=bloomberg_industry_subgroup,json=bloombergIndustrySubgroup,proto3" json:"bloomberg_industry_subgroup,omitempty"`
-	GicsSector                string                 `protobuf:"bytes,4,opt,name=gics_sector,json=gicsSector,proto3" json:"gics_sector,omitempty"`
-	GicsIndustry              string                 `protobuf:"bytes,5,opt,name=gics_industry,json=gicsIndustry,proto3" json:"gics_industry,omitempty"`
-	GicsSubindustry           string                 `protobuf:"bytes,6,opt,name=gics_subindustry,json=gicsSubindustry,proto3" json:"gics_subindustry,omitempty"`
-	Theme                     string                 `protobuf:"bytes,7,opt,name=theme,proto3" json:"theme,omitempty"`
-	Sector                    string                 `protobuf:"bytes,8,opt,name=sector,proto3" json:"sector,omitempty"`
-	Industry                  string                 `protobuf:"bytes,9,opt,name=industry,proto3" json:"industry,omitempty"`
-	MorningstarSector         string                 `protobuf:"bytes,10,opt,name=morningstar_sector,json=morningstarSector,proto3" json:"morningstar_sector,omitempty"`
-	MorningstarIndustryGroup  string                 `protobuf:"bytes,11,opt,name=morningstar_industry_group,json=morningstarIndustryGroup,proto3" json:"morningstar_industry_group,omitempty"`
-	MorningstarIndustry       string                 `protobuf:"bytes,12,opt,name=morningstar_industry,json=morningstarIndustry,proto3" json:"morningstar_industry,omitempty"`
-	IcbIndustry               string                 `protobuf:"bytes,13,opt,name=icb_industry,json=icbIndustry,proto3" json:"icb_industry,omitempty"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Bloomberg Industry Sector
+	// Bloomberg Industry Classification System) level I classification of the security
+	// based on its business or economic function and characteristics
+	BloombergIndustrySector string `protobuf:"bytes,1,opt,name=bloomberg_industry_sector,json=bloombergIndustrySector,proto3" json:"bloomberg_industry_sector,omitempty"`
+	// Bloomberg Industry Group
+	// Bloomberg Industry Classification System) level II classification of the security
+	// based on its business or economic function and characteristics
+	BloombergIndustryGroup string `protobuf:"bytes,2,opt,name=bloomberg_industry_group,json=bloombergIndustryGroup,proto3" json:"bloomberg_industry_group,omitempty"`
+	// Bloomberg Industry SubGroup
+	// Bloomberg Industry Classification System) level III classification of the security
+	// based on its business or economic function and characteristics
+	BloombergIndustrySubgroup string `protobuf:"bytes,3,opt,name=bloomberg_industry_subgroup,json=bloombergIndustrySubgroup,proto3" json:"bloomberg_industry_subgroup,omitempty"`
+	// GICS Sector name
+	// A text description indicating GICS sector classification. GICS (Global Industry
+	// Classification Standard) is an industry classification standard developed by
+	// MSCI in collaboration with Standard & Poors (S&P).
+	GicsSector string `protobuf:"bytes,4,opt,name=gics_sector,json=gicsSector,proto3" json:"gics_sector,omitempty"`
+	// Primary Global Industry Classification Standard (GICS) Industry Group Description.
+	// GICS Classifies companies with increasing granularity by Sector, Industry Group, Industry and Sub-Industry.
+	GicsIndustry string `protobuf:"bytes,5,opt,name=gics_industry,json=gicsIndustry,proto3" json:"gics_industry,omitempty"`
+	// GICS Sub_industry
+	GicsSubindustry string `protobuf:"bytes,6,opt,name=gics_subindustry,json=gicsSubindustry,proto3" json:"gics_subindustry,omitempty"`
+	// Investment theme
+	// This theme attribute provides a flexible and lightweight way for the user to classify / group
+	// instruments into user specified themes or ideas.  The available themes are set by the
+	// user and are not shared between instrument deployments.  Given that this is a classification,
+	// each instrument can only belong to a single theme at any point in time.
+	Theme string `protobuf:"bytes,7,opt,name=theme,proto3" json:"theme,omitempty"`
+	// Instrument sector
+	// This is a generic sector field and not necessarily linked to a classification system.
+	Sector string `protobuf:"bytes,8,opt,name=sector,proto3" json:"sector,omitempty"`
+	// Instrument industry
+	// This is a generic industry field and not necessarily linked to a classification system.
+	Industry string `protobuf:"bytes,9,opt,name=industry,proto3" json:"industry,omitempty"`
+	// Name of the sector that the research entity is classified into.
+	// The list of sector classifiers may be found on the Morningstar Mapping Reference endpoint on Morningstar Equity API.
+	// https://equityapi.morningstar.com/DataCatalog.aspx?catalogid=38
+	MorningstarSector string `protobuf:"bytes,10,opt,name=morningstar_sector,json=morningstarSector,proto3" json:"morningstar_sector,omitempty"`
+	// Name of the industry group that the research entity is classified into.
+	// The list of industry group classifiers may be found on the Morningstar Mapping Reference endpoint on Morningstar Equity API.
+	// https://equityapi.morningstar.com/DataCatalog.aspx?catalogid=38
+	MorningstarIndustryGroup string `protobuf:"bytes,11,opt,name=morningstar_industry_group,json=morningstarIndustryGroup,proto3" json:"morningstar_industry_group,omitempty"`
+	// Name of the industry that the research entity is classified into.
+	// The list of industry classifiers may be found on the Morningstar Mapping Reference endpoint on Morningstar Equity API.
+	// https://equityapi.morningstar.com/DataCatalog.aspx?catalogid=38
+	MorningstarIndustry string `protobuf:"bytes,12,opt,name=morningstar_industry,json=morningstarIndustry,proto3" json:"morningstar_industry,omitempty"`
+	// ICB Industry
+	// The Industry Classification Benchmark (ICB) is a globally recognized
+	// standard for categorizing companies and securities.
+	IcbIndustry   string `protobuf:"bytes,13,opt,name=icb_industry,json=icbIndustry,proto3" json:"icb_industry,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument_Classifications) Reset() {
@@ -612,34 +768,96 @@ func (x *Instrument_Classifications) GetIcbIndustry() string {
 	return ""
 }
 
+// External identifiers
 type Instrument_ExternalIDs struct {
-	state                   protoimpl.MessageState `protogen:"open.v1"`
-	Figi                    string                 `protobuf:"bytes,1,opt,name=figi,proto3" json:"figi,omitempty"`
-	CompositeFigi           string                 `protobuf:"bytes,2,opt,name=composite_figi,json=compositeFigi,proto3" json:"composite_figi,omitempty"`
-	ShareClassFigi          string                 `protobuf:"bytes,3,opt,name=share_class_figi,json=shareClassFigi,proto3" json:"share_class_figi,omitempty"`
-	Isin                    string                 `protobuf:"bytes,4,opt,name=isin,proto3" json:"isin,omitempty"`
-	Sedol                   string                 `protobuf:"bytes,5,opt,name=sedol,proto3" json:"sedol,omitempty"`
-	Cusip                   string                 `protobuf:"bytes,6,opt,name=cusip,proto3" json:"cusip,omitempty"`
-	Ric                     string                 `protobuf:"bytes,7,opt,name=ric,proto3" json:"ric,omitempty"`
-	PrimaryRic              string                 `protobuf:"bytes,8,opt,name=primary_ric,json=primaryRic,proto3" json:"primary_ric,omitempty"`
-	BloombergTicker         string                 `protobuf:"bytes,9,opt,name=bloomberg_ticker,json=bloombergTicker,proto3" json:"bloomberg_ticker,omitempty"`
-	MsciSecCode             string                 `protobuf:"bytes,10,opt,name=msci_sec_code,json=msciSecCode,proto3" json:"msci_sec_code,omitempty"`
-	Cik                     string                 `protobuf:"bytes,11,opt,name=cik,proto3" json:"cik,omitempty"`
-	InvestOne               string                 `protobuf:"bytes,12,opt,name=invest_one,json=investOne,proto3" json:"invest_one,omitempty"`
-	MorningstarSecId        string                 `protobuf:"bytes,13,opt,name=morningstar_sec_id,json=morningstarSecId,proto3" json:"morningstar_sec_id,omitempty"`
-	MorningstarCompanyId    string                 `protobuf:"bytes,14,opt,name=morningstar_company_id,json=morningstarCompanyId,proto3" json:"morningstar_company_id,omitempty"`
-	Mch                     string                 `protobuf:"bytes,15,opt,name=mch,proto3" json:"mch,omitempty"`
-	Multifonds              string                 `protobuf:"bytes,16,opt,name=multifonds,proto3" json:"multifonds,omitempty"`
-	Fundamental             string                 `protobuf:"bytes,17,opt,name=fundamental,proto3" json:"fundamental,omitempty"`
-	MorganStanley           string                 `protobuf:"bytes,18,opt,name=morgan_stanley,json=morganStanley,proto3" json:"morgan_stanley,omitempty"`
-	JseAlphaCode            string                 `protobuf:"bytes,19,opt,name=jse_alpha_code,json=jseAlphaCode,proto3" json:"jse_alpha_code,omitempty"`
-	PermId                  string                 `protobuf:"bytes,20,opt,name=perm_id,json=permId,proto3" json:"perm_id,omitempty"`
-	DatastreamSymbol        string                 `protobuf:"bytes,21,opt,name=datastream_symbol,json=datastreamSymbol,proto3" json:"datastream_symbol,omitempty"`
-	IexId                   string                 `protobuf:"bytes,22,opt,name=iex_id,json=iexId,proto3" json:"iex_id,omitempty"`
-	PortfolioExchangeBranch string                 `protobuf:"bytes,23,opt,name=portfolio_exchange_branch,json=portfolioExchangeBranch,proto3" json:"portfolio_exchange_branch,omitempty"`
-	ResearchFigi            string                 `protobuf:"bytes,24,opt,name=research_figi,json=researchFigi,proto3" json:"research_figi,omitempty"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// FIGI as defined by www.openfigi.com.
+	Figi string `protobuf:"bytes,1,opt,name=figi,proto3" json:"figi,omitempty"`
+	// Composite Financial Instrument Global Identifier - The Composite Financial Instrument Global Identifier
+	// (FIGI) enables users to link multiple FIGIs at the trading venue level within the same country or market
+	// in order to obtain an aggregated view for an instrument within that country or market.
+	CompositeFigi string `protobuf:"bytes,2,opt,name=composite_figi,json=compositeFigi,proto3" json:"composite_figi,omitempty"`
+	// Share Class Financial Instrument Global Identifier - A Share Class level Financial Instrument Global Identifier
+	// is assigned to an instrument that is traded in more than one country. This enables users to link multiple
+	// Composite FIGIs for the same instrument in order to obtain an aggregated view for that instrument across all
+	// countries (globally).
+	ShareClassFigi string `protobuf:"bytes,3,opt,name=share_class_figi,json=shareClassFigi,proto3" json:"share_class_figi,omitempty"`
+	// ISIN
+	// An International Securities Identification Number (ISIN) is a code that uniquely identifies a specific
+	// securities issue.
+	Isin string `protobuf:"bytes,4,opt,name=isin,proto3" json:"isin,omitempty"`
+	// SEDOL (Stock Exchange Daily Official List)
+	// a list of security identifiers used in the United Kingdom and Ireland for clearing purposes.
+	// The numbers are assigned by the London Stock Exchange, on request by the security issuer.
+	Sedol string `protobuf:"bytes,5,opt,name=sedol,proto3" json:"sedol,omitempty"`
+	// CUSIP
+	// a nine-digit numeric (e.g. 037833100 for Apple) or nine-character alphanumeric (e.g. 38259P508 for Google)
+	// code that identifies a North American financial security for the purposes of facilitating clearing and
+	// settlement of trades.
+	// https://en.wikipedia.org/wiki/CUSIP
+	Cusip string `protobuf:"bytes,6,opt,name=cusip,proto3" json:"cusip,omitempty"`
+	// RIC (Reuters instrument code)
+	// is a ticker-like code used by Refinitiv to identify financial instruments and indices.
+	// https://en.wikipedia.org/wiki/Reuters_Instrument_Code
+	Ric string `protobuf:"bytes,7,opt,name=ric,proto3" json:"ric,omitempty"`
+	// Primary RIC (Reuters instrument code)
+	// is a ticker-like code used by Refinitiv to identify financial instruments and indices.
+	// https://en.wikipedia.org/wiki/Reuters_Instrument_Code
+	PrimaryRic string `protobuf:"bytes,8,opt,name=primary_ric,json=primaryRic,proto3" json:"primary_ric,omitempty"`
+	// Bloomberg Ticker
+	// a string of characters or numbers to identify a company or entity uniquely in Bloomberg.
+	BloombergTicker string `protobuf:"bytes,9,opt,name=bloomberg_ticker,json=bloombergTicker,proto3" json:"bloomberg_ticker,omitempty"`
+	// MSCI Security Code is a unique identifier assigned to each security by MSCI.
+	MsciSecCode string `protobuf:"bytes,10,opt,name=msci_sec_code,json=msciSecCode,proto3" json:"msci_sec_code,omitempty"`
+	// A Central Index Key or CIK number is a number given to an individual, company, or foreign government by
+	// the United States Securities and Exchange Commission. The number is used to identify its filings in
+	// several online databases, including EDGAR.
+	Cik string `protobuf:"bytes,11,opt,name=cik,proto3" json:"cik,omitempty"`
+	// InvestOne Id
+	// InvestOne is an investment accounting solution for institutional asset managers.
+	InvestOne string `protobuf:"bytes,12,opt,name=invest_one,json=investOne,proto3" json:"invest_one,omitempty"`
+	// Morningstar SecId
+	MorningstarSecId string `protobuf:"bytes,13,opt,name=morningstar_sec_id,json=morningstarSecId,proto3" json:"morningstar_sec_id,omitempty"`
+	// Morningstar CompanyId
+	MorningstarCompanyId string `protobuf:"bytes,14,opt,name=morningstar_company_id,json=morningstarCompanyId,proto3" json:"morningstar_company_id,omitempty"`
+	// MCH Id
+	// MCH (Multi-Currency Horizon) is an investment accounting solution for institutional asset managers.
+	Mch string `protobuf:"bytes,15,opt,name=mch,proto3" json:"mch,omitempty"`
+	// Multifonds Id
+	// Multifonds is an investment accounting solution for institutional asset managers.
+	Multifonds string `protobuf:"bytes,16,opt,name=multifonds,proto3" json:"multifonds,omitempty"`
+	// Fundamental Id
+	// Fundamental is an investment accounting solution for institutional asset managers.
+	Fundamental string `protobuf:"bytes,17,opt,name=fundamental,proto3" json:"fundamental,omitempty"`
+	// Morgan Stanley Id
+	// Morgan Stanley is an investment trading solution provider for institutional asset managers.
+	MorganStanley string `protobuf:"bytes,18,opt,name=morgan_stanley,json=morganStanley,proto3" json:"morgan_stanley,omitempty"`
+	// JSE Alpha Code
+	// The ticker used by the Johannesburg Stock Exchange
+	JseAlphaCode string `protobuf:"bytes,19,opt,name=jse_alpha_code,json=jseAlphaCode,proto3" json:"jse_alpha_code,omitempty"`
+	// Refinitiv PermID
+	// PermIDs are open, permanent and universal identifiers where underlying attributes capture the
+	// context of the identity they each represent.
+	// https://permid.org/
+	PermId string `protobuf:"bytes,20,opt,name=perm_id,json=permId,proto3" json:"perm_id,omitempty"`
+	// Datastream Symbol
+	DatastreamSymbol string `protobuf:"bytes,21,opt,name=datastream_symbol,json=datastreamSymbol,proto3" json:"datastream_symbol,omitempty"`
+	// IEX Identifier
+	IexId string `protobuf:"bytes,22,opt,name=iex_id,json=iexId,proto3" json:"iex_id,omitempty"`
+	// Portfolio Exchange Branch is the unique identifier keeping
+	// track of tickerised Portfolio Branches.
+	// A particular Portfolio Branch may be tickerised and created
+	// as an instrument in IN. This identifier is used to link the
+	// instrument bak to the Portfolio Branch in Portfolio Exchange.
+	//
+	// Format: "portfolios/{portfolioID}/branches/{branchID}"
+	// Example: "portfolios/PXPK9F123456/branches/example_branch"
+	PortfolioExchangeBranch string `protobuf:"bytes,23,opt,name=portfolio_exchange_branch,json=portfolioExchangeBranch,proto3" json:"portfolio_exchange_branch,omitempty"`
+	// Research Figi represents the instrument that should be referenced for investment research purposes.
+	// For example: Even though the actual instrument that is held in a given portfolio is the ADR BBG013CYP248. The instrument to reference for investment research purposes should be the actual referenced Equity BBG000BC9LX8.
+	ResearchFigi  string `protobuf:"bytes,24,opt,name=research_figi,json=researchFigi,proto3" json:"research_figi,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument_ExternalIDs) Reset() {
@@ -840,12 +1058,21 @@ func (x *Instrument_ExternalIDs) GetResearchFigi() string {
 	return ""
 }
 
+// Exchange identifiers
 type Instrument_ExchangeIdentifiers struct {
-	state                   protoimpl.MessageState `protogen:"open.v1"`
-	Mic                     string                 `protobuf:"bytes,1,opt,name=mic,proto3" json:"mic,omitempty"`
-	OperatingMic            string                 `protobuf:"bytes,12,opt,name=operating_mic,json=operatingMic,proto3" json:"operating_mic,omitempty"`
-	BloombergExchangeCode   string                 `protobuf:"bytes,2,opt,name=bloomberg_exchange_code,json=bloombergExchangeCode,proto3" json:"bloomberg_exchange_code,omitempty"`
-	MorningstarExchangeCode string                 `protobuf:"bytes,3,opt,name=morningstar_exchange_code,json=morningstarExchangeCode,proto3" json:"morningstar_exchange_code,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Exchange MIC
+	// The Market Identifier Code (MIC) (ISO 10383) is a unique identification code
+	// used to identify securities trading exchanges, regulated and non-regulated
+	// trading markets. The MIC is a four alphanumeric character code, and is
+	// defined in ISO 10383.
+	Mic string `protobuf:"bytes,1,opt,name=mic,proto3" json:"mic,omitempty"`
+	// Exchange operating mic
+	OperatingMic string `protobuf:"bytes,12,opt,name=operating_mic,json=operatingMic,proto3" json:"operating_mic,omitempty"`
+	// Bloomberg Exchange Code
+	BloombergExchangeCode string `protobuf:"bytes,2,opt,name=bloomberg_exchange_code,json=bloombergExchangeCode,proto3" json:"bloomberg_exchange_code,omitempty"`
+	// Morningstar Exchange Code
+	MorningstarExchangeCode string `protobuf:"bytes,3,opt,name=morningstar_exchange_code,json=morningstarExchangeCode,proto3" json:"morningstar_exchange_code,omitempty"`
 	unknownFields           protoimpl.UnknownFields
 	sizeCache               protoimpl.SizeCache
 }
@@ -908,10 +1135,13 @@ func (x *Instrument_ExchangeIdentifiers) GetMorningstarExchangeCode() string {
 	return ""
 }
 
+// Instrument details required for common Alis Engines
 type Instrument_Engines struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Px            *px.Instrument         `protobuf:"bytes,1,opt,name=px,proto3" json:"px,omitempty"`
-	Cx            *cx.Instrument         `protobuf:"bytes,2,opt,name=cx,proto3" json:"cx,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Portfolio Exchange Engine details
+	Px *px.Instrument `protobuf:"bytes,1,opt,name=px,proto3" json:"px,omitempty"`
+	// Compliance Exchange Engine details
+	Cx            *cx.Instrument `protobuf:"bytes,2,opt,name=cx,proto3" json:"cx,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -960,9 +1190,12 @@ func (x *Instrument_Engines) GetCx() *cx.Instrument {
 	return nil
 }
 
+// This represents the attribute level source details
 type Instrument_SourceMetaData struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Source        Source                 `protobuf:"varint,1,opt,name=source,proto3,enum=alis.open.in.v1.Source" json:"source,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Source the attribute
+	Source Source `protobuf:"varint,1,opt,name=source,proto3,enum=alis.open.in.v1.Source" json:"source,omitempty"`
+	// Time Updated
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
