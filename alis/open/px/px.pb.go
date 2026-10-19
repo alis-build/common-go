@@ -4,6 +4,28 @@
 // 	protoc        v3.21.12
 // source: alis/open/px/v1/px.proto
 
+// Holds the Portfolio Exchange (PX) attributes of a financial instrument: how
+// its points data (prices and total returns) is sourced and synced, how it
+// maps to portfolio branches, and the health of its data.
+//
+// The package defines no service. Its main types are:
+//
+// - `Instrument` (`instruments/{instrument_id}`): extends the IN instrument
+//   (`alis.open.in.v1.Instrument`, which embeds it as `engines.px`) with price
+//   and total return proxies, look-through and aggregation mappings, cash
+//   placeholder handling, a per-source `PointsSyncConfig`, and a
+//   `HealthCheckConfig`. An instrument must be defined in IN before PX can
+//   use it.
+// - `InstrumentHealthState`: the outcome of an instrument's health checks,
+//   grouped into reference data, points coverage, and points quality checks.
+//   Each check reports a `HealthCheckResult` of pass, pass with warnings, or
+//   fail, with a reason and notes.
+// - `Source`: the data sources PX syncs instruments and points from, such as
+//   Datastream, Bloomberg, JSE, and Rezco Fund Accounting.
+//
+// Portfolio branches are referenced by name in the format
+// `portfolios/{portfolio}/branches/{branch}`.
+
 package px
 
 import (
@@ -25,19 +47,34 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Data sources from which PX syncs instruments and points data.
 type Source int32
 
 const (
+	// Source not specified by the user.
 	Source_SOURCE_UNSPECIFIED Source = 0
-	Source_CUSTOM             Source = 1
-	Source_DATASTREAM         Source = 2
-	Source_BLOOMBERG          Source = 3
-	Source_OPENFIGI           Source = 4
-	Source_JSE                Source = 5
-	Source_ALIS_IN            Source = 6
-	Source_ALIS_PX            Source = 7
-	Source_REZCO_FA           Source = 8
-	Source_MORNINGSTAR        Source = 9
+	// Custom Uploaded Data e.g. Portfolio Manager, User etc.
+	Source_CUSTOM Source = 1
+	// Datastream
+	Source_DATASTREAM Source = 2
+	// Bloomberg
+	Source_BLOOMBERG Source = 3
+	// Openfigi
+	Source_OPENFIGI Source = 4
+	// JSE
+	Source_JSE Source = 5
+	// Alis IN Instruments
+	Source_ALIS_IN Source = 6
+	// Alis PX Custom Instruments/Points
+	// This is a special source that is used to indicate that the instrument/point was created by Alis PX
+	// and not by a user.
+	//
+	// A good example is Points for custom instruments that are cash placeholders
+	Source_ALIS_PX Source = 7
+	// Rezco Fund Accounting
+	Source_REZCO_FA Source = 8
+	// Morningstar
+	Source_MORNINGSTAR Source = 9
 )
 
 // Enum value maps for Source.
@@ -95,11 +132,17 @@ func (Source) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_px_v1_px_proto_rawDescGZIP(), []int{0}
 }
 
+// The instrument's state
 type Instrument_State int32
 
 const (
+	// The instrument's state is unspecified
+	// This is the default value and will be used if the state is not set.
 	Instrument_STATE_UNSPECIFIED Instrument_State = 0
-	Instrument_ACTIVE            Instrument_State = 1
+	// The instrument is active
+	// This means that the instrument is held in one or more portfolios at a certain point in time.
+	// These instruments should always have points data available for the period(s) they are active.
+	Instrument_ACTIVE Instrument_State = 1
 )
 
 // Enum value maps for Instrument_State.
@@ -141,19 +184,30 @@ func (Instrument_State) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_px_v1_px_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// State Street Asset categories
 type Instrument_AssetClassification_StateStreet_AssetCategory int32
 
 const (
+	// Category unspecified
 	Instrument_AssetClassification_StateStreet_ASSET_CATEGORY_UNSPECIFIED Instrument_AssetClassification_StateStreet_AssetCategory = 0
-	Instrument_AssetClassification_StateStreet_CASH                       Instrument_AssetClassification_StateStreet_AssetCategory = 1
-	Instrument_AssetClassification_StateStreet_OPTIONS                    Instrument_AssetClassification_StateStreet_AssetCategory = 2
-	Instrument_AssetClassification_StateStreet_ASSET                      Instrument_AssetClassification_StateStreet_AssetCategory = 3
-	Instrument_AssetClassification_StateStreet_CASH_EQUIVALENT            Instrument_AssetClassification_StateStreet_AssetCategory = 4
-	Instrument_AssetClassification_StateStreet_EQUITY                     Instrument_AssetClassification_StateStreet_AssetCategory = 5
-	Instrument_AssetClassification_StateStreet_FIXED_INCOME               Instrument_AssetClassification_StateStreet_AssetCategory = 6
-	Instrument_AssetClassification_StateStreet_LIABILITIES                Instrument_AssetClassification_StateStreet_AssetCategory = 7
-	Instrument_AssetClassification_StateStreet_FUTURE                     Instrument_AssetClassification_StateStreet_AssetCategory = 8
-	Instrument_AssetClassification_StateStreet_FOREIGN_EXCHANGE           Instrument_AssetClassification_StateStreet_AssetCategory = 9
+	// Cash
+	Instrument_AssetClassification_StateStreet_CASH Instrument_AssetClassification_StateStreet_AssetCategory = 1
+	// Options
+	Instrument_AssetClassification_StateStreet_OPTIONS Instrument_AssetClassification_StateStreet_AssetCategory = 2
+	// Asset
+	Instrument_AssetClassification_StateStreet_ASSET Instrument_AssetClassification_StateStreet_AssetCategory = 3
+	// Cash Equivalent
+	Instrument_AssetClassification_StateStreet_CASH_EQUIVALENT Instrument_AssetClassification_StateStreet_AssetCategory = 4
+	// Equity
+	Instrument_AssetClassification_StateStreet_EQUITY Instrument_AssetClassification_StateStreet_AssetCategory = 5
+	// Fixed Income
+	Instrument_AssetClassification_StateStreet_FIXED_INCOME Instrument_AssetClassification_StateStreet_AssetCategory = 6
+	// Liabilities
+	Instrument_AssetClassification_StateStreet_LIABILITIES Instrument_AssetClassification_StateStreet_AssetCategory = 7
+	// Future
+	Instrument_AssetClassification_StateStreet_FUTURE Instrument_AssetClassification_StateStreet_AssetCategory = 8
+	// Foreign Exchange
+	Instrument_AssetClassification_StateStreet_FOREIGN_EXCHANGE Instrument_AssetClassification_StateStreet_AssetCategory = 9
 )
 
 // Enum value maps for Instrument_AssetClassification_StateStreet_AssetCategory.
@@ -211,101 +265,194 @@ func (Instrument_AssetClassification_StateStreet_AssetCategory) EnumDescriptor()
 	return file_alis_open_px_v1_px_proto_rawDescGZIP(), []int{0, 0, 0, 0}
 }
 
+// JTC Asset groups
 type Instrument_AssetClassification_JTC_AssetGroup int32
 
 const (
+	// Asset group unspecified
 	Instrument_AssetClassification_JTC_ASSET_GROUP_UNSPECIFIED Instrument_AssetClassification_JTC_AssetGroup = 0
-	Instrument_AssetClassification_JTC_AP                      Instrument_AssetClassification_JTC_AssetGroup = 1
-	Instrument_AssetClassification_JTC_B                       Instrument_AssetClassification_JTC_AssetGroup = 2
-	Instrument_AssetClassification_JTC_BA                      Instrument_AssetClassification_JTC_AssetGroup = 3
-	Instrument_AssetClassification_JTC_BR                      Instrument_AssetClassification_JTC_AssetGroup = 4
-	Instrument_AssetClassification_JTC_CA                      Instrument_AssetClassification_JTC_AssetGroup = 5
-	Instrument_AssetClassification_JTC_CB                      Instrument_AssetClassification_JTC_AssetGroup = 6
-	Instrument_AssetClassification_JTC_CC                      Instrument_AssetClassification_JTC_AssetGroup = 7
-	Instrument_AssetClassification_JTC_CD                      Instrument_AssetClassification_JTC_AssetGroup = 8
-	Instrument_AssetClassification_JTC_CF                      Instrument_AssetClassification_JTC_AssetGroup = 9
-	Instrument_AssetClassification_JTC_CFD                     Instrument_AssetClassification_JTC_AssetGroup = 10
-	Instrument_AssetClassification_JTC_CL                      Instrument_AssetClassification_JTC_AssetGroup = 11
-	Instrument_AssetClassification_JTC_CM                      Instrument_AssetClassification_JTC_AssetGroup = 12
-	Instrument_AssetClassification_JTC_CP                      Instrument_AssetClassification_JTC_AssetGroup = 13
-	Instrument_AssetClassification_JTC_CS                      Instrument_AssetClassification_JTC_AssetGroup = 14
-	Instrument_AssetClassification_JTC_CT                      Instrument_AssetClassification_JTC_AssetGroup = 15
-	Instrument_AssetClassification_JTC_CU                      Instrument_AssetClassification_JTC_AssetGroup = 16
-	Instrument_AssetClassification_JTC_CV                      Instrument_AssetClassification_JTC_AssetGroup = 17
-	Instrument_AssetClassification_JTC_CW                      Instrument_AssetClassification_JTC_AssetGroup = 18
-	Instrument_AssetClassification_JTC_DA                      Instrument_AssetClassification_JTC_AssetGroup = 19
-	Instrument_AssetClassification_JTC_DD                      Instrument_AssetClassification_JTC_AssetGroup = 20
-	Instrument_AssetClassification_JTC_DE                      Instrument_AssetClassification_JTC_AssetGroup = 21
-	Instrument_AssetClassification_JTC_DN                      Instrument_AssetClassification_JTC_AssetGroup = 22
-	Instrument_AssetClassification_JTC_DW                      Instrument_AssetClassification_JTC_AssetGroup = 23
-	Instrument_AssetClassification_JTC_ED                      Instrument_AssetClassification_JTC_AssetGroup = 24
-	Instrument_AssetClassification_JTC_EI                      Instrument_AssetClassification_JTC_AssetGroup = 25
-	Instrument_AssetClassification_JTC_EP                      Instrument_AssetClassification_JTC_AssetGroup = 26
-	Instrument_AssetClassification_JTC_EQU                     Instrument_AssetClassification_JTC_AssetGroup = 27
-	Instrument_AssetClassification_JTC_F                       Instrument_AssetClassification_JTC_AssetGroup = 28
-	Instrument_AssetClassification_JTC_FB                      Instrument_AssetClassification_JTC_AssetGroup = 29
-	Instrument_AssetClassification_JTC_FC                      Instrument_AssetClassification_JTC_AssetGroup = 30
-	Instrument_AssetClassification_JTC_FE                      Instrument_AssetClassification_JTC_AssetGroup = 31
-	Instrument_AssetClassification_JTC_FH                      Instrument_AssetClassification_JTC_AssetGroup = 32
-	Instrument_AssetClassification_JTC_FL                      Instrument_AssetClassification_JTC_AssetGroup = 33
-	Instrument_AssetClassification_JTC_FM                      Instrument_AssetClassification_JTC_AssetGroup = 34
-	Instrument_AssetClassification_JTC_FS                      Instrument_AssetClassification_JTC_AssetGroup = 35
-	Instrument_AssetClassification_JTC_FT                      Instrument_AssetClassification_JTC_AssetGroup = 36
-	Instrument_AssetClassification_JTC_G                       Instrument_AssetClassification_JTC_AssetGroup = 37
-	Instrument_AssetClassification_JTC_G1                      Instrument_AssetClassification_JTC_AssetGroup = 38
-	Instrument_AssetClassification_JTC_G2                      Instrument_AssetClassification_JTC_AssetGroup = 39
-	Instrument_AssetClassification_JTC_GI                      Instrument_AssetClassification_JTC_AssetGroup = 40
-	Instrument_AssetClassification_JTC_I                       Instrument_AssetClassification_JTC_AssetGroup = 41
-	Instrument_AssetClassification_JTC_IB                      Instrument_AssetClassification_JTC_AssetGroup = 42
-	Instrument_AssetClassification_JTC_IC                      Instrument_AssetClassification_JTC_AssetGroup = 43
-	Instrument_AssetClassification_JTC_IE                      Instrument_AssetClassification_JTC_AssetGroup = 44
-	Instrument_AssetClassification_JTC_II                      Instrument_AssetClassification_JTC_AssetGroup = 45
-	Instrument_AssetClassification_JTC_IO                      Instrument_AssetClassification_JTC_AssetGroup = 46
-	Instrument_AssetClassification_JTC_IR                      Instrument_AssetClassification_JTC_AssetGroup = 47
-	Instrument_AssetClassification_JTC_IS                      Instrument_AssetClassification_JTC_AssetGroup = 48
-	Instrument_AssetClassification_JTC_IT                      Instrument_AssetClassification_JTC_AssetGroup = 49
-	Instrument_AssetClassification_JTC_IV                      Instrument_AssetClassification_JTC_AssetGroup = 50
-	Instrument_AssetClassification_JTC_IW                      Instrument_AssetClassification_JTC_AssetGroup = 51
-	Instrument_AssetClassification_JTC_JN                      Instrument_AssetClassification_JTC_AssetGroup = 52
-	Instrument_AssetClassification_JTC_LOA                     Instrument_AssetClassification_JTC_AssetGroup = 53
-	Instrument_AssetClassification_JTC_LPS                     Instrument_AssetClassification_JTC_AssetGroup = 54
-	Instrument_AssetClassification_JTC_M                       Instrument_AssetClassification_JTC_AssetGroup = 55
-	Instrument_AssetClassification_JTC_MA                      Instrument_AssetClassification_JTC_AssetGroup = 56
-	Instrument_AssetClassification_JTC_MB                      Instrument_AssetClassification_JTC_AssetGroup = 57
-	Instrument_AssetClassification_JTC_MD                      Instrument_AssetClassification_JTC_AssetGroup = 58
-	Instrument_AssetClassification_JTC_ME                      Instrument_AssetClassification_JTC_AssetGroup = 59
-	Instrument_AssetClassification_JTC_MF                      Instrument_AssetClassification_JTC_AssetGroup = 60
-	Instrument_AssetClassification_JTC_MM                      Instrument_AssetClassification_JTC_AssetGroup = 61
-	Instrument_AssetClassification_JTC_MN                      Instrument_AssetClassification_JTC_AssetGroup = 62
-	Instrument_AssetClassification_JTC_MR                      Instrument_AssetClassification_JTC_AssetGroup = 63
-	Instrument_AssetClassification_JTC_MS                      Instrument_AssetClassification_JTC_AssetGroup = 64
-	Instrument_AssetClassification_JTC_O                       Instrument_AssetClassification_JTC_AssetGroup = 65
-	Instrument_AssetClassification_JTC_OE                      Instrument_AssetClassification_JTC_AssetGroup = 66
-	Instrument_AssetClassification_JTC_P                       Instrument_AssetClassification_JTC_AssetGroup = 67
-	Instrument_AssetClassification_JTC_PL                      Instrument_AssetClassification_JTC_AssetGroup = 68
-	Instrument_AssetClassification_JTC_PO                      Instrument_AssetClassification_JTC_AssetGroup = 69
-	Instrument_AssetClassification_JTC_PRO                     Instrument_AssetClassification_JTC_AssetGroup = 70
-	Instrument_AssetClassification_JTC_R                       Instrument_AssetClassification_JTC_AssetGroup = 71
-	Instrument_AssetClassification_JTC_RE                      Instrument_AssetClassification_JTC_AssetGroup = 72
-	Instrument_AssetClassification_JTC_RL                      Instrument_AssetClassification_JTC_AssetGroup = 73
-	Instrument_AssetClassification_JTC_RP                      Instrument_AssetClassification_JTC_AssetGroup = 74
-	Instrument_AssetClassification_JTC_RR                      Instrument_AssetClassification_JTC_AssetGroup = 75
-	Instrument_AssetClassification_JTC_S                       Instrument_AssetClassification_JTC_AssetGroup = 76
-	Instrument_AssetClassification_JTC_SB                      Instrument_AssetClassification_JTC_AssetGroup = 77
-	Instrument_AssetClassification_JTC_SM                      Instrument_AssetClassification_JTC_AssetGroup = 78
-	Instrument_AssetClassification_JTC_SN                      Instrument_AssetClassification_JTC_AssetGroup = 79
-	Instrument_AssetClassification_JTC_TD                      Instrument_AssetClassification_JTC_AssetGroup = 80
-	Instrument_AssetClassification_JTC_TI                      Instrument_AssetClassification_JTC_AssetGroup = 81
-	Instrument_AssetClassification_JTC_TIP                     Instrument_AssetClassification_JTC_AssetGroup = 82
-	Instrument_AssetClassification_JTC_TL                      Instrument_AssetClassification_JTC_AssetGroup = 83
-	Instrument_AssetClassification_JTC_TN                      Instrument_AssetClassification_JTC_AssetGroup = 84
-	Instrument_AssetClassification_JTC_TO                      Instrument_AssetClassification_JTC_AssetGroup = 85
-	Instrument_AssetClassification_JTC_TW                      Instrument_AssetClassification_JTC_AssetGroup = 86
-	Instrument_AssetClassification_JTC_UN                      Instrument_AssetClassification_JTC_AssetGroup = 87
-	Instrument_AssetClassification_JTC_W                       Instrument_AssetClassification_JTC_AssetGroup = 88
-	Instrument_AssetClassification_JTC_WE                      Instrument_AssetClassification_JTC_AssetGroup = 89
-	Instrument_AssetClassification_JTC_XX                      Instrument_AssetClassification_JTC_AssetGroup = 90
-	Instrument_AssetClassification_JTC_YD                      Instrument_AssetClassification_JTC_AssetGroup = 91
+	// Auction Rate Preferred Stock
+	Instrument_AssetClassification_JTC_AP Instrument_AssetClassification_JTC_AssetGroup = 1
+	// Corporate Bond
+	Instrument_AssetClassification_JTC_B Instrument_AssetClassification_JTC_AssetGroup = 2
+	// Bankers Acceptance
+	Instrument_AssetClassification_JTC_BA Instrument_AssetClassification_JTC_AssetGroup = 3
+	// Benchmark
+	Instrument_AssetClassification_JTC_BR Instrument_AssetClassification_JTC_AssetGroup = 4
+	// Cash
+	Instrument_AssetClassification_JTC_CA Instrument_AssetClassification_JTC_AssetGroup = 5
+	// Convertible Bond
+	Instrument_AssetClassification_JTC_CB Instrument_AssetClassification_JTC_AssetGroup = 6
+	// Currency Contract
+	Instrument_AssetClassification_JTC_CC Instrument_AssetClassification_JTC_AssetGroup = 7
+	// Certificate of Deposit
+	Instrument_AssetClassification_JTC_CD Instrument_AssetClassification_JTC_AssetGroup = 8
+	// Capital Fixed Expense
+	Instrument_AssetClassification_JTC_CF Instrument_AssetClassification_JTC_AssetGroup = 9
+	// Contract for Difference (Don't use)
+	Instrument_AssetClassification_JTC_CFD Instrument_AssetClassification_JTC_AssetGroup = 10
+	// Capital Assets
+	Instrument_AssetClassification_JTC_CL Instrument_AssetClassification_JTC_AssetGroup = 11
+	// Capital Management Expense
+	Instrument_AssetClassification_JTC_CM Instrument_AssetClassification_JTC_AssetGroup = 12
+	// Commercial Paper
+	Instrument_AssetClassification_JTC_CP Instrument_AssetClassification_JTC_AssetGroup = 13
+	// Currency Swaps (Old)
+	Instrument_AssetClassification_JTC_CS Instrument_AssetClassification_JTC_AssetGroup = 14
+	// Non-Scheduled Capital Fixed Expense
+	Instrument_AssetClassification_JTC_CT Instrument_AssetClassification_JTC_AssetGroup = 15
+	// Currency Security
+	Instrument_AssetClassification_JTC_CU Instrument_AssetClassification_JTC_AssetGroup = 16
+	// Non-Scheduled Capital Mgmt Expense
+	Instrument_AssetClassification_JTC_CV Instrument_AssetClassification_JTC_AssetGroup = 17
+	// Currency Swaps (New)
+	Instrument_AssetClassification_JTC_CW Instrument_AssetClassification_JTC_AssetGroup = 18
+	// Digital Asset
+	Instrument_AssetClassification_JTC_DA Instrument_AssetClassification_JTC_AssetGroup = 19
+	// Deep Discounted Bond
+	Instrument_AssetClassification_JTC_DD Instrument_AssetClassification_JTC_AssetGroup = 20
+	// Deferred Expense
+	Instrument_AssetClassification_JTC_DE Instrument_AssetClassification_JTC_AssetGroup = 21
+	// Demand Note
+	Instrument_AssetClassification_JTC_DN Instrument_AssetClassification_JTC_AssetGroup = 22
+	// Credit Default Swap
+	Instrument_AssetClassification_JTC_DW Instrument_AssetClassification_JTC_AssetGroup = 23
+	// Euro Dollar
+	Instrument_AssetClassification_JTC_ED Instrument_AssetClassification_JTC_AssetGroup = 24
+	// Complex Derivative
+	Instrument_AssetClassification_JTC_EI Instrument_AssetClassification_JTC_AssetGroup = 25
+	// Complex Portfolio
+	Instrument_AssetClassification_JTC_EP Instrument_AssetClassification_JTC_AssetGroup = 26
+	// Equalisation
+	Instrument_AssetClassification_JTC_EQU Instrument_AssetClassification_JTC_AssetGroup = 27
+	// Future (Old)
+	Instrument_AssetClassification_JTC_F Instrument_AssetClassification_JTC_AssetGroup = 28
+	// Foreign Bond
+	Instrument_AssetClassification_JTC_FB Instrument_AssetClassification_JTC_AssetGroup = 29
+	// Forward Exchange Contract - Short
+	Instrument_AssetClassification_JTC_FC Instrument_AssetClassification_JTC_AssetGroup = 30
+	// Fixed Expense
+	Instrument_AssetClassification_JTC_FE Instrument_AssetClassification_JTC_AssetGroup = 31
+	// FHLMC
+	Instrument_AssetClassification_JTC_FH Instrument_AssetClassification_JTC_AssetGroup = 32
+	// Forward Exchange Contract - Long
+	Instrument_AssetClassification_JTC_FL Instrument_AssetClassification_JTC_AssetGroup = 33
+	// FNMA
+	Instrument_AssetClassification_JTC_FM Instrument_AssetClassification_JTC_AssetGroup = 34
+	// Foreign Stock
+	Instrument_AssetClassification_JTC_FS Instrument_AssetClassification_JTC_AssetGroup = 35
+	// Future (New)
+	Instrument_AssetClassification_JTC_FT Instrument_AssetClassification_JTC_AssetGroup = 36
+	// Government Bond
+	Instrument_AssetClassification_JTC_G Instrument_AssetClassification_JTC_AssetGroup = 37
+	// GNMA1
+	Instrument_AssetClassification_JTC_G1 Instrument_AssetClassification_JTC_AssetGroup = 38
+	// GNMA2
+	Instrument_AssetClassification_JTC_G2 Instrument_AssetClassification_JTC_AssetGroup = 39
+	// Gilt Bond
+	Instrument_AssetClassification_JTC_GI Instrument_AssetClassification_JTC_AssetGroup = 40
+	// Index
+	Instrument_AssetClassification_JTC_I Instrument_AssetClassification_JTC_AssetGroup = 41
+	// Installment Bond
+	Instrument_AssetClassification_JTC_IB Instrument_AssetClassification_JTC_AssetGroup = 42
+	// Investment Contract
+	Instrument_AssetClassification_JTC_IC Instrument_AssetClassification_JTC_AssetGroup = 43
+	// IO-ETTE Bond
+	Instrument_AssetClassification_JTC_IE Instrument_AssetClassification_JTC_AssetGroup = 44
+	// Inflation Indexed
+	Instrument_AssetClassification_JTC_II Instrument_AssetClassification_JTC_AssetGroup = 45
+	// Interest Only Bond
+	Instrument_AssetClassification_JTC_IO Instrument_AssetClassification_JTC_AssetGroup = 46
+	// Installment Receipt
+	Instrument_AssetClassification_JTC_IR Instrument_AssetClassification_JTC_AssetGroup = 47
+	// Interest Rate Swaps (Old)
+	Instrument_AssetClassification_JTC_IS Instrument_AssetClassification_JTC_AssetGroup = 48
+	// Non-Scheduled Fixed Expense
+	Instrument_AssetClassification_JTC_IT Instrument_AssetClassification_JTC_AssetGroup = 49
+	// Non-Scheduled Management Expense
+	Instrument_AssetClassification_JTC_IV Instrument_AssetClassification_JTC_AssetGroup = 50
+	// Interest Rate Swaps (New)
+	Instrument_AssetClassification_JTC_IW Instrument_AssetClassification_JTC_AssetGroup = 51
+	// Junior Note
+	Instrument_AssetClassification_JTC_JN Instrument_AssetClassification_JTC_AssetGroup = 52
+	// Loan
+	Instrument_AssetClassification_JTC_LOA Instrument_AssetClassification_JTC_AssetGroup = 53
+	// Limited Partnership
+	Instrument_AssetClassification_JTC_LPS Instrument_AssetClassification_JTC_AssetGroup = 54
+	// Municipal Bond
+	Instrument_AssetClassification_JTC_M Instrument_AssetClassification_JTC_AssetGroup = 55
+	// Miscellaneous Asset
+	Instrument_AssetClassification_JTC_MA Instrument_AssetClassification_JTC_AssetGroup = 56
+	// Mutual Bond Fund
+	Instrument_AssetClassification_JTC_MB Instrument_AssetClassification_JTC_AssetGroup = 57
+	// Margin Deposits
+	Instrument_AssetClassification_JTC_MD Instrument_AssetClassification_JTC_AssetGroup = 58
+	// Management Fee
+	Instrument_AssetClassification_JTC_ME Instrument_AssetClassification_JTC_AssetGroup = 59
+	// Mutual Fund
+	Instrument_AssetClassification_JTC_MF Instrument_AssetClassification_JTC_AssetGroup = 60
+	// Money Market
+	Instrument_AssetClassification_JTC_MM Instrument_AssetClassification_JTC_AssetGroup = 61
+	// Master Notes
+	Instrument_AssetClassification_JTC_MN Instrument_AssetClassification_JTC_AssetGroup = 62
+	// Mortgage Related
+	Instrument_AssetClassification_JTC_MR Instrument_AssetClassification_JTC_AssetGroup = 63
+	// Master Portfolio
+	Instrument_AssetClassification_JTC_MS Instrument_AssetClassification_JTC_AssetGroup = 64
+	// Option
+	Instrument_AssetClassification_JTC_O Instrument_AssetClassification_JTC_AssetGroup = 65
+	// Other Expense
+	Instrument_AssetClassification_JTC_OE Instrument_AssetClassification_JTC_AssetGroup = 66
+	// Preferred Stock
+	Instrument_AssetClassification_JTC_P Instrument_AssetClassification_JTC_AssetGroup = 67
+	// Investment Pools
+	Instrument_AssetClassification_JTC_PL Instrument_AssetClassification_JTC_AssetGroup = 68
+	// Principal Only Bond
+	Instrument_AssetClassification_JTC_PO Instrument_AssetClassification_JTC_AssetGroup = 69
+	// Property
+	Instrument_AssetClassification_JTC_PRO Instrument_AssetClassification_JTC_AssetGroup = 70
+	// Right
+	Instrument_AssetClassification_JTC_R Instrument_AssetClassification_JTC_AssetGroup = 71
+	// REMIC
+	Instrument_AssetClassification_JTC_RE Instrument_AssetClassification_JTC_AssetGroup = 72
+	// Revolving Loan
+	Instrument_AssetClassification_JTC_RL Instrument_AssetClassification_JTC_AssetGroup = 73
+	// Repurchase Agreement
+	Instrument_AssetClassification_JTC_RP Instrument_AssetClassification_JTC_AssetGroup = 74
+	// Reverse Repo
+	Instrument_AssetClassification_JTC_RR Instrument_AssetClassification_JTC_AssetGroup = 75
+	// Common Stock
+	Instrument_AssetClassification_JTC_S Instrument_AssetClassification_JTC_AssetGroup = 76
+	// Stepped Bond
+	Instrument_AssetClassification_JTC_SB Instrument_AssetClassification_JTC_AssetGroup = 77
+	// Stepped Municipal Bond
+	Instrument_AssetClassification_JTC_SM Instrument_AssetClassification_JTC_AssetGroup = 78
+	// Senior Note
+	Instrument_AssetClassification_JTC_SN Instrument_AssetClassification_JTC_AssetGroup = 79
+	// Time Deposit
+	Instrument_AssetClassification_JTC_TD Instrument_AssetClassification_JTC_AssetGroup = 80
+	// Treasury Bill
+	Instrument_AssetClassification_JTC_TI Instrument_AssetClassification_JTC_AssetGroup = 81
+	// Inflation Linked Bond (TIPS)
+	Instrument_AssetClassification_JTC_TIP Instrument_AssetClassification_JTC_AssetGroup = 82
+	// Term Loan
+	Instrument_AssetClassification_JTC_TL Instrument_AssetClassification_JTC_AssetGroup = 83
+	// Treasury Note
+	Instrument_AssetClassification_JTC_TN Instrument_AssetClassification_JTC_AssetGroup = 84
+	// Treasury Bond
+	Instrument_AssetClassification_JTC_TO Instrument_AssetClassification_JTC_AssetGroup = 85
+	// Total Return Swaps
+	Instrument_AssetClassification_JTC_TW Instrument_AssetClassification_JTC_AssetGroup = 86
+	// Units
+	Instrument_AssetClassification_JTC_UN Instrument_AssetClassification_JTC_AssetGroup = 87
+	// Warrant
+	Instrument_AssetClassification_JTC_W Instrument_AssetClassification_JTC_AssetGroup = 88
+	// Waiver, Reimbursement, Recoupment Expense
+	Instrument_AssetClassification_JTC_WE Instrument_AssetClassification_JTC_AssetGroup = 89
+	// Other Security
+	Instrument_AssetClassification_JTC_XX Instrument_AssetClassification_JTC_AssetGroup = 90
+	// Yankee Dollar
+	Instrument_AssetClassification_JTC_YD Instrument_AssetClassification_JTC_AssetGroup = 91
 )
 
 // Enum value maps for Instrument_AssetClassification_JTC_AssetGroup.
@@ -527,13 +674,18 @@ func (Instrument_AssetClassification_JTC_AssetGroup) EnumDescriptor() ([]byte, [
 	return file_alis_open_px_v1_px_proto_rawDescGZIP(), []int{0, 0, 1, 0}
 }
 
+// Result of the health check
 type InstrumentHealthState_HealthCheckResult int32
 
 const (
+	// Unspecified result
 	InstrumentHealthState_HEALTH_CHECK_RESULT_UNSPECIFIED InstrumentHealthState_HealthCheckResult = 0
-	InstrumentHealthState_PASS                            InstrumentHealthState_HealthCheckResult = 1
-	InstrumentHealthState_PASS_WITH_WARNINGS              InstrumentHealthState_HealthCheckResult = 2
-	InstrumentHealthState_FAIL                            InstrumentHealthState_HealthCheckResult = 3
+	// Check passed with no warnings. Green
+	InstrumentHealthState_PASS InstrumentHealthState_HealthCheckResult = 1
+	// Check passed with warnings. Amber
+	InstrumentHealthState_PASS_WITH_WARNINGS InstrumentHealthState_HealthCheckResult = 2
+	// Check failed. Red
+	InstrumentHealthState_FAIL InstrumentHealthState_HealthCheckResult = 3
 )
 
 // Enum value maps for InstrumentHealthState_HealthCheckResult.
@@ -579,37 +731,117 @@ func (InstrumentHealthState_HealthCheckResult) EnumDescriptor() ([]byte, []int) 
 	return file_alis_open_px_v1_px_proto_rawDescGZIP(), []int{1, 0}
 }
 
+// Instrument is an extension of the IN Instrument resource, and is used to hold additional
+// attributes that are not defined in IN, but are useful in PX.
+//
+// For an instrument to be used in PX, it must be defined in IN
 type Instrument struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The instrument name as defined within the IN product.
+	// Format: instruments/{instrument_id}. {instrument_id} must be a valid Global FIGI,
+	// or a valid custom instrument ID.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Use Bloomberg as a source for this instrument.
+	//
+	// This field is deprecated, please use `points_sync_config` instead.
+	//
 	// Deprecated: Marked as deprecated in alis/open/px/v1/px.proto.
-	BloombergSourceEnabled bool   `protobuf:"varint,2,opt,name=bloomberg_source_enabled,json=bloombergSourceEnabled,proto3" json:"bloomberg_source_enabled,omitempty"`
-	CurrencyCode           string `protobuf:"bytes,3,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
-	PriceProxy             string `protobuf:"bytes,4,opt,name=price_proxy,json=priceProxy,proto3" json:"price_proxy,omitempty"`
-	TotalReturnProxy       string `protobuf:"bytes,5,opt,name=total_return_proxy,json=totalReturnProxy,proto3" json:"total_return_proxy,omitempty"`
+	BloombergSourceEnabled bool `protobuf:"varint,2,opt,name=bloomberg_source_enabled,json=bloombergSourceEnabled,proto3" json:"bloomberg_source_enabled,omitempty"`
+	// Instrument's currency code
+	CurrencyCode string `protobuf:"bytes,3,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
+	// An instrument to use as the price proxy
+	// Format: instruments/{instrument}
+	PriceProxy string `protobuf:"bytes,4,opt,name=price_proxy,json=priceProxy,proto3" json:"price_proxy,omitempty"`
+	// An instrument to use as the total return proxy
+	// Format: instruments/{instrument}
+	TotalReturnProxy string `protobuf:"bytes,5,opt,name=total_return_proxy,json=totalReturnProxy,proto3" json:"total_return_proxy,omitempty"`
+	// A branch to use for lookthroughs
+	// Format portfolios/{portfolio}/branches/{branch}
+	//
+	// Deprecated: Use lookthrough_config instead
+	//
 	// Deprecated: Marked as deprecated in alis/open/px/v1/px.proto.
 	LookthroughMapping string `protobuf:"bytes,6,opt,name=lookthrough_mapping,json=lookthroughMapping,proto3" json:"lookthrough_mapping,omitempty"`
+	// Instrument that this instrument should be aggregated to
+	// If this is set, the position's weight_close and quantity_close
+	// will be aggregated to the supplied instrument on days calculation
+	//
+	// Format instruments/{instrument}
 	AggregationMapping string `protobuf:"bytes,7,opt,name=aggregation_mapping,json=aggregationMapping,proto3" json:"aggregation_mapping,omitempty"`
-	DisplayName        string `protobuf:"bytes,8,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// Instrument display name
+	DisplayName string `protobuf:"bytes,8,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// Instrument's asset classification as defined by different asset/fund managers
+	//
 	// Deprecated: Marked as deprecated in alis/open/px/v1/px.proto.
 	AssetClassification *Instrument_AssetClassification `protobuf:"bytes,9,opt,name=asset_classification,json=assetClassification,proto3" json:"asset_classification,omitempty"`
-	LookthroughConfig   *Instrument_LookthroughConfig   `protobuf:"bytes,10,opt,name=lookthrough_config,json=lookthroughConfig,proto3" json:"lookthrough_config,omitempty"`
-	IsCashPlaceholder   bool                            `protobuf:"varint,11,opt,name=is_cash_placeholder,json=isCashPlaceholder,proto3" json:"is_cash_placeholder,omitempty"`
-	State               Instrument_State                `protobuf:"varint,12,opt,name=state,proto3,enum=alis.open.px.v1.Instrument_State" json:"state,omitempty"`
+	// The instrument's lookthrough configuration
+	// The instrument is considered to have a valid lookthrough mapping
+	// if either the default_map or the branch_level_maps are set.
+	// If both are set, the default_map will only be used for branches not specified in the branch_level_maps.
+	LookthroughConfig *Instrument_LookthroughConfig `protobuf:"bytes,10,opt,name=lookthrough_config,json=lookthroughConfig,proto3" json:"lookthrough_config,omitempty"`
+	// The instrument is a cash placeholder
+	// Cash placeholders are used to represent cash and cash equivalents in a portfolio.
+	// When this is set to true, PX will maintain it's price at 1.0 and will calculate it's
+	// price return as the change in FX rate to the portfolio's base currency.
+	IsCashPlaceholder bool `protobuf:"varint,11,opt,name=is_cash_placeholder,json=isCashPlaceholder,proto3" json:"is_cash_placeholder,omitempty"`
+	// The instrument's state
+	State Instrument_State `protobuf:"varint,12,opt,name=state,proto3,enum=alis.open.px.v1.Instrument_State" json:"state,omitempty"`
+	// Metadata about the points data for the instrument
+	// This is used to determine which points data to sync for the instrument.
+	// This is typically only set if a new instrument came into the universe and we need to sync full history points data for it.
+	// If this is empty/nil, the points sync service will determine the start and end dates to sync.
+	//
+	// The metadata is cleared once the points data has been synced.
+	//
+	// Key is the string representation of the `Source` enum from which the points data is synced
+	// Example: DATASTREAM, BLOOMBERG, REZCO_FA, JSE_BONDS
+	//   - In Golang:
+	//     source := pb.Source_DATASTREAM.String()
+	//
 	// Deprecated: Marked as deprecated in alis/open/px/v1/px.proto.
 	PointsMeta map[string]*Instrument_PointsMetadata `protobuf:"bytes,13,rep,name=points_meta,json=pointsMeta,proto3" json:"points_meta,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// This field is deprecated
+	//
+	// Metadata about the branches where the instrument is active
+	// This is typically only set if a new instrument came into the universe and we need to sync full history points data for it
+	// and refresh the days for the branches where it is active.
+	// The sync service will refresh days for these branches once points data is synced.
+	// If this is empty/nil, no branches will be refreshed.
+	//
+	// The metadata is cleared once the branches are refreshed.
+	//
+	// Key is the fully qualified branch name(portfolios/{portfolio}/branches/{branch}), value is the metadata for that branch.
+	//
 	// Deprecated: Marked as deprecated in alis/open/px/v1/px.proto.
-	BranchesMeta            map[string]*Instrument_BranchMetadata `protobuf:"bytes,14,rep,name=branches_meta,json=branchesMeta,proto3" json:"branches_meta,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	SyncedSources           []Source                              `protobuf:"varint,15,rep,packed,name=synced_sources,json=syncedSources,proto3,enum=alis.open.px.v1.Source" json:"synced_sources,omitempty"`
-	PxBranch                string                                `protobuf:"bytes,16,opt,name=px_branch,json=pxBranch,proto3" json:"px_branch,omitempty"`
-	PreferredSourcePriority []Source                              `protobuf:"varint,17,rep,packed,name=preferred_source_priority,json=preferredSourcePriority,proto3,enum=alis.open.px.v1.Source" json:"preferred_source_priority,omitempty"`
-	PointsSyncConfig        *Instrument_PointsSyncConfig          `protobuf:"bytes,18,opt,name=points_sync_config,json=pointsSyncConfig,proto3" json:"points_sync_config,omitempty"`
-	HealthCheckConfig       *Instrument_HealthCheckConfig         `protobuf:"bytes,19,opt,name=health_check_config,json=healthCheckConfig,proto3" json:"health_check_config,omitempty"`
-	HealthState             *InstrumentHealthState                `protobuf:"bytes,20,opt,name=health_state,json=healthState,proto3" json:"health_state,omitempty"`
-	ETag                    string                                `protobuf:"bytes,97,opt,name=e_tag,json=eTag,proto3" json:"e_tag,omitempty"`
-	UpdateTime              *timestamppb.Timestamp                `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	BranchesMeta map[string]*Instrument_BranchMetadata `protobuf:"bytes,14,rep,name=branches_meta,json=branchesMeta,proto3" json:"branches_meta,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Metadata about the sources from which the instrument has been synced
+	SyncedSources []Source `protobuf:"varint,15,rep,packed,name=synced_sources,json=syncedSources,proto3,enum=alis.open.px.v1.Source" json:"synced_sources,omitempty"`
+	// PX Branch that the instrument is mapped to
+	// Format: portfolios/{portfolio}/branches/{branch}
+	// Example: portfolios/123/branches/456
+	//
+	// Once an instrument is mapped to a PX branch, it cannot be changed.
+	PxBranch string `protobuf:"bytes,16,opt,name=px_branch,json=pxBranch,proto3" json:"px_branch,omitempty"`
+	// Preferred source priority override.
+	// If this is set, the specified priority will be used when fetching points data for the instrument.
+	// If not specified, the default PX priority will be used.
+	// Not implemented yet.
+	PreferredSourcePriority []Source `protobuf:"varint,17,rep,packed,name=preferred_source_priority,json=preferredSourcePriority,proto3,enum=alis.open.px.v1.Source" json:"preferred_source_priority,omitempty"`
+	// Config for syncing points data from different sources
+	// Determines which sources to sync points data from and how to sync it.
+	//
+	// If this is not set, the points sync service will use the default config.
+	PointsSyncConfig *Instrument_PointsSyncConfig `protobuf:"bytes,18,opt,name=points_sync_config,json=pointsSyncConfig,proto3" json:"points_sync_config,omitempty"`
+	// Health check config, specifies how to run health checks for the instrument
+	HealthCheckConfig *Instrument_HealthCheckConfig `protobuf:"bytes,19,opt,name=health_check_config,json=healthCheckConfig,proto3" json:"health_check_config,omitempty"`
+	// Instrument Health state
+	HealthState *InstrumentHealthState `protobuf:"bytes,20,opt,name=health_state,json=healthState,proto3" json:"health_state,omitempty"`
+	// Unique Entity Tag(ETag) used for optimistic concurrency control as a way to help prevent simultaneous updates from overwriting each other.
+	ETag string `protobuf:"bytes,97,opt,name=e_tag,json=eTag,proto3" json:"e_tag,omitempty"`
+	// Time the Instrument was last updated
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument) Reset() {
@@ -801,17 +1033,26 @@ func (x *Instrument) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Instrument Health State
 type InstrumentHealthState struct {
-	state               protoimpl.MessageState                     `protogen:"open.v1"`
-	Result              InstrumentHealthState_HealthCheckResult    `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason              string                                     `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes               string                                     `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
-	ReferenceDataCheck  *InstrumentHealthState_ReferenceDataCheck  `protobuf:"bytes,21,opt,name=reference_data_check,json=referenceDataCheck,proto3" json:"reference_data_check,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Reference data checks
+	ReferenceDataCheck *InstrumentHealthState_ReferenceDataCheck `protobuf:"bytes,21,opt,name=reference_data_check,json=referenceDataCheck,proto3" json:"reference_data_check,omitempty"`
+	// Points coverage checks
 	PointsCoverageCheck *InstrumentHealthState_PointsCoverageCheck `protobuf:"bytes,22,opt,name=points_coverage_check,json=pointsCoverageCheck,proto3" json:"points_coverage_check,omitempty"`
-	PointsQualityCheck  *InstrumentHealthState_PointsQualityCheck  `protobuf:"bytes,23,opt,name=points_quality_check,json=pointsQualityCheck,proto3" json:"points_quality_check,omitempty"`
-	UpdateTime          *timestamppb.Timestamp                     `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// Points quality checks
+	PointsQualityCheck *InstrumentHealthState_PointsQualityCheck `protobuf:"bytes,23,opt,name=points_quality_check,json=pointsQualityCheck,proto3" json:"points_quality_check,omitempty"`
+	// Time the Instrument was last updated
+	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InstrumentHealthState) Reset() {
@@ -893,10 +1134,13 @@ func (x *InstrumentHealthState) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Asset classification
 type Instrument_AssetClassification struct {
-	state         protoimpl.MessageState                      `protogen:"open.v1"`
-	StateStreet   *Instrument_AssetClassification_StateStreet `protobuf:"bytes,1,opt,name=state_street,json=stateStreet,proto3" json:"state_street,omitempty"`
-	Jtc           *Instrument_AssetClassification_JTC         `protobuf:"bytes,2,opt,name=jtc,proto3" json:"jtc,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// State street specific asset classification
+	StateStreet *Instrument_AssetClassification_StateStreet `protobuf:"bytes,1,opt,name=state_street,json=stateStreet,proto3" json:"state_street,omitempty"`
+	// JTC specific asset classification
+	Jtc           *Instrument_AssetClassification_JTC `protobuf:"bytes,2,opt,name=jtc,proto3" json:"jtc,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -945,10 +1189,18 @@ func (x *Instrument_AssetClassification) GetJtc() *Instrument_AssetClassificatio
 	return nil
 }
 
+// The instrument's lookthrough configuration
 type Instrument_LookthroughConfig struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	DefaultMap      string                 `protobuf:"bytes,1,opt,name=default_map,json=defaultMap,proto3" json:"default_map,omitempty"`
-	BranchLevelMaps map[string]string      `protobuf:"bytes,2,rep,name=branch_level_maps,json=branchLevelMaps,proto3" json:"branch_level_maps,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// A branch to use for deployment level look-through
+	// Format portfolios/{portfolio}/branches/{branch}
+	DefaultMap string `protobuf:"bytes,1,opt,name=default_map,json=defaultMap,proto3" json:"default_map,omitempty"`
+	// Look-through mapping overrides for specific branches
+	// Format Map(key=portfolios/{portfolio}/branches/{branch}, value=portfolios/{portfolio}/branches/{branch})
+	//
+	// If this is not set, the default_map will be used for all branches
+	// If both this and the default_map are set, the default_map will only be used for branches not specified in this map
+	BranchLevelMaps map[string]string `protobuf:"bytes,2,rep,name=branch_level_maps,json=branchLevelMaps,proto3" json:"branch_level_maps,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -997,10 +1249,15 @@ func (x *Instrument_LookthroughConfig) GetBranchLevelMaps() map[string]string {
 	return nil
 }
 
+// Metadata about a branch where the instrument is active
 type Instrument_BranchMetadata struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	StartDate     *date.Date             `protobuf:"bytes,1,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	EndDate       *date.Date             `protobuf:"bytes,2,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The date the instrument first became active in the branch
+	// If this is not set, the start date is determined by the days service.
+	StartDate *date.Date `protobuf:"bytes,1,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	// The date the instrument last became active in the branch
+	// If this is not set, the end date is determined by the days service.
+	EndDate       *date.Date `protobuf:"bytes,2,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1049,15 +1306,21 @@ func (x *Instrument_BranchMetadata) GetEndDate() *date.Date {
 	return nil
 }
 
+// Points sync config
 type Instrument_PointsSyncConfig struct {
-	state            protoimpl.MessageState                        `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Points sync config for Datastream
 	DatastreamConfig *Instrument_PointsSyncConfig_DatastreamConfig `protobuf:"bytes,1,opt,name=datastream_config,json=datastreamConfig,proto3" json:"datastream_config,omitempty"`
-	BloombergConfig  *Instrument_PointsSyncConfig_BloombergConfig  `protobuf:"bytes,2,opt,name=bloomberg_config,json=bloombergConfig,proto3" json:"bloomberg_config,omitempty"`
-	AlisPxConfig     *Instrument_PointsSyncConfig_AlisPxConfig     `protobuf:"bytes,3,opt,name=alis_px_config,json=alisPxConfig,proto3" json:"alis_px_config,omitempty"`
-	JseConfig        *Instrument_PointsSyncConfig_JseConfig        `protobuf:"bytes,4,opt,name=jse_config,json=jseConfig,proto3" json:"jse_config,omitempty"`
-	RezcoFaConfig    *Instrument_PointsSyncConfig_RezcoFaConfig    `protobuf:"bytes,5,opt,name=rezco_fa_config,json=rezcoFaConfig,proto3" json:"rezco_fa_config,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// Points sync config for Bloomberg
+	BloombergConfig *Instrument_PointsSyncConfig_BloombergConfig `protobuf:"bytes,2,opt,name=bloomberg_config,json=bloombergConfig,proto3" json:"bloomberg_config,omitempty"`
+	// Points sync config for Alis PX
+	AlisPxConfig *Instrument_PointsSyncConfig_AlisPxConfig `protobuf:"bytes,3,opt,name=alis_px_config,json=alisPxConfig,proto3" json:"alis_px_config,omitempty"`
+	// Points sync config for JSE
+	JseConfig *Instrument_PointsSyncConfig_JseConfig `protobuf:"bytes,4,opt,name=jse_config,json=jseConfig,proto3" json:"jse_config,omitempty"`
+	// Points sync config for Rezco Fund Accounting
+	RezcoFaConfig *Instrument_PointsSyncConfig_RezcoFaConfig `protobuf:"bytes,5,opt,name=rezco_fa_config,json=rezcoFaConfig,proto3" json:"rezco_fa_config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument_PointsSyncConfig) Reset() {
@@ -1125,13 +1388,23 @@ func (x *Instrument_PointsSyncConfig) GetRezcoFaConfig() *Instrument_PointsSyncC
 	return nil
 }
 
+// Health check config, specifies how to run health checks for the instrument
+//   - Which fields are important
+//   - What frequency
 type Instrument_HealthCheckConfig struct {
-	state                protoimpl.MessageState  `protogen:"open.v1"`
-	ExcludedPointsFields []string                `protobuf:"bytes,1,rep,name=excluded_points_fields,json=excludedPointsFields,proto3" json:"excluded_points_fields,omitempty"`
-	MaxFillForwardDays   *wrapperspb.UInt32Value `protobuf:"bytes,2,opt,name=max_fill_forward_days,json=maxFillForwardDays,proto3" json:"max_fill_forward_days,omitempty"`
-	IncludeWeekends      *wrapperspb.BoolValue   `protobuf:"bytes,3,opt,name=include_weekends,json=includeWeekends,proto3" json:"include_weekends,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Points fields to exclude
+	// If not specified or empty, all relevant points fields will be included
+	ExcludedPointsFields []string `protobuf:"bytes,1,rep,name=excluded_points_fields,json=excludedPointsFields,proto3" json:"excluded_points_fields,omitempty"`
+	// Fill forward max days
+	// The maximum number of days allowed to fill forward points data
+	// If not specified a default of 7 days is set as the maximum
+	MaxFillForwardDays *wrapperspb.UInt32Value `protobuf:"bytes,2,opt,name=max_fill_forward_days,json=maxFillForwardDays,proto3" json:"max_fill_forward_days,omitempty"`
+	// Include weekends when checking for filled forward points data
+	// If not specified a default of false is set
+	IncludeWeekends *wrapperspb.BoolValue `protobuf:"bytes,3,opt,name=include_weekends,json=includeWeekends,proto3" json:"include_weekends,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Instrument_HealthCheckConfig) Reset() {
@@ -1185,10 +1458,15 @@ func (x *Instrument_HealthCheckConfig) GetIncludeWeekends() *wrapperspb.BoolValu
 	return nil
 }
 
+// Metadata about the points data for the instrument
 type Instrument_PointsMetadata struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	StartDate     *date.Date             `protobuf:"bytes,1,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	EndDate       *date.Date             `protobuf:"bytes,2,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The date from which to sync points data
+	// If this is not set, the start date is determined by the sync service.
+	StartDate *date.Date `protobuf:"bytes,1,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	// The date to which to sync points data
+	// If this is not set, the end date is determined by the sync service.
+	EndDate       *date.Date `protobuf:"bytes,2,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1237,8 +1515,10 @@ func (x *Instrument_PointsMetadata) GetEndDate() *date.Date {
 	return nil
 }
 
+// State street specific asset classification
 type Instrument_AssetClassification_StateStreet struct {
-	state         protoimpl.MessageState                                   `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The instrument's asset category as defined by State Street
 	AssetCategory Instrument_AssetClassification_StateStreet_AssetCategory `protobuf:"varint,1,opt,name=asset_category,json=assetCategory,proto3,enum=alis.open.px.v1.Instrument_AssetClassification_StateStreet_AssetCategory" json:"asset_category,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1281,8 +1561,10 @@ func (x *Instrument_AssetClassification_StateStreet) GetAssetCategory() Instrume
 	return Instrument_AssetClassification_StateStreet_ASSET_CATEGORY_UNSPECIFIED
 }
 
+// JTC specific asset classification
 type Instrument_AssetClassification_JTC struct {
-	state         protoimpl.MessageState                        `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The instrument's asset group as defined by JTC
 	AssetGroup    Instrument_AssetClassification_JTC_AssetGroup `protobuf:"varint,2,opt,name=asset_group,json=assetGroup,proto3,enum=alis.open.px.v1.Instrument_AssetClassification_JTC_AssetGroup" json:"asset_group,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1325,9 +1607,12 @@ func (x *Instrument_AssetClassification_JTC) GetAssetGroup() Instrument_AssetCla
 	return Instrument_AssetClassification_JTC_ASSET_GROUP_UNSPECIFIED
 }
 
+// Points sync config for Datastream
 type Instrument_PointsSyncConfig_DatastreamConfig struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	Enabled       bool                       `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Sync enabled
+	Enabled bool `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// Metadata used when syncing points data
 	PointsMeta    *Instrument_PointsMetadata `protobuf:"bytes,9,opt,name=points_meta,json=pointsMeta,proto3" json:"points_meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1377,13 +1662,29 @@ func (x *Instrument_PointsSyncConfig_DatastreamConfig) GetPointsMeta() *Instrume
 	return nil
 }
 
+// Points sync config for Bloomberg
 type Instrument_PointsSyncConfig_BloombergConfig struct {
-	state              protoimpl.MessageState     `protogen:"open.v1"`
-	Enabled            bool                       `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	SyncActivationTime *timeofday.TimeOfDay       `protobuf:"bytes,2,opt,name=sync_activation_time,json=syncActivationTime,proto3" json:"sync_activation_time,omitempty"`
-	PointsMeta         *Instrument_PointsMetadata `protobuf:"bytes,9,opt,name=points_meta,json=pointsMeta,proto3" json:"points_meta,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Sync enabled
+	Enabled bool `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// The time after which the instrument should be synchronised.
+	// This enables users to specify that the instrument should be synchronised
+	// after a particular time of day, for example the time at which Bloomberg publishes
+	// the pricing data.
+	//
+	// The instrument will be synchronised at the next scheduled synchronisation
+	// after the specified time of day.
+	//
+	// Depending on the schedule of the synchronisation, the instrument may be
+	// up to 12 hours after the specified time of day.
+	//
+	// By default, the instrument will be synchronised at the earliest
+	// daily synchronisation.
+	SyncActivationTime *timeofday.TimeOfDay `protobuf:"bytes,2,opt,name=sync_activation_time,json=syncActivationTime,proto3" json:"sync_activation_time,omitempty"`
+	// Metadata used when syncing points data
+	PointsMeta    *Instrument_PointsMetadata `protobuf:"bytes,9,opt,name=points_meta,json=pointsMeta,proto3" json:"points_meta,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument_PointsSyncConfig_BloombergConfig) Reset() {
@@ -1437,9 +1738,12 @@ func (x *Instrument_PointsSyncConfig_BloombergConfig) GetPointsMeta() *Instrumen
 	return nil
 }
 
+// Points sync config for Alis PX
 type Instrument_PointsSyncConfig_AlisPxConfig struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	Enabled       bool                       `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Sync enabled
+	Enabled bool `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// Metadata used when syncing points data
 	PointsMeta    *Instrument_PointsMetadata `protobuf:"bytes,9,opt,name=points_meta,json=pointsMeta,proto3" json:"points_meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1489,9 +1793,12 @@ func (x *Instrument_PointsSyncConfig_AlisPxConfig) GetPointsMeta() *Instrument_P
 	return nil
 }
 
+// Points sync config for JSE
 type Instrument_PointsSyncConfig_JseConfig struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	Enabled       bool                       `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Sync enabled
+	Enabled bool `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// Metadata used when syncing points data
 	PointsMeta    *Instrument_PointsMetadata `protobuf:"bytes,9,opt,name=points_meta,json=pointsMeta,proto3" json:"points_meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1541,9 +1848,12 @@ func (x *Instrument_PointsSyncConfig_JseConfig) GetPointsMeta() *Instrument_Poin
 	return nil
 }
 
+// Points sync config for Rezco Fund Accounting
 type Instrument_PointsSyncConfig_RezcoFaConfig struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	Enabled       bool                       `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Sync enabled
+	Enabled bool `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// Metadata used when syncing points data
 	PointsMeta    *Instrument_PointsMetadata `protobuf:"bytes,9,opt,name=points_meta,json=pointsMeta,proto3" json:"points_meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1593,13 +1903,23 @@ func (x *Instrument_PointsSyncConfig_RezcoFaConfig) GetPointsMeta() *Instrument_
 	return nil
 }
 
+// Checks for an instrument's reference data (e.g. name, currency code, etc.)
 type InstrumentHealthState_ReferenceDataCheck struct {
-	state               protoimpl.MessageState                                             `protogen:"open.v1"`
-	Result              InstrumentHealthState_HealthCheckResult                            `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason              string                                                             `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes               string                                                             `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
-	InstrumentExists    *InstrumentHealthState_ReferenceDataCheck_InstrumentExistsCheck    `protobuf:"bytes,21,opt,name=instrument_exists,json=instrumentExists,proto3" json:"instrument_exists,omitempty"`
-	CurrencyCodeValid   *InstrumentHealthState_ReferenceDataCheck_CurrencyCodeValidCheck   `protobuf:"bytes,22,opt,name=currency_code_valid,json=currencyCodeValid,proto3" json:"currency_code_valid,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Checks if the instrument exists in alis.IN
+	InstrumentExists *InstrumentHealthState_ReferenceDataCheck_InstrumentExistsCheck `protobuf:"bytes,21,opt,name=instrument_exists,json=instrumentExists,proto3" json:"instrument_exists,omitempty"`
+	// Checks if the instrument's currency code is set and valid;
+	CurrencyCodeValid *InstrumentHealthState_ReferenceDataCheck_CurrencyCodeValidCheck `protobuf:"bytes,22,opt,name=currency_code_valid,json=currencyCodeValid,proto3" json:"currency_code_valid,omitempty"`
+	// Checks if the instrument's points sync prerequisites are met for each source
+	// This includes checking if the instrument has a valid dataset mapping for each source.
+	// This is driven by the points sync config.
 	SourcePrerequisites *InstrumentHealthState_ReferenceDataCheck_SourcePrerequisitesCheck `protobuf:"bytes,23,opt,name=source_prerequisites,json=sourcePrerequisites,proto3" json:"source_prerequisites,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
@@ -1677,12 +1997,20 @@ func (x *InstrumentHealthState_ReferenceDataCheck) GetSourcePrerequisites() *Ins
 	return nil
 }
 
+// Checks for an instrument's points coverage (e.g. price, total return, etc.)
+// Check for points' completeness. This may include missing points, missing fields in points, etc.
 type InstrumentHealthState_PointsCoverageCheck struct {
-	state         protoimpl.MessageState                                        `protogen:"open.v1"`
-	Result        InstrumentHealthState_HealthCheckResult                       `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason        string                                                        `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes         string                                                        `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Check for missing points
 	MissingPoints *InstrumentHealthState_PointsCoverageCheck_MissingPointsCheck `protobuf:"bytes,21,opt,name=missing_points,json=missingPoints,proto3" json:"missing_points,omitempty"`
+	// Check for missing fields in points
 	MissingFields *InstrumentHealthState_PointsCoverageCheck_MissingFieldsCheck `protobuf:"bytes,22,opt,name=missing_fields,json=missingFields,proto3" json:"missing_fields,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1753,15 +2081,25 @@ func (x *InstrumentHealthState_PointsCoverageCheck) GetMissingFields() *Instrume
 	return nil
 }
 
+// Checks for an instrument's points accuracy (e.g. price, total return, etc.)
+// Check for points' accuracy. This may include points that are stale, have zero prices, zero adjustment factors, etc.
+// It also checks for variation of points' values across different sources.
+// This may include points that have different prices, different adjustment factors, etc, over a certain threshold.
 type InstrumentHealthState_PointsQualityCheck struct {
-	state               protoimpl.MessageState                                             `protogen:"open.v1"`
-	Result              InstrumentHealthState_HealthCheckResult                            `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason              string                                                             `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes               string                                                             `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Fill forwarded points check
 	FillForwardedPoints *InstrumentHealthState_PointsQualityCheck_FillForwardedPointsCheck `protobuf:"bytes,21,opt,name=fill_forwarded_points,json=fillForwardedPoints,proto3" json:"fill_forwarded_points,omitempty"`
-	ZeroReturnsPoints   *InstrumentHealthState_PointsQualityCheck_ZeroReturnsPointsCheck   `protobuf:"bytes,22,opt,name=zero_returns_points,json=zeroReturnsPoints,proto3" json:"zero_returns_points,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// Zero Returns points check
+	ZeroReturnsPoints *InstrumentHealthState_PointsQualityCheck_ZeroReturnsPointsCheck `protobuf:"bytes,22,opt,name=zero_returns_points,json=zeroReturnsPoints,proto3" json:"zero_returns_points,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *InstrumentHealthState_PointsQualityCheck) Reset() {
@@ -1829,11 +2167,16 @@ func (x *InstrumentHealthState_PointsQualityCheck) GetZeroReturnsPoints() *Instr
 	return nil
 }
 
+// Instrument exists check
 type InstrumentHealthState_ReferenceDataCheck_InstrumentExistsCheck struct {
-	state         protoimpl.MessageState                  `protogen:"open.v1"`
-	Result        InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason        string                                  `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes         string                                  `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes         string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1889,11 +2232,16 @@ func (x *InstrumentHealthState_ReferenceDataCheck_InstrumentExistsCheck) GetNote
 	return ""
 }
 
+// Currency code valid check
 type InstrumentHealthState_ReferenceDataCheck_CurrencyCodeValidCheck struct {
-	state         protoimpl.MessageState                  `protogen:"open.v1"`
-	Result        InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason        string                                  `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes         string                                  `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes         string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1949,11 +2297,18 @@ func (x *InstrumentHealthState_ReferenceDataCheck_CurrencyCodeValidCheck) GetNot
 	return ""
 }
 
+// A generic field to check for everything we need to get data from a certain source e.g. DSCodes, Dataset maps, etc.
 type InstrumentHealthState_ReferenceDataCheck_SourcePrerequisitesCheck struct {
-	state         protoimpl.MessageState                                                           `protogen:"open.v1"`
-	Result        InstrumentHealthState_HealthCheckResult                                          `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason        string                                                                           `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes         string                                                                           `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Source check
+	// Checks if the instrument has a valid dataset mapping for each source
 	SourceChecks  []*InstrumentHealthState_ReferenceDataCheck_SourcePrerequisitesCheck_SourceCheck `protobuf:"bytes,4,rep,name=source_checks,json=sourceChecks,proto3" json:"source_checks,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2017,12 +2372,18 @@ func (x *InstrumentHealthState_ReferenceDataCheck_SourcePrerequisitesCheck) GetS
 	return nil
 }
 
+// Source check
 type InstrumentHealthState_ReferenceDataCheck_SourcePrerequisitesCheck_SourceCheck struct {
-	state         protoimpl.MessageState                  `protogen:"open.v1"`
-	Result        InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason        string                                  `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes         string                                  `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
-	Source        Source                                  `protobuf:"varint,4,opt,name=source,proto3,enum=alis.open.px.v1.Source" json:"source,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Source
+	Source        Source `protobuf:"varint,4,opt,name=source,proto3,enum=alis.open.px.v1.Source" json:"source,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2086,13 +2447,22 @@ func (x *InstrumentHealthState_ReferenceDataCheck_SourcePrerequisitesCheck_Sourc
 	return Source_SOURCE_UNSPECIFIED
 }
 
+// Check for missing points
 type InstrumentHealthState_PointsCoverageCheck_MissingPointsCheck struct {
-	state            protoimpl.MessageState                  `protogen:"open.v1"`
-	Result           InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason           string                                  `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes            string                                  `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
-	MissingPoints    []string                                `protobuf:"bytes,4,rep,name=missing_points,json=missingPoints,proto3" json:"missing_points,omitempty"`
-	TotalPointsCount int32                                   `protobuf:"varint,5,opt,name=total_points_count,json=totalPointsCount,proto3" json:"total_points_count,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Missing points
+	// Fully qualified point name
+	// Format: [instruments/{instrument}/points/{point}]
+	MissingPoints []string `protobuf:"bytes,4,rep,name=missing_points,json=missingPoints,proto3" json:"missing_points,omitempty"`
+	// Total points count
+	TotalPointsCount int32 `protobuf:"varint,5,opt,name=total_points_count,json=totalPointsCount,proto3" json:"total_points_count,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -2162,15 +2532,22 @@ func (x *InstrumentHealthState_PointsCoverageCheck_MissingPointsCheck) GetTotalP
 	return 0
 }
 
+// Check for missing fields in points
 type InstrumentHealthState_PointsCoverageCheck_MissingFieldsCheck struct {
-	state               protoimpl.MessageState                                                             `protogen:"open.v1"`
-	Result              InstrumentHealthState_HealthCheckResult                                            `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason              string                                                                             `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes               string                                                                             `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Points with missing fields
 	PointsMissingFields []*InstrumentHealthState_PointsCoverageCheck_MissingFieldsCheck_PointMissingFields `protobuf:"bytes,4,rep,name=points_missing_fields,json=pointsMissingFields,proto3" json:"points_missing_fields,omitempty"`
-	TotalPointsCount    int32                                                                              `protobuf:"varint,5,opt,name=total_points_count,json=totalPointsCount,proto3" json:"total_points_count,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// Total points count
+	TotalPointsCount int32 `protobuf:"varint,5,opt,name=total_points_count,json=totalPointsCount,proto3" json:"total_points_count,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *InstrumentHealthState_PointsCoverageCheck_MissingFieldsCheck) Reset() {
@@ -2238,10 +2615,15 @@ func (x *InstrumentHealthState_PointsCoverageCheck_MissingFieldsCheck) GetTotalP
 	return 0
 }
 
+// Points with missing fields
 type InstrumentHealthState_PointsCoverageCheck_MissingFieldsCheck_PointMissingFields struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Point         string                 `protobuf:"bytes,1,opt,name=point,proto3" json:"point,omitempty"`
-	MissingFields []string               `protobuf:"bytes,2,rep,name=missing_fields,json=missingFields,proto3" json:"missing_fields,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Fully qualified point name
+	// Format: [instruments/{instrument}/points/{point}]
+	Point string `protobuf:"bytes,1,opt,name=point,proto3" json:"point,omitempty"`
+	// Missing fields
+	// Format: [price_unadjusted, total_return_usd, ...]
+	MissingFields []string `protobuf:"bytes,2,rep,name=missing_fields,json=missingFields,proto3" json:"missing_fields,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2291,15 +2673,25 @@ func (x *InstrumentHealthState_PointsCoverageCheck_MissingFieldsCheck_PointMissi
 	return nil
 }
 
+// Fill forwarded points check
+// Checks for any points that have been filled forward
 type InstrumentHealthState_PointsQualityCheck_FillForwardedPointsCheck struct {
-	state               protoimpl.MessageState                  `protogen:"open.v1"`
-	Result              InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason              string                                  `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes               string                                  `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
-	FillForwardedPoints []string                                `protobuf:"bytes,4,rep,name=fill_forwarded_points,json=fillForwardedPoints,proto3" json:"fill_forwarded_points,omitempty"`
-	TotalPointsCount    int32                                   `protobuf:"varint,5,opt,name=total_points_count,json=totalPointsCount,proto3" json:"total_points_count,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Fill forwarded points
+	// Fully qualified point name
+	// Format: [instruments/{instrument}/points/{point}]
+	FillForwardedPoints []string `protobuf:"bytes,4,rep,name=fill_forwarded_points,json=fillForwardedPoints,proto3" json:"fill_forwarded_points,omitempty"`
+	// Total points count
+	TotalPointsCount int32 `protobuf:"varint,5,opt,name=total_points_count,json=totalPointsCount,proto3" json:"total_points_count,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *InstrumentHealthState_PointsQualityCheck_FillForwardedPointsCheck) Reset() {
@@ -2367,15 +2759,23 @@ func (x *InstrumentHealthState_PointsQualityCheck_FillForwardedPointsCheck) GetT
 	return 0
 }
 
+// Zero Returns points check
+// Checks for cases where the price changes but the total return does not
 type InstrumentHealthState_PointsQualityCheck_ZeroReturnsPointsCheck struct {
-	state                  protoimpl.MessageState                                                                   `protogen:"open.v1"`
-	Result                 InstrumentHealthState_HealthCheckResult                                                  `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
-	Reason                 string                                                                                   `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Notes                  string                                                                                   `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resulting top level state of the health check
+	Result InstrumentHealthState_HealthCheckResult `protobuf:"varint,1,opt,name=result,proto3,enum=alis.open.px.v1.InstrumentHealthState_HealthCheckResult" json:"result,omitempty"`
+	// The reason the instrument is invalid
+	Reason string `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Notes on the invalid instrument
+	// May contain additional information on why the instrument is invalid and how to resolve the issue
+	Notes string `protobuf:"bytes,3,opt,name=notes,proto3" json:"notes,omitempty"`
+	// Points with zero return fields
 	PointsZeroReturnFields []*InstrumentHealthState_PointsQualityCheck_ZeroReturnsPointsCheck_PointZeroReturnFields `protobuf:"bytes,4,rep,name=points_zero_return_fields,json=pointsZeroReturnFields,proto3" json:"points_zero_return_fields,omitempty"`
-	TotalPointsCount       int32                                                                                    `protobuf:"varint,5,opt,name=total_points_count,json=totalPointsCount,proto3" json:"total_points_count,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	// Total points count
+	TotalPointsCount int32 `protobuf:"varint,5,opt,name=total_points_count,json=totalPointsCount,proto3" json:"total_points_count,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *InstrumentHealthState_PointsQualityCheck_ZeroReturnsPointsCheck) Reset() {
@@ -2443,10 +2843,15 @@ func (x *InstrumentHealthState_PointsQualityCheck_ZeroReturnsPointsCheck) GetTot
 	return 0
 }
 
+// Points with zero return fields
 type InstrumentHealthState_PointsQualityCheck_ZeroReturnsPointsCheck_PointZeroReturnFields struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Point            string                 `protobuf:"bytes,1,opt,name=point,proto3" json:"point,omitempty"`
-	ZeroReturnFields []string               `protobuf:"bytes,2,rep,name=zero_return_fields,json=zeroReturnFields,proto3" json:"zero_return_fields,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Fully qualified point name
+	// Format: [instruments/{instrument}/points/{point}]
+	Point string `protobuf:"bytes,1,opt,name=point,proto3" json:"point,omitempty"`
+	// Zero return fields
+	// Format: [total_return_usd, total_return_eur, ...]
+	ZeroReturnFields []string `protobuf:"bytes,2,rep,name=zero_return_fields,json=zeroReturnFields,proto3" json:"zero_return_fields,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
