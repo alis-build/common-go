@@ -4,6 +4,19 @@
 // 	protoc        v3.21.12
 // source: alis/open/pubsub/v1/pubsub.proto
 
+// The request body that a Pub/Sub push subscription delivers, so services can
+// receive Pub/Sub events through an ordinary RPC.
+//
+// `PubSubMessage` models the push body: the published `Message` (data,
+// attributes, message ID, publish time and ordering key) and the name of the
+// subscription that delivered it. Event-handling RPCs take it as their
+// request, for example `HandleEvent` and `HandleDeadLetter` on
+// `alis.open.flows.v1.FlowsService`.
+//
+// Push deliveries carry the message ID and publish time under both camelCase
+// and snake_case keys, so `Message` has the extra fields `message_id1` and
+// `publish_time1` to hold the duplicates.
+
 package pubsub
 
 import (
@@ -22,10 +35,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// PubSubMessage is the body/payload/data attribute from a Pub/Sub push HTTP request.
+// As we are using Pub/Sub for many of our events, we declare this message in
+// this shared package.
 type PubSubMessage struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       *PubSubMessage_Message `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	Subscription  string                 `protobuf:"bytes,2,opt,name=subscription,proto3" json:"subscription,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// A message that is published by publishers and consumed by subscribers. The
+	// message must contain either a non-empty data field or at least one attribute.
+	// Note that client libraries represent this object differently
+	// depending on the language. See the corresponding [client library documentation](https://cloud.google.com/pubsub/docs/reference/libraries) for
+	// more information. See [quotas and limits](https://cloud.google.com/pubsub/quotas)
+	// for more information about message limits.
+	Message *PubSubMessage_Message `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// Pub/Sub subscription resource name
+	Subscription  string `protobuf:"bytes,2,opt,name=subscription,proto3" json:"subscription,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,14 +97,37 @@ func (x *PubSubMessage) GetSubscription() string {
 	return ""
 }
 
+// The Body of a Pub/Sub push subscription.
 type PubSubMessage_Message struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	Attributes    map[string]string      `protobuf:"bytes,2,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	MessageId     string                 `protobuf:"bytes,3,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
-	PublishTime   *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=publish_time,json=publishTime,proto3" json:"publish_time,omitempty"`
-	OrderingKey   string                 `protobuf:"bytes,5,opt,name=ordering_key,json=orderingKey,proto3" json:"ordering_key,omitempty"`
-	MessageId1    string                 `protobuf:"bytes,6,opt,name=message_id1,json=messageId1,proto3" json:"message_id1,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The message data field. If this field is empty, the message must contain
+	// at least one attribute.
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	// Attributes for this message. If this field is empty, the message must
+	// contain non-empty data. This can be used to filter messages on the
+	// subscription.
+	Attributes map[string]string `protobuf:"bytes,2,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// ID of this message, assigned by the server when the message is published.
+	// Guaranteed to be unique within the topic. This value may be read by a
+	// subscriber that receives a `PubsubMessage` via a `Pull` call or a push
+	// delivery. It must not be populated by the publisher in a `Publish` call.
+	MessageId string `protobuf:"bytes,3,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	// The time at which the message was published, populated by the server when
+	// it receives the `Publish` call. It must not be populated by the
+	// publisher in a `Publish` call.
+	PublishTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=publish_time,json=publishTime,proto3" json:"publish_time,omitempty"`
+	// If non-empty, identifies related messages for which publish order should be
+	// respected. If a `Subscription` has `enable_message_ordering` set to `true`,
+	// messages published with the same non-empty `ordering_key` value will be
+	// delivered to subscribers in the order in which they are received by the
+	// Pub/Sub system. All `PubsubMessage`s published in a given `PublishRequest`
+	// must specify the same `ordering_key` value.
+	OrderingKey string `protobuf:"bytes,5,opt,name=ordering_key,json=orderingKey,proto3" json:"ordering_key,omitempty"`
+	// A temporary fix - pubsub push delivers both messageId and message_id
+	// attributes, which is seen as a duplicate in the proto world.
+	MessageId1 string `protobuf:"bytes,6,opt,name=message_id1,json=messageId1,proto3" json:"message_id1,omitempty"`
+	// A temporary fix - pubsub push delivers both publishTime and publish_time
+	// attributes, which is seen as a duplicate in the proto world.
 	PublishTime1  *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=publish_time1,json=publishTime1,proto3" json:"publish_time1,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
