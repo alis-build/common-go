@@ -4,6 +4,28 @@
 // 	protoc        v3.21.12
 // source: alis/usage/v1/usage.proto
 
+// API usage snapshots that Alis products publish about their own traffic.
+//
+// The package defines one payload, `ProductUsage`: request counts, error
+// rates, latency percentiles and approximate caller counts per gRPC method,
+// aggregated from the Cloud Run request logs of a product's deployments. Each
+// product computes a snapshot hourly and publishes it to the Pub/Sub topic
+// `alis.usage.v1.ProductUsage` in its own Google Cloud project, where any
+// consumer with access to that project may subscribe.
+//
+// A snapshot contains:
+//
+// - `Window`: rolling 24-hour, 7-day and 30-day aggregates, broken down by
+//   deployment project (`DeploymentUsage`) and then by method
+//   (`MethodUsage`).
+// - `DailyCount`: request and error counts per UTC day and deployment project
+//   over the last 30 days, for trend charts.
+//
+// Methods are identified by protobuf package, service and method name, so the
+// figures line up with the product's protobuf contracts. Snapshots are an
+// adoption and usage view for builders, not a replacement for Cloud Logging
+// or Cloud Trace.
+
 package usage
 
 import (
@@ -22,12 +44,17 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The rolling windows a snapshot reports on.
 type ProductUsage_WindowKind int32
 
 const (
+	// Not set. The default value; should not be used.
 	ProductUsage_WINDOW_KIND_UNSPECIFIED ProductUsage_WindowKind = 0
+	// The 24 hours up to snapshot_time.
 	ProductUsage_WINDOW_KIND_ROLLING_24H ProductUsage_WindowKind = 1
-	ProductUsage_WINDOW_KIND_ROLLING_7D  ProductUsage_WindowKind = 2
+	// The 7 days up to snapshot_time.
+	ProductUsage_WINDOW_KIND_ROLLING_7D ProductUsage_WindowKind = 2
+	// The 30 days up to snapshot_time.
 	ProductUsage_WINDOW_KIND_ROLLING_30D ProductUsage_WindowKind = 3
 )
 
@@ -74,15 +101,39 @@ func (ProductUsage_WindowKind) EnumDescriptor() ([]byte, []int) {
 	return file_alis_usage_v1_usage_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// A product-level API usage snapshot, derived from the Cloud Run request logs
+// of all the product's deployments. Every Alis service is a gRPC service, so
+// each request URL path carries "<package>.<Service>/<Method>" — the same
+// identifiers locked at the Define stage — which makes these aggregates
+// directly consistent with the product's protobuf contracts.
+//
+// Snapshots are analytical aggregates over what may be tens of thousands of
+// requests; the underlying log records are not retained here. This is an
+// adoption/usage lens for builders, not a replacement for observability
+// (Cloud Trace, Cloud Logging, error reporting).
+//
+// Each product publishes one snapshot per schedule tick (hourly) to the
+// Pub/Sub topic named after this message's fully qualified name,
+// "alis.usage.v1.ProductUsage", in the product's Google Cloud project. Any
+// consumer with access to the product project may subscribe.
 type ProductUsage struct {
-	state            protoimpl.MessageState     `protogen:"open.v1"`
-	Product          string                     `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
-	ProductProjectId string                     `protobuf:"bytes,2,opt,name=product_project_id,json=productProjectId,proto3" json:"product_project_id,omitempty"`
-	SnapshotTime     *timestamppb.Timestamp     `protobuf:"bytes,3,opt,name=snapshot_time,json=snapshotTime,proto3" json:"snapshot_time,omitempty"`
-	Windows          []*ProductUsage_Window     `protobuf:"bytes,4,rep,name=windows,proto3" json:"windows,omitempty"`
-	DailyTrend       []*ProductUsage_DailyCount `protobuf:"bytes,5,rep,name=daily_trend,json=dailyTrend,proto3" json:"daily_trend,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The product these usage statistics relate to.
+	// Format: organisations/{organisation}/products/{product}
+	Product string `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
+	// The Google Cloud project id of the product project publishing this
+	// snapshot, e.g. "myorg-ab-prod-a1b2c3". Consumers should verify this
+	// against the product's registered project before trusting the payload.
+	ProductProjectId string `protobuf:"bytes,2,opt,name=product_project_id,json=productProjectId,proto3" json:"product_project_id,omitempty"`
+	// The time at which this snapshot was computed.
+	SnapshotTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=snapshot_time,json=snapshotTime,proto3" json:"snapshot_time,omitempty"`
+	// Aggregates for each rolling window, computed relative to snapshot_time.
+	Windows []*ProductUsage_Window `protobuf:"bytes,4,rep,name=windows,proto3" json:"windows,omitempty"`
+	// Request counts per UTC day per deployment project over the last 30 days,
+	// intended for trend/sparkline rendering.
+	DailyTrend    []*ProductUsage_DailyCount `protobuf:"bytes,5,rep,name=daily_trend,json=dailyTrend,proto3" json:"daily_trend,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ProductUsage) Reset() {
@@ -150,11 +201,17 @@ func (x *ProductUsage) GetDailyTrend() []*ProductUsage_DailyCount {
 	return nil
 }
 
+// Aggregates over one rolling window.
 type ProductUsage_Window struct {
-	state         protoimpl.MessageState          `protogen:"open.v1"`
-	Kind          ProductUsage_WindowKind         `protobuf:"varint,1,opt,name=kind,proto3,enum=alis.usage.v1.ProductUsage_WindowKind" json:"kind,omitempty"`
-	StartTime     *timestamppb.Timestamp          `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime       *timestamppb.Timestamp          `protobuf:"bytes,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Which rolling window these aggregates cover.
+	Kind ProductUsage_WindowKind `protobuf:"varint,1,opt,name=kind,proto3,enum=alis.usage.v1.ProductUsage_WindowKind" json:"kind,omitempty"`
+	// The start of the window.
+	StartTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	// The end of the window. Rolling windows run up to `snapshot_time`.
+	EndTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	// One entry per deployment (environment) Google Cloud project that
+	// received traffic in the window.
 	Deployments   []*ProductUsage_DeploymentUsage `protobuf:"bytes,4,rep,name=deployments,proto3" json:"deployments,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -218,13 +275,18 @@ func (x *ProductUsage_Window) GetDeployments() []*ProductUsage_DeploymentUsage {
 	return nil
 }
 
+// Aggregates for one deployment project within a window.
 type ProductUsage_DeploymentUsage struct {
-	state           protoimpl.MessageState      `protogen:"open.v1"`
-	GoogleProjectId string                      `protobuf:"bytes,1,opt,name=google_project_id,json=googleProjectId,proto3" json:"google_project_id,omitempty"`
-	Totals          *ProductUsage_MethodStats   `protobuf:"bytes,2,opt,name=totals,proto3" json:"totals,omitempty"`
-	Methods         []*ProductUsage_MethodUsage `protobuf:"bytes,3,rep,name=methods,proto3" json:"methods,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Google Cloud project id of the deployment (environment) project,
+	// as recorded on the Cloud Run revision's monitored resource.
+	GoogleProjectId string `protobuf:"bytes,1,opt,name=google_project_id,json=googleProjectId,proto3" json:"google_project_id,omitempty"`
+	// Totals across all methods in this deployment for the window.
+	Totals *ProductUsage_MethodStats `protobuf:"bytes,2,opt,name=totals,proto3" json:"totals,omitempty"`
+	// Per-method aggregates, ordered by request_count descending.
+	Methods       []*ProductUsage_MethodUsage `protobuf:"bytes,3,rep,name=methods,proto3" json:"methods,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ProductUsage_DeploymentUsage) Reset() {
@@ -278,15 +340,21 @@ func (x *ProductUsage_DeploymentUsage) GetMethods() []*ProductUsage_MethodUsage 
 	return nil
 }
 
+// Aggregates for one gRPC method.
 type ProductUsage_MethodUsage struct {
-	state           protoimpl.MessageState    `protogen:"open.v1"`
-	Package         string                    `protobuf:"bytes,1,opt,name=package,proto3" json:"package,omitempty"`
-	Service         string                    `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
-	Method          string                    `protobuf:"bytes,3,opt,name=method,proto3" json:"method,omitempty"`
-	CloudRunService string                    `protobuf:"bytes,4,opt,name=cloud_run_service,json=cloudRunService,proto3" json:"cloud_run_service,omitempty"`
-	Stats           *ProductUsage_MethodStats `protobuf:"bytes,5,opt,name=stats,proto3" json:"stats,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The protobuf package, e.g. "myorg.ab.orders.v1".
+	Package string `protobuf:"bytes,1,opt,name=package,proto3" json:"package,omitempty"`
+	// The unqualified service name, e.g. "OrdersService".
+	Service string `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
+	// The method name, e.g. "GetOrder".
+	Method string `protobuf:"bytes,3,opt,name=method,proto3" json:"method,omitempty"`
+	// The Cloud Run service that served the requests, e.g. "orders-v1".
+	CloudRunService string `protobuf:"bytes,4,opt,name=cloud_run_service,json=cloudRunService,proto3" json:"cloud_run_service,omitempty"`
+	// Request statistics for this method in this deployment and window.
+	Stats         *ProductUsage_MethodStats `protobuf:"bytes,5,opt,name=stats,proto3" json:"stats,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ProductUsage_MethodUsage) Reset() {
@@ -354,15 +422,26 @@ func (x *ProductUsage_MethodUsage) GetStats() *ProductUsage_MethodStats {
 	return nil
 }
 
+// Request statistics derived from Cloud Run request logs.
 type ProductUsage_MethodStats struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	RequestCount    int64                  `protobuf:"varint,1,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
-	ErrorCount      int64                  `protobuf:"varint,2,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
-	ErrorRate       float64                `protobuf:"fixed64,3,opt,name=error_rate,json=errorRate,proto3" json:"error_rate,omitempty"`
-	LatencyP50      float64                `protobuf:"fixed64,4,opt,name=latency_p50,json=latencyP50,proto3" json:"latency_p50,omitempty"`
-	LatencyP95      float64                `protobuf:"fixed64,5,opt,name=latency_p95,json=latencyP95,proto3" json:"latency_p95,omitempty"`
-	LatencyP99      float64                `protobuf:"fixed64,6,opt,name=latency_p99,json=latencyP99,proto3" json:"latency_p99,omitempty"`
-	DistinctCallers int64                  `protobuf:"varint,7,opt,name=distinct_callers,json=distinctCallers,proto3" json:"distinct_callers,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The number of requests.
+	RequestCount int64 `protobuf:"varint,1,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
+	// Requests with an HTTP status other than 200. gRPC errors surface as
+	// non-200 statuses on the Cloud Run request log entry.
+	ErrorCount int64 `protobuf:"varint,2,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
+	// error_count / request_count, in [0, 1].
+	ErrorRate float64 `protobuf:"fixed64,3,opt,name=error_rate,json=errorRate,proto3" json:"error_rate,omitempty"`
+	// Request latency percentiles in seconds.
+	LatencyP50 float64 `protobuf:"fixed64,4,opt,name=latency_p50,json=latencyP50,proto3" json:"latency_p50,omitempty"`
+	// 95th percentile request latency, in seconds.
+	LatencyP95 float64 `protobuf:"fixed64,5,opt,name=latency_p95,json=latencyP95,proto3" json:"latency_p95,omitempty"`
+	// 99th percentile request latency, in seconds.
+	LatencyP99 float64 `protobuf:"fixed64,6,opt,name=latency_p99,json=latencyP99,proto3" json:"latency_p99,omitempty"`
+	// Approximate number of distinct callers, estimated from the request's
+	// (remote IP, user agent) pair. Request logs carry no caller identity, so
+	// treat this as an indication rather than an exact audience count.
+	DistinctCallers int64 `protobuf:"varint,7,opt,name=distinct_callers,json=distinctCallers,proto3" json:"distinct_callers,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -446,14 +525,20 @@ func (x *ProductUsage_MethodStats) GetDistinctCallers() int64 {
 	return 0
 }
 
+// Request counts for one UTC day in one deployment project.
 type ProductUsage_DailyCount struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Date            string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
-	GoogleProjectId string                 `protobuf:"bytes,2,opt,name=google_project_id,json=googleProjectId,proto3" json:"google_project_id,omitempty"`
-	RequestCount    int64                  `protobuf:"varint,3,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
-	ErrorCount      int64                  `protobuf:"varint,4,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The UTC day in RFC 3339 date-only form, e.g. "2026-08-31".
+	Date string `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
+	// The Google Cloud project id of the deployment (environment) project.
+	GoogleProjectId string `protobuf:"bytes,2,opt,name=google_project_id,json=googleProjectId,proto3" json:"google_project_id,omitempty"`
+	// The number of requests on that day.
+	RequestCount int64 `protobuf:"varint,3,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
+	// The number of requests on that day with an HTTP status other than 200,
+	// counted as in `MethodStats.error_count`.
+	ErrorCount    int64 `protobuf:"varint,4,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ProductUsage_DailyCount) Reset() {
