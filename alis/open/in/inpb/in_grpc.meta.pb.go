@@ -3,7 +3,7 @@
 // Source: alis/open/in/v1/in.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-10-19 08:23:56 UTC
+// Generated on: 2026-10-19 09:00:22 UTC
 
 package inpb
 
