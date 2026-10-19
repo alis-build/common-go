@@ -4,6 +4,36 @@
 // 	protoc        v3.21.12
 // source: alis/open/options/v1/options.proto
 
+// Custom options that control how alis code generators treat a proto file,
+// currently JSON Schema (Draft 2020-12) generation by
+// `protoc-gen-go-jsonschema`.
+//
+// Three extensions, each at field number 1001 of its descriptor options
+// message, carry the options:
+//
+// - `(alis.open.options.v1.file)` (`FileOptions`): turns schema generation on
+//   for every message in the file.
+// - `(alis.open.options.v1.message)` (`MessageOptions`): overrides the file
+//   default for one message and declares schema-level oneof groups.
+// - `(alis.open.options.v1.field)` (`FieldOptions`): adds JSON Schema keywords
+//   to a field, such as `title`, `pattern`, `format`, numeric and length
+//   bounds, `enum`, `default` and `examples`.
+//
+// ```proto
+// import "alis/open/options/v1/options.proto";
+//
+// option (alis.open.options.v1.file).json_schema.generate = true;
+//
+// message Contact {
+//   string email = 1 [(alis.open.options.v1.field).json_schema = {
+//     format: "email"
+//   }];
+// }
+// ```
+//
+// A message referenced by a generating message is always generated, even if
+// it opts out, so that `$ref` pointers resolve.
+
 package options
 
 import (
@@ -22,8 +52,11 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// FileOptions carries file-level options consumed by alis code generators.
 type FileOptions struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Options controlling JSON Schema (Draft 2020-12) generation for this
+	// file, consumed by protoc-gen-go-jsonschema.
 	JsonSchema    *FileOptions_JsonSchema `protobuf:"bytes,1,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -66,8 +99,12 @@ func (x *FileOptions) GetJsonSchema() *FileOptions_JsonSchema {
 	return nil
 }
 
+// MessageOptions carries message-level options consumed by alis code
+// generators.
 type MessageOptions struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Options controlling JSON Schema (Draft 2020-12) generation for this
+	// message, consumed by protoc-gen-go-jsonschema.
 	JsonSchema    *MessageOptions_JsonSchema `protobuf:"bytes,1,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -110,8 +147,11 @@ func (x *MessageOptions) GetJsonSchema() *MessageOptions_JsonSchema {
 	return nil
 }
 
+// FieldOptions carries field-level options consumed by alis code generators.
 type FieldOptions struct {
-	state         protoimpl.MessageState   `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Options controlling how this field appears in generated JSON Schemas,
+	// consumed by protoc-gen-go-jsonschema.
 	JsonSchema    *FieldOptions_JsonSchema `protobuf:"bytes,1,opt,name=json_schema,json=jsonSchema,proto3" json:"json_schema,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -154,9 +194,14 @@ func (x *FieldOptions) GetJsonSchema() *FieldOptions_JsonSchema {
 	return nil
 }
 
+// JsonSchema holds the file-level JSON Schema generation options.
 type FileOptions_JsonSchema struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Generate      bool                   `protobuf:"varint,1,opt,name=generate,proto3" json:"generate,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// If true, schemas are generated for every message in this file unless a
+	// message explicitly sets its own `generate = false`. Messages referenced
+	// by a generating message (field dependencies and nested messages) are
+	// always generated regardless, so that `$ref` pointers resolve.
+	Generate      bool `protobuf:"varint,1,opt,name=generate,proto3" json:"generate,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -198,9 +243,33 @@ func (x *FileOptions_JsonSchema) GetGenerate() bool {
 	return false
 }
 
+// JsonSchema holds the message-level JSON Schema generation options.
 type MessageOptions_JsonSchema struct {
-	state         protoimpl.MessageState             `protogen:"open.v1"`
-	Generate      *bool                              `protobuf:"varint,1,opt,name=generate,proto3,oneof" json:"generate,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Explicitly enables or disables schema generation for this message,
+	// overriding the file-level default. When unset, the file-level default
+	// applies — so setting other options here (such as `oneof`) does not
+	// change whether the message generates. An explicit false is still
+	// overridden when the message is referenced by a generating message (as a
+	// field dependency or nested message): generation is forced so that
+	// `$ref` pointers resolve. `optional` is required for that distinction —
+	// without presence, an explicit false is indistinguishable from unset.
+	Generate *bool `protobuf:"varint,1,opt,name=generate,proto3,oneof" json:"generate,omitempty"`
+	// Declares oneof groups over this message's fields for schema purposes.
+	//
+	// Each entry names a set of fields (by proto field name) that are
+	// mutually exclusive. If `required` is true, exactly one of the listed
+	// fields must be set.
+	//
+	// The referenced names may be members of a proto `oneof` block, or
+	// ordinary singular fields treated as a virtual oneof (the same pattern
+	// as `buf.validate.message.oneof`). Repeated and map fields are not
+	// permitted as members.
+	//
+	// A group may deliberately cover only a subset of a proto `oneof`'s
+	// members: the schema then narrows the contract (like enum_int narrows a
+	// proto enum), and with `required: true` a value that sets an uncovered
+	// variant fails schema validation even though it is a legal proto value.
 	Oneof         []*MessageOptions_JsonSchema_Oneof `protobuf:"bytes,2,rep,name=oneof,proto3" json:"oneof,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -250,10 +319,17 @@ func (x *MessageOptions_JsonSchema) GetOneof() []*MessageOptions_JsonSchema_Oneo
 	return nil
 }
 
+// Oneof declares a mutually-exclusive group of fields on the enclosing
+// message.
 type MessageOptions_JsonSchema_Oneof struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Fields        []string               `protobuf:"bytes,1,rep,name=fields,proto3" json:"fields,omitempty"`
-	Required      *bool                  `protobuf:"varint,2,opt,name=required,proto3,oneof" json:"required,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Proto field names that participate in this oneof group. Must name
+	// fields defined on the enclosing message; must be at least two names;
+	// must not include repeated or map fields.
+	Fields []string `protobuf:"bytes,1,rep,name=fields,proto3" json:"fields,omitempty"`
+	// If true, exactly one of `fields` must be set. If false or unset,
+	// at most one may be set.
+	Required      *bool `protobuf:"varint,2,opt,name=required,proto3,oneof" json:"required,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -302,42 +378,149 @@ func (x *MessageOptions_JsonSchema_Oneof) GetRequired() bool {
 	return false
 }
 
+// JsonSchema holds the field-level JSON Schema generation options. Unless a
+// field's comment says otherwise, an option applies to the field's own
+// schema for singular fields, and to each element or value for repeated and
+// map fields; on message-typed fields, options are emitted as sibling
+// keywords next to the field's `$ref` (JSON Schema Draft 2020-12
+// semantics).
 type FieldOptions_JsonSchema struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Title            *string                `protobuf:"bytes,1,opt,name=title,proto3,oneof" json:"title,omitempty"`
-	Description      *string                `protobuf:"bytes,2,opt,name=description,proto3,oneof" json:"description,omitempty"`
-	Ignore           *bool                  `protobuf:"varint,3,opt,name=ignore,proto3,oneof" json:"ignore,omitempty"`
-	Pattern          *string                `protobuf:"bytes,4,opt,name=pattern,proto3,oneof" json:"pattern,omitempty"`
-	Format           *string                `protobuf:"bytes,5,opt,name=format,proto3,oneof" json:"format,omitempty"`
-	ContentEncoding  *string                `protobuf:"bytes,6,opt,name=content_encoding,json=contentEncoding,proto3,oneof" json:"content_encoding,omitempty"`
-	ContentMediaType *string                `protobuf:"bytes,7,opt,name=content_media_type,json=contentMediaType,proto3,oneof" json:"content_media_type,omitempty"`
-	MinLength        *int64                 `protobuf:"varint,8,opt,name=min_length,json=minLength,proto3,oneof" json:"min_length,omitempty"`
-	MaxLength        *int64                 `protobuf:"varint,9,opt,name=max_length,json=maxLength,proto3,oneof" json:"max_length,omitempty"`
-	Minimum          *float64               `protobuf:"fixed64,10,opt,name=minimum,proto3,oneof" json:"minimum,omitempty"`
-	Maximum          *float64               `protobuf:"fixed64,11,opt,name=maximum,proto3,oneof" json:"maximum,omitempty"`
-	ExclusiveMinimum *bool                  `protobuf:"varint,12,opt,name=exclusive_minimum,json=exclusiveMinimum,proto3,oneof" json:"exclusive_minimum,omitempty"`
-	ExclusiveMaximum *bool                  `protobuf:"varint,13,opt,name=exclusive_maximum,json=exclusiveMaximum,proto3,oneof" json:"exclusive_maximum,omitempty"`
-	MinItems         *int64                 `protobuf:"varint,14,opt,name=min_items,json=minItems,proto3,oneof" json:"min_items,omitempty"`
-	MaxItems         *int64                 `protobuf:"varint,15,opt,name=max_items,json=maxItems,proto3,oneof" json:"max_items,omitempty"`
-	UniqueItems      *bool                  `protobuf:"varint,16,opt,name=unique_items,json=uniqueItems,proto3,oneof" json:"unique_items,omitempty"`
-	MinProperties    *int64                 `protobuf:"varint,17,opt,name=min_properties,json=minProperties,proto3,oneof" json:"min_properties,omitempty"`
-	MaxProperties    *int64                 `protobuf:"varint,18,opt,name=max_properties,json=maxProperties,proto3,oneof" json:"max_properties,omitempty"`
-	EnumString       []string               `protobuf:"bytes,19,rep,name=enum_string,json=enumString,proto3" json:"enum_string,omitempty"`
-	EnumInt          []int64                `protobuf:"varint,20,rep,packed,name=enum_int,json=enumInt,proto3" json:"enum_int,omitempty"`
-	EnumNumber       []float64              `protobuf:"fixed64,21,rep,packed,name=enum_number,json=enumNumber,proto3" json:"enum_number,omitempty"`
-	Deprecated       *bool                  `protobuf:"varint,22,opt,name=deprecated,proto3,oneof" json:"deprecated,omitempty"`
-	ReadOnly         *bool                  `protobuf:"varint,23,opt,name=read_only,json=readOnly,proto3,oneof" json:"read_only,omitempty"`
-	WriteOnly        *bool                  `protobuf:"varint,24,opt,name=write_only,json=writeOnly,proto3,oneof" json:"write_only,omitempty"`
-	MultipleOf       *float64               `protobuf:"fixed64,25,opt,name=multiple_of,json=multipleOf,proto3,oneof" json:"multiple_of,omitempty"`
-	DefaultString    *string                `protobuf:"bytes,26,opt,name=default_string,json=defaultString,proto3,oneof" json:"default_string,omitempty"`
-	DefaultInt       *int64                 `protobuf:"varint,27,opt,name=default_int,json=defaultInt,proto3,oneof" json:"default_int,omitempty"`
-	DefaultNumber    *float64               `protobuf:"fixed64,28,opt,name=default_number,json=defaultNumber,proto3,oneof" json:"default_number,omitempty"`
-	DefaultBool      *bool                  `protobuf:"varint,29,opt,name=default_bool,json=defaultBool,proto3,oneof" json:"default_bool,omitempty"`
-	ExamplesString   []string               `protobuf:"bytes,30,rep,name=examples_string,json=examplesString,proto3" json:"examples_string,omitempty"`
-	ExamplesInt      []int64                `protobuf:"varint,31,rep,packed,name=examples_int,json=examplesInt,proto3" json:"examples_int,omitempty"`
-	ExamplesNumber   []float64              `protobuf:"fixed64,32,rep,packed,name=examples_number,json=examplesNumber,proto3" json:"examples_number,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Short human-readable title for the field. Emitted as JSON Schema
+	// `title`, overriding the title derived from the first paragraph of the
+	// field's leading comment. Applies to all field types.
+	Title *string `protobuf:"bytes,1,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	// Human-readable description of the field. Emitted as JSON Schema
+	// `description`, overriding the description derived from the field's
+	// leading comment. Applies to all field types.
+	Description *string `protobuf:"bytes,2,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	// Excludes the field from the generated schema entirely: no property is
+	// emitted and the field never appears in `required`. Applies to all
+	// field types, including oneof members.
+	Ignore *bool `protobuf:"varint,3,opt,name=ignore,proto3,oneof" json:"ignore,omitempty"`
+	// Regular expression the value must match, e.g. "^[A-Z]+$". Emitted as
+	// JSON Schema `pattern`. Applies to string values; on repeated and map
+	// fields it applies to each element or value.
+	Pattern *string `protobuf:"bytes,4,opt,name=pattern,proto3,oneof" json:"pattern,omitempty"`
+	// Semantic format annotation such as "email", "uuid", "ipv4", "uri", or
+	// "date-time". Emitted as JSON Schema `format`. Most validators treat
+	// this as an annotation, not an assertion. Applies to string values; on
+	// repeated and map fields it applies to each element or value.
+	Format *string `protobuf:"bytes,5,opt,name=format,proto3,oneof" json:"format,omitempty"`
+	// Encoding of binary content stored in a string, e.g. "base64". Emitted
+	// as JSON Schema `contentEncoding`. bytes fields default to "base64";
+	// setting this overrides that default.
+	ContentEncoding *string `protobuf:"bytes,6,opt,name=content_encoding,json=contentEncoding,proto3,oneof" json:"content_encoding,omitempty"`
+	// Media type of the field's (decoded) content, e.g. "application/json".
+	// Emitted as JSON Schema `contentMediaType`.
+	ContentMediaType *string `protobuf:"bytes,7,opt,name=content_media_type,json=contentMediaType,proto3,oneof" json:"content_media_type,omitempty"`
+	// Minimum string length in characters. Emitted as JSON Schema
+	// `minLength`. Applies to string values; on repeated and map fields it
+	// applies to each element or value.
+	MinLength *int64 `protobuf:"varint,8,opt,name=min_length,json=minLength,proto3,oneof" json:"min_length,omitempty"`
+	// Maximum string length in characters. Emitted as JSON Schema
+	// `maxLength`. Applies to string values; on repeated and map fields it
+	// applies to each element or value.
+	MaxLength *int64 `protobuf:"varint,9,opt,name=max_length,json=maxLength,proto3,oneof" json:"max_length,omitempty"`
+	// Inclusive lower bound for numeric values, unless `exclusive_minimum`
+	// is set. Emitted as JSON Schema `minimum`. Applies to numeric values;
+	// on repeated and map fields it applies to each element or value.
+	Minimum *float64 `protobuf:"fixed64,10,opt,name=minimum,proto3,oneof" json:"minimum,omitempty"`
+	// Inclusive upper bound for numeric values, unless `exclusive_maximum`
+	// is set. Emitted as JSON Schema `maximum`. Applies to numeric values;
+	// on repeated and map fields it applies to each element or value.
+	Maximum *float64 `protobuf:"fixed64,11,opt,name=maximum,proto3,oneof" json:"maximum,omitempty"`
+	// If true, the `minimum` value is emitted as JSON Schema
+	// `exclusiveMinimum` instead of `minimum` (the bound itself is not an
+	// allowed value). Requires `minimum` to be set.
+	ExclusiveMinimum *bool `protobuf:"varint,12,opt,name=exclusive_minimum,json=exclusiveMinimum,proto3,oneof" json:"exclusive_minimum,omitempty"`
+	// If true, the `maximum` value is emitted as JSON Schema
+	// `exclusiveMaximum` instead of `maximum` (the bound itself is not an
+	// allowed value). Requires `maximum` to be set.
+	ExclusiveMaximum *bool `protobuf:"varint,13,opt,name=exclusive_maximum,json=exclusiveMaximum,proto3,oneof" json:"exclusive_maximum,omitempty"`
+	// Minimum number of elements in a repeated field. Emitted as JSON Schema
+	// `minItems` on the array itself.
+	MinItems *int64 `protobuf:"varint,14,opt,name=min_items,json=minItems,proto3,oneof" json:"min_items,omitempty"`
+	// Maximum number of elements in a repeated field. Emitted as JSON Schema
+	// `maxItems` on the array itself.
+	MaxItems *int64 `protobuf:"varint,15,opt,name=max_items,json=maxItems,proto3,oneof" json:"max_items,omitempty"`
+	// If true, all elements of a repeated field must be distinct. Emitted as
+	// JSON Schema `uniqueItems` on the array itself.
+	UniqueItems *bool `protobuf:"varint,16,opt,name=unique_items,json=uniqueItems,proto3,oneof" json:"unique_items,omitempty"`
+	// Minimum number of entries in a map field. Emitted as JSON Schema
+	// `minProperties` on the object itself.
+	MinProperties *int64 `protobuf:"varint,17,opt,name=min_properties,json=minProperties,proto3,oneof" json:"min_properties,omitempty"`
+	// Maximum number of entries in a map field. Emitted as JSON Schema
+	// `maxProperties` on the object itself.
+	MaxProperties *int64 `protobuf:"varint,18,opt,name=max_properties,json=maxProperties,proto3,oneof" json:"max_properties,omitempty"`
+	// Restricts a string or bytes field's value to a fixed set. Emitted as
+	// JSON Schema `enum`. On repeated and map fields the set applies to each
+	// element or value. Setting more than one enum_* variant, or using this
+	// variant on a field that is not string or bytes, is an error at
+	// generation time.
+	EnumString []string `protobuf:"bytes,19,rep,name=enum_string,json=enumString,proto3" json:"enum_string,omitempty"`
+	// Restricts an integer field's value to a fixed set. Emitted as JSON
+	// Schema `enum`. Applies to integer fields (int32/int64/uint*/sint*/
+	// fixed*) and proto enum fields, where the values must be a subset of the
+	// enum's declared numeric values. On repeated and map fields the set
+	// applies to each element or value. Setting more than one enum_* variant,
+	// or using this variant on a non-integer field, is an error at generation
+	// time. Cannot express uint64 values above 2^63-1.
+	EnumInt []int64 `protobuf:"varint,20,rep,packed,name=enum_int,json=enumInt,proto3" json:"enum_int,omitempty"`
+	// Restricts a float or double field's value to a fixed set. Emitted as
+	// JSON Schema `enum`. On repeated and map fields the set applies to each
+	// element or value. Setting more than one enum_* variant, or using this
+	// variant on a non-numeric field, is an error at generation time.
+	EnumNumber []float64 `protobuf:"fixed64,21,rep,packed,name=enum_number,json=enumNumber,proto3" json:"enum_number,omitempty"`
+	// Marks the field as deprecated. Emitted as JSON Schema `deprecated`.
+	// Applies to the field's schema root: on repeated and map fields it marks
+	// the array or object itself, not its elements.
+	Deprecated *bool `protobuf:"varint,22,opt,name=deprecated,proto3,oneof" json:"deprecated,omitempty"`
+	// Marks the field as read-only. Emitted as JSON Schema `readOnly`.
+	// Applies to the field's schema root, like `deprecated`.
+	ReadOnly *bool `protobuf:"varint,23,opt,name=read_only,json=readOnly,proto3,oneof" json:"read_only,omitempty"`
+	// Marks the field as write-only. Emitted as JSON Schema `writeOnly`.
+	// Applies to the field's schema root, like `deprecated`.
+	WriteOnly *bool `protobuf:"varint,24,opt,name=write_only,json=writeOnly,proto3,oneof" json:"write_only,omitempty"`
+	// Requires numeric values to be a multiple of this number. Emitted as
+	// JSON Schema `multipleOf`. Numeric fields only; must be greater than 0.
+	// On repeated and map fields it applies to each element or value.
+	MultipleOf *float64 `protobuf:"fixed64,25,opt,name=multiple_of,json=multipleOf,proto3,oneof" json:"multiple_of,omitempty"`
+	// Default value for a string or bytes field. Emitted as JSON Schema
+	// `default`. Only valid on singular fields of those types: using it on a
+	// repeated, map, message-typed, or non-string field, or setting more than
+	// one default_* variant, is an error at generation time.
+	DefaultString *string `protobuf:"bytes,26,opt,name=default_string,json=defaultString,proto3,oneof" json:"default_string,omitempty"`
+	// Default value for an integer or proto enum field. Emitted as JSON
+	// Schema `default`. Only valid on singular fields of those types: using
+	// it on a repeated, map, message-typed, or non-integer field, or setting
+	// more than one default_* variant, is an error at generation time.
+	DefaultInt *int64 `protobuf:"varint,27,opt,name=default_int,json=defaultInt,proto3,oneof" json:"default_int,omitempty"`
+	// Default value for a float or double field. Emitted as JSON Schema
+	// `default`. Only valid on singular fields of those types: using it on a
+	// repeated, map, message-typed, or non-numeric field, or setting more
+	// than one default_* variant, is an error at generation time.
+	DefaultNumber *float64 `protobuf:"fixed64,28,opt,name=default_number,json=defaultNumber,proto3,oneof" json:"default_number,omitempty"`
+	// Default value for a bool field. Emitted as JSON Schema `default`. Only
+	// valid on singular bool fields: using it on a repeated, map,
+	// message-typed, or non-bool field, or setting more than one default_*
+	// variant, is an error at generation time.
+	DefaultBool *bool `protobuf:"varint,29,opt,name=default_bool,json=defaultBool,proto3,oneof" json:"default_bool,omitempty"`
+	// Example values for a string or bytes field. Emitted as JSON Schema
+	// `examples`. Only valid on singular fields of those types, same rules as
+	// default_string.
+	ExamplesString []string `protobuf:"bytes,30,rep,name=examples_string,json=examplesString,proto3" json:"examples_string,omitempty"`
+	// Example values for an integer or proto enum field. Emitted as JSON
+	// Schema `examples`. Only valid on singular fields of those types, same
+	// rules as default_int.
+	ExamplesInt []int64 `protobuf:"varint,31,rep,packed,name=examples_int,json=examplesInt,proto3" json:"examples_int,omitempty"`
+	// Example values for a float or double field. Emitted as JSON Schema
+	// `examples`. Only valid on singular fields of those types, same rules as
+	// default_number. There is deliberately no examples_bool: a boolean
+	// example carries no information.
+	ExamplesNumber []float64 `protobuf:"fixed64,32,rep,packed,name=examples_number,json=examplesNumber,proto3" json:"examples_number,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *FieldOptions_JsonSchema) Reset() {
@@ -623,18 +806,52 @@ var file_alis_open_options_v1_options_proto_extTypes = []protoimpl.ExtensionInfo
 
 // Extension fields to descriptorpb.FileOptions.
 var (
+	// File-level alis options.
+	//
+	// Usage: option (alis.open.options.v1.file).json_schema.generate = true;
+	//
 	// optional alis.open.options.v1.FileOptions file = 1001;
 	E_File = &file_alis_open_options_v1_options_proto_extTypes[0]
 )
 
 // Extension fields to descriptorpb.MessageOptions.
 var (
+	// Message-level alis options.
+	//
+	// Usage:
+	//
+	//	option (alis.open.options.v1.message).json_schema.generate = true;
+	//	option (alis.open.options.v1.message).json_schema.oneof = {
+	//	  fields: ["field_a", "field_b", "field_c"],
+	//	  required: true
+	//	};
+	//
 	// optional alis.open.options.v1.MessageOptions message = 1001;
 	E_Message = &file_alis_open_options_v1_options_proto_extTypes[1]
 )
 
 // Extension fields to descriptorpb.FieldOptions.
 var (
+	// Field-level alis options.
+	//
+	// Usage:
+	// string email = 1 [
+	//
+	//	(alis.open.options.v1.field).json_schema = {
+	//	  format: "email",
+	//	  title: "Primary Email"
+	//	}
+	//
+	// ];
+	//
+	// string region = 2 [
+	//
+	//	(alis.open.options.v1.field).json_schema = {
+	//	  enum_string: ["ALL", "EXPORT", "LOCAL"]
+	//	}
+	//
+	// ];
+	//
 	// optional alis.open.options.v1.FieldOptions field = 1001;
 	E_Field = &file_alis_open_options_v1_options_proto_extTypes[2]
 )
