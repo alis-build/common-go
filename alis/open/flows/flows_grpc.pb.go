@@ -4,6 +4,27 @@
 // - protoc             v3.21.12
 // source: alis/open/flows/v1/flows.proto
 
+// Records the steps an API request goes through while it runs, so clients can
+// follow the progress of the underlying business logic.
+//
+// `FlowsService` exposes one resource:
+//
+// - `Flow` (`flows/{flow}`, where `{flow}` is 32 lowercase hex characters):
+//   the journey of one API request, identified by the method that produced it
+//   (`source`) and made up of `Flow.Step`s, each with its own `State`.
+//
+// Flows nest. A flow can be the child of a step in another flow, in which case
+// `parent_id` holds `{flow_id}-{step_id}`, the same format as the
+// `x-alis-flow-parent` header. `ListFlows` and `StreamFlows` return the flows
+// under a parent flow, or root flows when no parent is set. `GenerateFlowTree`
+// returns a flow with its descendants populated in the output-only
+// `Step.children`, plus the children of the leaf steps so the tree can be
+// expanded on demand.
+//
+// The service also consumes Pub/Sub push messages
+// (`alis.open.pubsub.v1.PubSubMessage`) through `HandleEvent` and
+// `HandleDeadLetter`.
+
 package flows
 
 import (
@@ -32,12 +53,29 @@ const (
 // FlowsServiceClient is the client API for FlowsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Manages Flow resources with an API service.
+//
+// When an API wants to communicate more details on the progress or steps while running,
+// this service would be used by clients to retrieve the Flow resources which will provide
+// additional details on the underlying business logic.
 type FlowsServiceClient interface {
+	// Get a Flow resource
 	GetFlow(ctx context.Context, in *GetFlowRequest, opts ...grpc.CallOption) (*Flow, error)
+	// Lists Flows.
 	ListFlows(ctx context.Context, in *ListFlowsRequest, opts ...grpc.CallOption) (*ListFlowsResponse, error)
+	// Streams Flows under a parent flow, or root flows when no parent is set,
+	// as a server stream of `Flow` messages.
 	StreamFlows(ctx context.Context, in *StreamFlowsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Flow], error)
+	// Generate a tree of Flows and Steps.
+	// This method returns a single Flow resource but with the Flow children populated.
+	//
+	// The response also includes the next immediate children of the leaf nodes(steps at the max depth).
+	// This can be used to generate the next level of the tree on demand.
 	GenerateFlowTree(ctx context.Context, in *GenerateFlowTreeRequest, opts ...grpc.CallOption) (*GenerateFlowTreeResponse, error)
+	// Handles an event from Pub/Sub
 	HandleEvent(ctx context.Context, in *pubsub.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Handles a dead letter event from Pub/Sub
 	HandleDeadLetter(ctx context.Context, in *pubsub.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -121,12 +159,29 @@ func (c *flowsServiceClient) HandleDeadLetter(ctx context.Context, in *pubsub.Pu
 // FlowsServiceServer is the server API for FlowsService service.
 // All implementations must embed UnimplementedFlowsServiceServer
 // for forward compatibility.
+//
+// Manages Flow resources with an API service.
+//
+// When an API wants to communicate more details on the progress or steps while running,
+// this service would be used by clients to retrieve the Flow resources which will provide
+// additional details on the underlying business logic.
 type FlowsServiceServer interface {
+	// Get a Flow resource
 	GetFlow(context.Context, *GetFlowRequest) (*Flow, error)
+	// Lists Flows.
 	ListFlows(context.Context, *ListFlowsRequest) (*ListFlowsResponse, error)
+	// Streams Flows under a parent flow, or root flows when no parent is set,
+	// as a server stream of `Flow` messages.
 	StreamFlows(*StreamFlowsRequest, grpc.ServerStreamingServer[Flow]) error
+	// Generate a tree of Flows and Steps.
+	// This method returns a single Flow resource but with the Flow children populated.
+	//
+	// The response also includes the next immediate children of the leaf nodes(steps at the max depth).
+	// This can be used to generate the next level of the tree on demand.
 	GenerateFlowTree(context.Context, *GenerateFlowTreeRequest) (*GenerateFlowTreeResponse, error)
+	// Handles an event from Pub/Sub
 	HandleEvent(context.Context, *pubsub.PubSubMessage) (*emptypb.Empty, error)
+	// Handles a dead letter event from Pub/Sub
 	HandleDeadLetter(context.Context, *pubsub.PubSubMessage) (*emptypb.Empty, error)
 	mustEmbedUnimplementedFlowsServiceServer()
 }

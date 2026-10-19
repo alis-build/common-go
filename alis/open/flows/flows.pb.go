@@ -4,6 +4,27 @@
 // 	protoc        v3.21.12
 // source: alis/open/flows/v1/flows.proto
 
+// Records the steps an API request goes through while it runs, so clients can
+// follow the progress of the underlying business logic.
+//
+// `FlowsService` exposes one resource:
+//
+// - `Flow` (`flows/{flow}`, where `{flow}` is 32 lowercase hex characters):
+//   the journey of one API request, identified by the method that produced it
+//   (`source`) and made up of `Flow.Step`s, each with its own `State`.
+//
+// Flows nest. A flow can be the child of a step in another flow, in which case
+// `parent_id` holds `{flow_id}-{step_id}`, the same format as the
+// `x-alis-flow-parent` header. `ListFlows` and `StreamFlows` return the flows
+// under a parent flow, or root flows when no parent is set. `GenerateFlowTree`
+// returns a flow with its descendants populated in the output-only
+// `Step.children`, plus the children of the leaf steps so the tree can be
+// expanded on demand.
+//
+// The service also consumes Pub/Sub push messages
+// (`alis.open.pubsub.v1.PubSubMessage`) through `HandleEvent` and
+// `HandleDeadLetter`.
+
 package flows
 
 import (
@@ -25,16 +46,24 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The lifecycle state of a step.
 type Flow_Step_State int32
 
 const (
+	// State is not specified
 	Flow_Step_STATE_UNSPECIFIED Flow_Step_State = 0
-	Flow_Step_QUEUED            Flow_Step_State = 1
-	Flow_Step_IN_PROGRESS       Flow_Step_State = 2
-	Flow_Step_CANCELLED         Flow_Step_State = 3
-	Flow_Step_COMPLETED         Flow_Step_State = 4
-	Flow_Step_FAILED            Flow_Step_State = 5
-	Flow_Step_AWAITING_INPUT    Flow_Step_State = 6
+	// The step has been queued
+	Flow_Step_QUEUED Flow_Step_State = 1
+	// The step is in progress
+	Flow_Step_IN_PROGRESS Flow_Step_State = 2
+	// The step has been cancelled
+	Flow_Step_CANCELLED Flow_Step_State = 3
+	// The step is complete
+	Flow_Step_COMPLETED Flow_Step_State = 4
+	// The step failed
+	Flow_Step_FAILED Flow_Step_State = 5
+	// The step is awaiting human review or input
+	Flow_Step_AWAITING_INPUT Flow_Step_State = 6
 )
 
 // Enum value maps for Flow_Step_State.
@@ -86,14 +115,29 @@ func (Flow_Step_State) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_flows_v1_flows_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
+// A Flow represents the entire journey of an API request, from its initial receipt to the final
+// response generation. It encapsulates the sequence of operations and transformations that
+// occur during the processing of the request.
 type Flow struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Source        string                 `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
-	ParentId      string                 `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Steps         []*Flow_Step           `protobuf:"bytes,7,rep,name=steps,proto3" json:"steps,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,97,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Identifies the particular flow message.
+	// Format: flows/0af7651916cd43dd8448eb211c80319c (32 lowercase hex characters)
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The fully qualified name of the method that produces the flow.
+	// Example: alis.os.resources.products.v1.ProductsService/CreateProduct
+	Source string `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
+	// A reference to the parent of the Flow.
+	// Within a current flow the header may contain the relevant parent in the header: `x-alis-flow-parent`
+	// Format: {flow_id}-{step_id}
+	// Header example: 0af7651916cd43dd8448eb211c80319c-0, represents step with id 0
+	ParentId string `protobuf:"bytes,3,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	// A sequence of steps
+	Steps []*Flow_Step `protobuf:"bytes,7,rep,name=steps,proto3" json:"steps,omitempty"`
+	// The time at which the Flow was created.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,97,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// The time at which the Flow was last updated.
+	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	// The time at which the Flow was published.
 	PublishTime   *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=publish_time,json=publishTime,proto3" json:"publish_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -178,9 +222,13 @@ func (x *Flow) GetPublishTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Request message for [alis.open.flows.v1.FlowsService/GetFlow]
 type GetFlowRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the Flow resource
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The fields to return in snake_case, as defined in the proto
+	// All fields are returned if not provided
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -230,13 +278,29 @@ func (x *GetFlowRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request message for [alis.open.flows.v1.FlowsService/ListFlows]
 type ListFlowsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the parent flow.
+	// If not set, fetches all root flows.
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The maximum number of flows to return.
+	// The service may return fewer than this value.
+	// If unspecified, at most 1000 flows will be returned.
+	// The maximum value is 1000; values above 1000 will be coerced to 1000.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// The page token to use when requesting the next page of results.
+	// This is typically received from a previous `ListFlows` call.
+	// Provide this to retrieve the subsequent page.
+	//
+	// When paginating, all other parameters provided to `ListFlows` must match
+	// the call that provided the page token.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case, as defined in the proto
+	// All fields are returned if not provided
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// Optional filter string to filter results.
+	Filter        string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -306,10 +370,14 @@ func (x *ListFlowsRequest) GetFilter() string {
 	return ""
 }
 
+// Response message for [alis.open.flows.v1.FlowsService/ListFlows]
 type ListFlowsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Flows         []*Flow                `protobuf:"bytes,1,rep,name=flows,proto3" json:"flows,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of Flows.
+	Flows []*Flow `protobuf:"bytes,1,rep,name=flows,proto3" json:"flows,omitempty"`
+	// The next page token.
+	// If empty, there are no more pages.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -358,9 +426,14 @@ func (x *ListFlowsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// Request message for [alis.open.flows.v1.FlowsService/StreamFlows]
 type StreamFlowsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the parent flow.
+	// If not set, fetches all root flows.
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The fields to return in snake_case, as defined in the proto
+	// All fields are returned if not provided
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -410,12 +483,22 @@ func (x *StreamFlowsRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request message for [alis.open.flows.v1.FlowsService/GenerateFlowTree]
 type GenerateFlowTreeRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	MaxDepth      int32                  `protobuf:"varint,2,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the parent Flow resource
+	// Format: flows/{flow_id}
+	// Example: flows/0af7651916cd43dd8448eb211c80319c
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The maximum depth of the tree to generate.
+	// The service may return fewer than this value.
+	// If unspecified, all levels up to a max of 20 will be returned.
+	MaxDepth int32 `protobuf:"varint,2,opt,name=max_depth,json=maxDepth,proto3" json:"max_depth,omitempty"`
+	// The fields to return in snake_case, as defined in the proto
+	// All fields are returned if not provided
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// Optional filter string to filter results.
+	Filter        string `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -478,9 +561,14 @@ func (x *GenerateFlowTreeRequest) GetFilter() string {
 	return ""
 }
 
+// Response message for [alis.open.flows.v1.FlowsService/GenerateFlowTree]
 type GenerateFlowTreeResponse struct {
-	state         protoimpl.MessageState                   `protogen:"open.v1"`
-	Flow          *Flow                                    `protobuf:"bytes,1,opt,name=flow,proto3" json:"flow,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The root Flow.
+	Flow *Flow `protobuf:"bytes,1,opt,name=flow,proto3" json:"flow,omitempty"`
+	// Steps with children.
+	// This field returns the next immediate children of the leaf nodes(steps at the max depth).
+	// This can be used to generate the next level of the tree on demand.
 	StepChildren  []*GenerateFlowTreeResponse_StepChildren `protobuf:"bytes,2,rep,name=step_children,json=stepChildren,proto3" json:"step_children,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -530,14 +618,38 @@ func (x *GenerateFlowTreeResponse) GetStepChildren() []*GenerateFlowTreeResponse
 	return nil
 }
 
+// A Step is a single, distinct action or operation that contributes to the
+// overall Flow. It's a building block of the larger process, representing
+// a specific stage or task within the API's business logic.
 type Flow_Step struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	State         Flow_Step_State        `protobuf:"varint,4,opt,name=state,proto3,enum=alis.open.flows.v1.Flow_Step_State" json:"state,omitempty"`
-	Children      []*Flow                `protobuf:"bytes,8,rep,name=children,proto3" json:"children,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the step.
+	// The Id is provided by the user at runtime and may be used to create structure
+	// within a set of steps, for example:
+	//   - 1 Prepare data
+	//   - 1.1 Approved by Operator
+	//   - 1.2 Approved by Manager
+	//   - 1 Validate data
+	//   - etc.
+	//
+	// Example: my_subprocess
+	// Example: 1.1
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Title of the step.
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	// A short description of the step
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// The state of the step
+	State Flow_Step_State `protobuf:"varint,4,opt,name=state,proto3,enum=alis.open.flows.v1.Flow_Step_State" json:"state,omitempty"`
+	// Flow children originating from this step.
+	// A step may have multiple children, each representing a different path or outcome.
+	//
+	// This field is OUTPUT ONLY and is not persisted in the database.
+	// It is only populated by the GenerateFlowTree method.
+	Children []*Flow `protobuf:"bytes,8,rep,name=children,proto3" json:"children,omitempty"`
+	// The time at which the Step was created.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// The time at which the Step was updated.
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -622,10 +734,16 @@ func (x *Flow_Step) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Step children.
+// Provides the children of a step.
 type GenerateFlowTreeResponse_StepChildren struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Children      []string               `protobuf:"bytes,2,rep,name=children,proto3" json:"children,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The id of the step
+	// Format: {flow_id}-{step_id}
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The names of the children
+	// Format: [flows/{flow_id}]
+	Children      []string `protobuf:"bytes,2,rep,name=children,proto3" json:"children,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

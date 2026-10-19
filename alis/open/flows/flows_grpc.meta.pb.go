@@ -3,21 +3,21 @@
 // Source: alis/open/flows/v1/flows.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:38:41 UTC
+// Generated on: 2026-10-19 08:23:46 UTC
 
 package flows
 
 const (
 	// FlowsService_GetFlow_FullMethodDescription returns the description of the alis.open.flows.v1.FlowsService.GetFlow method.
-	FlowsService_GetFlow_FullMethodDescription = ""
+	FlowsService_GetFlow_FullMethodDescription = "Get a Flow resource"
 	// FlowsService_ListFlows_FullMethodDescription returns the description of the alis.open.flows.v1.FlowsService.ListFlows method.
-	FlowsService_ListFlows_FullMethodDescription = ""
+	FlowsService_ListFlows_FullMethodDescription = "Lists Flows."
 	// FlowsService_StreamFlows_FullMethodDescription returns the description of the alis.open.flows.v1.FlowsService.StreamFlows method.
-	FlowsService_StreamFlows_FullMethodDescription = ""
+	FlowsService_StreamFlows_FullMethodDescription = "Streams Flows under a parent flow, or root flows when no parent is set,\n as a server stream of `Flow` messages."
 	// FlowsService_GenerateFlowTree_FullMethodDescription returns the description of the alis.open.flows.v1.FlowsService.GenerateFlowTree method.
-	FlowsService_GenerateFlowTree_FullMethodDescription = ""
+	FlowsService_GenerateFlowTree_FullMethodDescription = "Generate a tree of Flows and Steps.\n This method returns a single Flow resource but with the Flow children populated. The response also includes the next immediate children of the leaf nodes(steps at the max depth).\n This can be used to generate the next level of the tree on demand."
 	// FlowsService_HandleEvent_FullMethodDescription returns the description of the alis.open.flows.v1.FlowsService.HandleEvent method.
-	FlowsService_HandleEvent_FullMethodDescription = ""
+	FlowsService_HandleEvent_FullMethodDescription = "Handles an event from Pub/Sub"
 	// FlowsService_HandleDeadLetter_FullMethodDescription returns the description of the alis.open.flows.v1.FlowsService.HandleDeadLetter method.
-	FlowsService_HandleDeadLetter_FullMethodDescription = ""
+	FlowsService_HandleDeadLetter_FullMethodDescription = "Handles a dead letter event from Pub/Sub"
 )
