@@ -4,6 +4,31 @@
 // - protoc             v3.21.12
 // source: alis/adk/sessions/v1/sessions.proto
 
+// Stores agent sessions: conversations between a user and an agent, the
+// ordered events that make them up, and the state carried across them.
+//
+// `SessionService` manages two resources:
+//
+// - `Session` (`sessions/{session}`): one conversation, owned by a `user_id`
+//   within an `app_name`, with a key-value `state` and an expiry set through
+//   `expire_time` or `ttl`.
+// - `SessionEvent` (`sessions/{session}/events/{event}`): one message from the
+//   user or an agent, with its `Content`, model response metadata, and the
+//   `EventActions` the agent took (state deltas, artifact updates, agent
+//   transfers, tool confirmations, context compaction). Events are added with
+//   `AppendEvent`; events that share an `invocation_id` belong to the same
+//   agent invocation.
+//
+// `AppState` and `UserState` hold state shared across all sessions of an app,
+// or of one user within an app. Their keys appear with the `app:` and `user:`
+// prefixes in the merged session state view; no RPC in this package takes
+// them directly.
+//
+// `Content` and `Part` carry multi-part message content (text, media, function
+// calls and responses, executable code). The remaining messages describe model
+// output: grounding, citations, token usage, log probabilities, and why
+// generation stopped.
+
 package sessions
 
 import (

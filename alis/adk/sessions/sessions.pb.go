@@ -4,6 +4,31 @@
 // 	protoc        v3.21.12
 // source: alis/adk/sessions/v1/sessions.proto
 
+// Stores agent sessions: conversations between a user and an agent, the
+// ordered events that make them up, and the state carried across them.
+//
+// `SessionService` manages two resources:
+//
+// - `Session` (`sessions/{session}`): one conversation, owned by a `user_id`
+//   within an `app_name`, with a key-value `state` and an expiry set through
+//   `expire_time` or `ttl`.
+// - `SessionEvent` (`sessions/{session}/events/{event}`): one message from the
+//   user or an agent, with its `Content`, model response metadata, and the
+//   `EventActions` the agent took (state deltas, artifact updates, agent
+//   transfers, tool confirmations, context compaction). Events are added with
+//   `AppendEvent`; events that share an `invocation_id` belong to the same
+//   agent invocation.
+//
+// `AppState` and `UserState` hold state shared across all sessions of an app,
+// or of one user within an app. Their keys appear with the `app:` and `user:`
+// prefixes in the merged session state view; no RPC in this package takes
+// them directly.
+//
+// `Content` and `Part` carry multi-part message content (text, media, function
+// calls and responses, executable code). The remaining messages describe model
+// output: grounding, citations, token usage, log probabilities, and why
+// generation stopped.
+
 package sessions
 
 import (
@@ -1744,11 +1769,11 @@ type EventActions struct {
 	ArtifactDelta map[string]int64 `protobuf:"bytes,3,rep,name=artifact_delta,json=artifactDelta,proto3" json:"artifact_delta,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
 	// Optional. The agent is escalating to a higher level agent.
 	Escalate bool `protobuf:"varint,6,opt,name=escalate,proto3" json:"escalate,omitempty"`
-	// Optional. Will only be set by a tool response indicating tool request
-	// authentication configuration.
+	// Optional. Will only be set by a tool response requesting that the user
+	// confirm a tool execution.
 	// Map key is the function call ID since one function call response (from
 	// model) could correspond to multiple function calls.
-	// Map value is the required auth config, which can be another struct.
+	// Map value is the confirmation request for that function call.
 	RequestedToolConfirmations map[string]*ToolConfirmation `protobuf:"bytes,7,rep,name=requested_tool_confirmations,json=requestedToolConfirmations,proto3" json:"requested_tool_confirmations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Optional. If set, the event transfers control to the specified agent.
 	TransferAgent string `protobuf:"bytes,8,opt,name=transfer_agent,json=transferAgent,proto3" json:"transfer_agent,omitempty"`
@@ -2201,6 +2226,9 @@ func (x *Content) GetParts() []*Part {
 // of the media if inline_data or file_data field is filled with raw bytes.
 type Part struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The data carried by this part: text, inline or URI-based media, a
+	// function call or response, or executable code and its result.
+	//
 	// Types that are valid to be assigned to Data:
 	//
 	//	*Part_Text
@@ -2211,6 +2239,9 @@ type Part struct {
 	//	*Part_ExecutableCode
 	//	*Part_CodeExecutionResult
 	Data isPart_Data `protobuf_oneof:"data"`
+	// Metadata describing the media in `data`. `video_metadata` is the only
+	// option.
+	//
 	// Types that are valid to be assigned to Metadata:
 	//
 	//	*Part_VideoMetadata
@@ -2777,6 +2808,8 @@ func (x *FunctionResponse) GetParts() []*FunctionResponsePart {
 // bytes.
 type FunctionResponsePart struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The media carried by this part, as inline bytes or a URI reference.
+	//
 	// Types that are valid to be assigned to Data:
 	//
 	//	*FunctionResponsePart_InlineData
