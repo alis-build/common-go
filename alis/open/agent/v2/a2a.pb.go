@@ -4,6 +4,30 @@
 // 	protoc        v3.21.12
 // source: alis/open/agent/v2/a2a.proto
 
+// A gRPC binding of the Agent2Agent (A2A) protocol for sending messages to
+// an agent and tracking the tasks it performs, shaped to follow AIP-127
+// where appropriate.
+//
+// `A2AService` works with four nouns:
+//
+// - Messages: sent with `SendMessage` or `SendStreamingMessage`. They are
+//   not stored resources.
+// - `Task` (`tasks/{task_id}`): the unit of work, with a status, output
+//   artifacts, and message history. Read with `GetTask` and `ListTasks`,
+//   cancelled with `CancelTask`, and streamed with `TaskSubscription`.
+// - `TaskPushNotificationConfig`
+//   (`tasks/{task_id}/pushNotificationConfigs/{config_id}`): a webhook that
+//   the agent notifies of updates to one task.
+// - `AgentCard`: the agent's self-description (skills, capabilities,
+//   security requirements), read with `GetAgentCard`.
+//
+// This package defines the same service and messages as
+// `alis.open.agent.v1` with two differences: `Task` has no `name` field
+// (requests still address a task as `tasks/{task_id}`), and `Part` cannot
+// carry an arbitrary `google.protobuf.Any` message. The
+// `alis.a2a.extension` packages build on the vendored `lf.a2a.v1` contract
+// rather than on this package.
+
 package v2
 
 import (
@@ -25,18 +49,34 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The set of states a Task can be in.
 type TaskState int32
 
 const (
-	TaskState_TASK_STATE_UNSPECIFIED    TaskState = 0
-	TaskState_TASK_STATE_SUBMITTED      TaskState = 1
-	TaskState_TASK_STATE_WORKING        TaskState = 2
-	TaskState_TASK_STATE_COMPLETED      TaskState = 3
-	TaskState_TASK_STATE_FAILED         TaskState = 4
-	TaskState_TASK_STATE_CANCELLED      TaskState = 5
+	// The task state is unknown or has not been set.
+	TaskState_TASK_STATE_UNSPECIFIED TaskState = 0
+	// Represents the status that acknowledges a task is created
+	TaskState_TASK_STATE_SUBMITTED TaskState = 1
+	// Represents the status that a task is actively being processed
+	TaskState_TASK_STATE_WORKING TaskState = 2
+	// Represents the status a task is finished. This is a terminal state
+	TaskState_TASK_STATE_COMPLETED TaskState = 3
+	// Represents the status a task is done but failed. This is a terminal state
+	TaskState_TASK_STATE_FAILED TaskState = 4
+	// Represents the status a task was cancelled before it finished.
+	// This is a terminal state.
+	TaskState_TASK_STATE_CANCELLED TaskState = 5
+	// Represents the status that the task requires information to complete.
+	// This is an interrupted state.
 	TaskState_TASK_STATE_INPUT_REQUIRED TaskState = 6
-	TaskState_TASK_STATE_REJECTED       TaskState = 7
-	TaskState_TASK_STATE_AUTH_REQUIRED  TaskState = 8
+	// Represents the status that the agent has decided to not perform the task.
+	// This may be done during initial task creation or later once an agent
+	// has determined it can't or won't proceed. This is a terminal state.
+	TaskState_TASK_STATE_REJECTED TaskState = 7
+	// Represents the state that some authentication is needed from the upstream
+	// client. Authentication is expected to come out-of-band thus this is not
+	// an interrupted or terminal state.
+	TaskState_TASK_STATE_AUTH_REQUIRED TaskState = 8
 )
 
 // Enum value maps for TaskState.
@@ -92,12 +132,16 @@ func (TaskState) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_agent_v2_a2a_proto_rawDescGZIP(), []int{0}
 }
 
+// Identifies the sender of a message.
 type Role int32
 
 const (
+	// The sender role has not been set.
 	Role_ROLE_UNSPECIFIED Role = 0
-	Role_ROLE_USER        Role = 1
-	Role_ROLE_AGENT       Role = 2
+	// USER role refers to communication from the client to the server.
+	Role_ROLE_USER Role = 1
+	// AGENT role refers to communication from the server to the client.
+	Role_ROLE_AGENT Role = 2
 )
 
 // Enum value maps for Role.
@@ -141,14 +185,23 @@ func (Role) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_agent_v2_a2a_proto_rawDescGZIP(), []int{1}
 }
 
+// Configuration of a send message request.
 type SendMessageConfiguration struct {
-	state               protoimpl.MessageState  `protogen:"open.v1"`
-	AcceptedOutputModes []string                `protobuf:"bytes,1,rep,name=accepted_output_modes,json=acceptedOutputModes,proto3" json:"accepted_output_modes,omitempty"`
-	PushNotification    *PushNotificationConfig `protobuf:"bytes,2,opt,name=push_notification,json=pushNotification,proto3" json:"push_notification,omitempty"`
-	HistoryLength       int32                   `protobuf:"varint,3,opt,name=history_length,json=historyLength,proto3" json:"history_length,omitempty"`
-	Blocking            bool                    `protobuf:"varint,4,opt,name=blocking,proto3" json:"blocking,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The output modes that the agent is expected to respond with.
+	AcceptedOutputModes []string `protobuf:"bytes,1,rep,name=accepted_output_modes,json=acceptedOutputModes,proto3" json:"accepted_output_modes,omitempty"`
+	// A configuration of a webhook that can be used to receive updates
+	PushNotification *PushNotificationConfig `protobuf:"bytes,2,opt,name=push_notification,json=pushNotification,proto3" json:"push_notification,omitempty"`
+	// The maximum number of messages to include in the history. if 0, the
+	// history will be unlimited.
+	HistoryLength int32 `protobuf:"varint,3,opt,name=history_length,json=historyLength,proto3" json:"history_length,omitempty"`
+	// If true, the message will be blocking until the task is completed. If
+	// false, the message will be non-blocking and the task will be returned
+	// immediately. It is the caller's responsibility to check for any task
+	// updates.
+	Blocking      bool `protobuf:"varint,4,opt,name=blocking,proto3" json:"blocking,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SendMessageConfiguration) Reset() {
@@ -209,14 +262,26 @@ func (x *SendMessageConfiguration) GetBlocking() bool {
 	return false
 }
 
+// Task is the core unit of action for A2A. It has a current status
+// and when results are created for the task they are stored in the
+// artifact. If there are multiple turns for a task, these are stored in
+// history.
 type Task struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ContextId     string                 `protobuf:"bytes,2,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
-	Status        *TaskStatus            `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Artifacts     []*Artifact            `protobuf:"bytes,4,rep,name=artifacts,proto3" json:"artifacts,omitempty"`
-	History       []*Message             `protobuf:"bytes,5,rep,name=history,proto3" json:"history,omitempty"`
-	Metadata      *structpb.Struct       `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier (e.g. UUID) for the task, generated by the server for a
+	// new task.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Unique identifier (e.g. UUID) for the contextual collection of interactions
+	// (tasks and messages). Created by the A2A server.
+	ContextId string `protobuf:"bytes,2,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
+	// The current status of a Task, including state and a message.
+	Status *TaskStatus `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	// A set of output artifacts for a Task.
+	Artifacts []*Artifact `protobuf:"bytes,4,rep,name=artifacts,proto3" json:"artifacts,omitempty"` // protolint:disable REPEATED_FIELD_NAMES_PLURALIZED
+	// The history of interactions from a task.
+	History []*Message `protobuf:"bytes,5,rep,name=history,proto3" json:"history,omitempty"` // protolint:enable REPEATED_FIELD_NAMES_PLURALIZED
+	// A key/value object to store custom metadata about a task.
+	Metadata      *structpb.Struct `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -293,10 +358,15 @@ func (x *Task) GetMetadata() *structpb.Struct {
 	return nil
 }
 
+// A container for the status of a task
 type TaskStatus struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	State         TaskState              `protobuf:"varint,1,opt,name=state,proto3,enum=alis.open.agent.v2.TaskState" json:"state,omitempty"`
-	Update        *Message               `protobuf:"bytes,2,opt,name=update,json=message,proto3" json:"update,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The current state of this task
+	State TaskState `protobuf:"varint,1,opt,name=state,proto3,enum=alis.open.agent.v2.TaskState" json:"state,omitempty"`
+	// A message associated with the status.
+	Update *Message `protobuf:"bytes,2,opt,name=update,json=message,proto3" json:"update,omitempty"`
+	// Timestamp when the status was recorded.
+	// Example: "2023-10-27T10:00:00Z"
 	Timestamp     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -353,14 +423,20 @@ func (x *TaskStatus) GetTimestamp() *timestamppb.Timestamp {
 	return nil
 }
 
+// Part represents a container for a section of communication content.
+// Parts can be purely textual, some sort of file (image, video, etc) or
+// a structured data blob (i.e. JSON).
 type Part struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The content carried by this part.
+	//
 	// Types that are valid to be assigned to Part:
 	//
 	//	*Part_Text
 	//	*Part_File
 	//	*Part_Data
-	Part          isPart_Part      `protobuf_oneof:"part"`
+	Part isPart_Part `protobuf_oneof:"part"`
+	// Optional metadata associated with this part.
 	Metadata      *structpb.Struct `protobuf:"bytes,4,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -442,14 +518,17 @@ type isPart_Part interface {
 }
 
 type Part_Text struct {
+	// Plain text content.
 	Text string `protobuf:"bytes,1,opt,name=text,proto3,oneof"`
 }
 
 type Part_File struct {
+	// A file, provided by URI or as inline bytes.
 	File *FilePart `protobuf:"bytes,2,opt,name=file,proto3,oneof"`
 }
 
 type Part_Data struct {
+	// Structured data, such as a JSON object.
 	Data *DataPart `protobuf:"bytes,3,opt,name=data,proto3,oneof"`
 }
 
@@ -459,15 +538,23 @@ func (*Part_File) isPart_Part() {}
 
 func (*Part_Data) isPart_Part() {}
 
+// FilePart represents the different ways files can be provided. If files are
+// small, directly feeding the bytes is supported via file_with_bytes. If the
+// file is large, the agent should read the content as appropriate directly
+// from the file_with_uri source.
 type FilePart struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The file content, referenced by URI or included inline.
+	//
 	// Types that are valid to be assigned to File:
 	//
 	//	*FilePart_FileWithUri
 	//	*FilePart_FileWithBytes
-	File          isFilePart_File `protobuf_oneof:"file"`
-	MimeType      string          `protobuf:"bytes,3,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
-	Name          string          `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	File isFilePart_File `protobuf_oneof:"file"`
+	// The MIME type of the file, for example `image/png`.
+	MimeType string `protobuf:"bytes,3,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
+	// An optional name for the file, for example `document.pdf`.
+	Name          string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -546,10 +633,14 @@ type isFilePart_File interface {
 }
 
 type FilePart_FileWithUri struct {
+	// A URI from which the agent can read the file content. Suited to large
+	// files.
 	FileWithUri string `protobuf:"bytes,1,opt,name=file_with_uri,json=fileWithUri,proto3,oneof"`
 }
 
 type FilePart_FileWithBytes struct {
+	// The file content as raw bytes. Suited to small files. In JSON this is
+	// encoded as a base64 string.
 	FileWithBytes []byte `protobuf:"bytes,2,opt,name=file_with_bytes,json=fileWithBytes,proto3,oneof"`
 }
 
@@ -557,9 +648,11 @@ func (*FilePart_FileWithUri) isFilePart_File() {}
 
 func (*FilePart_FileWithBytes) isFilePart_File() {}
 
+// DataPart represents a structured blob. This is most commonly a JSON payload.
 type DataPart struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          *structpb.Struct       `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The structured data, as a JSON object.
+	Data          *structpb.Struct `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -601,16 +694,34 @@ func (x *DataPart) GetData() *structpb.Struct {
 	return nil
 }
 
+// Message is one unit of communication between client and server. It is
+// associated with a context and optionally a task. Since the server is
+// responsible for the context definition, it must always provide a context_id
+// in its messages. The client can optionally provide the context_id if it
+// knows the context to associate the message to. Similarly for task_id,
+// except the server decides if a task is created and whether to include the
+// task_id.
 type Message struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	MessageId        string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
-	ContextId        string                 `protobuf:"bytes,2,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
-	TaskId           string                 `protobuf:"bytes,3,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
-	Role             Role                   `protobuf:"varint,4,opt,name=role,proto3,enum=alis.open.agent.v2.Role" json:"role,omitempty"`
-	Parts            []*Part                `protobuf:"bytes,5,rep,name=parts,proto3" json:"parts,omitempty"`
-	Metadata         *structpb.Struct       `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Extensions       []string               `protobuf:"bytes,7,rep,name=extensions,proto3" json:"extensions,omitempty"`
-	ReferenceTaskIds []string               `protobuf:"bytes,8,rep,name=reference_task_ids,json=referenceTaskIds,proto3" json:"reference_task_ids,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique identifier (e.g. UUID)of the message. This is required and
+	// created by the message creator.
+	MessageId string `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	// The context id of the message. This is optional and if set, the message
+	// will be associated with the given context.
+	ContextId string `protobuf:"bytes,2,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
+	// The task id of the message. This is optional and if set, the message
+	// will be associated with the given task.
+	TaskId string `protobuf:"bytes,3,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	// A role for the message.
+	Role Role `protobuf:"varint,4,opt,name=role,proto3,enum=alis.open.agent.v2.Role" json:"role,omitempty"` // protolint:disable REPEATED_FIELD_NAMES_PLURALIZED
+	// Parts is the container of the message content.
+	Parts []*Part `protobuf:"bytes,5,rep,name=parts,proto3" json:"parts,omitempty"` // protolint:enable REPEATED_FIELD_NAMES_PLURALIZED
+	// Any optional metadata to provide along with the message.
+	Metadata *structpb.Struct `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// The URIs of extensions that are present or contributed to this Message.
+	Extensions []string `protobuf:"bytes,7,rep,name=extensions,proto3" json:"extensions,omitempty"`
+	// A list of task IDs that this message references for additional context.
+	ReferenceTaskIds []string `protobuf:"bytes,8,rep,name=reference_task_ids,json=referenceTaskIds,proto3" json:"reference_task_ids,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -701,14 +812,24 @@ func (x *Message) GetReferenceTaskIds() []string {
 	return nil
 }
 
+// Artifacts are the container for task completed results. These are similar
+// to Messages but are intended to be the product of a task, as opposed to
+// point-to-point communication.
 type Artifact struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ArtifactId    string                 `protobuf:"bytes,1,opt,name=artifact_id,json=artifactId,proto3" json:"artifact_id,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Parts         []*Part                `protobuf:"bytes,5,rep,name=parts,proto3" json:"parts,omitempty"`
-	Metadata      *structpb.Struct       `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Extensions    []string               `protobuf:"bytes,7,rep,name=extensions,proto3" json:"extensions,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier (e.g. UUID) for the artifact. It must be at least unique
+	// within a task.
+	ArtifactId string `protobuf:"bytes,1,opt,name=artifact_id,json=artifactId,proto3" json:"artifact_id,omitempty"`
+	// A human readable name for the artifact.
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	// A human readable description of the artifact, optional.
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// The content of the artifact.
+	Parts []*Part `protobuf:"bytes,5,rep,name=parts,proto3" json:"parts,omitempty"`
+	// Optional metadata included with the artifact.
+	Metadata *structpb.Struct `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// The URIs of extensions that are present or contributed to this Artifact.
+	Extensions    []string `protobuf:"bytes,7,rep,name=extensions,proto3" json:"extensions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -785,13 +906,20 @@ func (x *Artifact) GetExtensions() []string {
 	return nil
 }
 
+// TaskStatusUpdateEvent is a delta even on a task indicating that a task
+// has changed.
 type TaskStatusUpdateEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
-	ContextId     string                 `protobuf:"bytes,2,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
-	Status        *TaskStatus            `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Final         bool                   `protobuf:"varint,4,opt,name=final,proto3" json:"final,omitempty"`
-	Metadata      *structpb.Struct       `protobuf:"bytes,5,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The id of the task that is changed
+	TaskId string `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	// The id of the context that the task belongs to
+	ContextId string `protobuf:"bytes,2,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
+	// The new status of the task.
+	Status *TaskStatus `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	// Whether this is the last status update expected for this task.
+	Final bool `protobuf:"varint,4,opt,name=final,proto3" json:"final,omitempty"`
+	// Optional metadata to associate with the task update.
+	Metadata      *structpb.Struct `protobuf:"bytes,5,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -861,14 +989,22 @@ func (x *TaskStatusUpdateEvent) GetMetadata() *structpb.Struct {
 	return nil
 }
 
+// TaskArtifactUpdateEvent represents a task delta where an artifact has
+// been generated.
 type TaskArtifactUpdateEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
-	ContextId     string                 `protobuf:"bytes,2,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
-	Artifact      *Artifact              `protobuf:"bytes,3,opt,name=artifact,proto3" json:"artifact,omitempty"`
-	Append        bool                   `protobuf:"varint,4,opt,name=append,proto3" json:"append,omitempty"`
-	LastChunk     bool                   `protobuf:"varint,5,opt,name=last_chunk,json=lastChunk,proto3" json:"last_chunk,omitempty"`
-	Metadata      *structpb.Struct       `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The id of the task for this artifact
+	TaskId string `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	// The id of the context that this task belongs too
+	ContextId string `protobuf:"bytes,2,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
+	// The artifact itself
+	Artifact *Artifact `protobuf:"bytes,3,opt,name=artifact,proto3" json:"artifact,omitempty"`
+	// Whether this should be appended to a prior one produced
+	Append bool `protobuf:"varint,4,opt,name=append,proto3" json:"append,omitempty"`
+	// Whether this represents the last part of an artifact
+	LastChunk bool `protobuf:"varint,5,opt,name=last_chunk,json=lastChunk,proto3" json:"last_chunk,omitempty"`
+	// Optional metadata associated with the artifact update.
+	Metadata      *structpb.Struct `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -945,12 +1081,17 @@ func (x *TaskArtifactUpdateEvent) GetMetadata() *structpb.Struct {
 	return nil
 }
 
+// Configuration for setting up push notifications for task updates.
 type PushNotificationConfig struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Url            string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
-	Token          string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
-	Authentication *AuthenticationInfo    `protobuf:"bytes,4,opt,name=authentication,proto3" json:"authentication,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// A unique identifier (e.g. UUID) for this push notification.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Url to send the notification too
+	Url string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	// Token unique for this task/session
+	Token string `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	// Information about the authentication to sent with the notification
+	Authentication *AuthenticationInfo `protobuf:"bytes,4,opt,name=authentication,proto3" json:"authentication,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1013,10 +1154,13 @@ func (x *PushNotificationConfig) GetAuthentication() *AuthenticationInfo {
 	return nil
 }
 
+// Defines authentication details, used for push notifications.
 type AuthenticationInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Schemes       []string               `protobuf:"bytes,1,rep,name=schemes,proto3" json:"schemes,omitempty"`
-	Credentials   string                 `protobuf:"bytes,2,opt,name=credentials,proto3" json:"credentials,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Supported authentication schemes - e.g. Basic, Bearer, etc
+	Schemes []string `protobuf:"bytes,1,rep,name=schemes,proto3" json:"schemes,omitempty"`
+	// Optional credentials
+	Credentials   string `protobuf:"bytes,2,opt,name=credentials,proto3" json:"credentials,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1065,10 +1209,15 @@ func (x *AuthenticationInfo) GetCredentials() string {
 	return ""
 }
 
+// Defines additional transport information for the agent.
 type AgentInterface struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Transport     string                 `protobuf:"bytes,2,opt,name=transport,proto3" json:"transport,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The url this interface is found at.
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// The transport supported this url. This is an open form string, to be
+	// easily extended for many transport protocols. The core ones officially
+	// supported are JSONRPC, GRPC and HTTP+JSON.
+	Transport     string `protobuf:"bytes,2,opt,name=transport,proto3" json:"transport,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1117,28 +1266,76 @@ func (x *AgentInterface) GetTransport() string {
 	return ""
 }
 
+// AgentCard conveys key information:
+// - Overall details (version, name, description, uses)
+// - Skills; a set of actions/solutions the agent can perform
+// - Default modalities/content types supported by the agent.
+// - Authentication requirements
+// Next ID: 19
 type AgentCard struct {
-	state                             protoimpl.MessageState     `protogen:"open.v1"`
-	ProtocolVersion                   string                     `protobuf:"bytes,16,opt,name=protocol_version,json=protocolVersion,proto3" json:"protocol_version,omitempty"`
-	Name                              string                     `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Description                       string                     `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Url                               string                     `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
-	PreferredTransport                string                     `protobuf:"bytes,14,opt,name=preferred_transport,json=preferredTransport,proto3" json:"preferred_transport,omitempty"`
-	AdditionalInterfaces              []*AgentInterface          `protobuf:"bytes,15,rep,name=additional_interfaces,json=additionalInterfaces,proto3" json:"additional_interfaces,omitempty"`
-	Provider                          *AgentProvider             `protobuf:"bytes,4,opt,name=provider,proto3" json:"provider,omitempty"`
-	Version                           string                     `protobuf:"bytes,5,opt,name=version,proto3" json:"version,omitempty"`
-	DocumentationUrl                  string                     `protobuf:"bytes,6,opt,name=documentation_url,json=documentationUrl,proto3" json:"documentation_url,omitempty"`
-	Capabilities                      *AgentCapabilities         `protobuf:"bytes,7,opt,name=capabilities,proto3" json:"capabilities,omitempty"`
-	SecuritySchemes                   map[string]*SecurityScheme `protobuf:"bytes,8,rep,name=security_schemes,json=securitySchemes,proto3" json:"security_schemes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Security                          []*Security                `protobuf:"bytes,9,rep,name=security,proto3" json:"security,omitempty"`
-	DefaultInputModes                 []string                   `protobuf:"bytes,10,rep,name=default_input_modes,json=defaultInputModes,proto3" json:"default_input_modes,omitempty"`
-	DefaultOutputModes                []string                   `protobuf:"bytes,11,rep,name=default_output_modes,json=defaultOutputModes,proto3" json:"default_output_modes,omitempty"`
-	Skills                            []*AgentSkill              `protobuf:"bytes,12,rep,name=skills,proto3" json:"skills,omitempty"`
-	SupportsAuthenticatedExtendedCard bool                       `protobuf:"varint,13,opt,name=supports_authenticated_extended_card,json=supportsAuthenticatedExtendedCard,proto3" json:"supports_authenticated_extended_card,omitempty"`
-	Signatures                        []*AgentCardSignature      `protobuf:"bytes,17,rep,name=signatures,proto3" json:"signatures,omitempty"`
-	IconUrl                           string                     `protobuf:"bytes,18,opt,name=icon_url,json=iconUrl,proto3" json:"icon_url,omitempty"`
-	unknownFields                     protoimpl.UnknownFields
-	sizeCache                         protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The version of the A2A protocol this agent supports.
+	ProtocolVersion string `protobuf:"bytes,16,opt,name=protocol_version,json=protocolVersion,proto3" json:"protocol_version,omitempty"`
+	// A human readable name for the agent.
+	// Example: "Recipe Agent"
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A description of the agent's domain of action/solution space.
+	// Example: "Agent that helps users with recipes and cooking."
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// A URL to the address the agent is hosted at. This represents the
+	// preferred endpoint as declared by the agent.
+	Url string `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+	// The transport of the preferred endpoint. If empty, defaults to JSONRPC.
+	PreferredTransport string `protobuf:"bytes,14,opt,name=preferred_transport,json=preferredTransport,proto3" json:"preferred_transport,omitempty"`
+	// Announcement of additional supported transports. Client can use any of
+	// the supported transports.
+	AdditionalInterfaces []*AgentInterface `protobuf:"bytes,15,rep,name=additional_interfaces,json=additionalInterfaces,proto3" json:"additional_interfaces,omitempty"`
+	// The service provider of the agent.
+	Provider *AgentProvider `protobuf:"bytes,4,opt,name=provider,proto3" json:"provider,omitempty"`
+	// The version of the agent.
+	// Example: "1.0.0"
+	Version string `protobuf:"bytes,5,opt,name=version,proto3" json:"version,omitempty"`
+	// A url to provide additional documentation about the agent.
+	DocumentationUrl string `protobuf:"bytes,6,opt,name=documentation_url,json=documentationUrl,proto3" json:"documentation_url,omitempty"`
+	// A2A Capability set supported by the agent.
+	Capabilities *AgentCapabilities `protobuf:"bytes,7,opt,name=capabilities,proto3" json:"capabilities,omitempty"`
+	// The security scheme details used for authenticating with this agent.
+	SecuritySchemes map[string]*SecurityScheme `protobuf:"bytes,8,rep,name=security_schemes,json=securitySchemes,proto3" json:"security_schemes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // protolint:disable REPEATED_FIELD_NAMES_PLURALIZED
+	// Security requirements for contacting the agent.
+	// This list can be seen as an OR of ANDs. Each object in the list describes
+	// one possible set of security requirements that must be present on a
+	// request. This allows specifying, for example, "callers must either use
+	// OAuth OR an API Key AND mTLS."
+	// Example:
+	//
+	//	security {
+	//	  schemes { key: "oauth" value { list: ["read"] } }
+	//	}
+	//
+	//	security {
+	//	  schemes { key: "api-key" }
+	//	  schemes { key: "mtls" }
+	//	}
+	Security []*Security `protobuf:"bytes,9,rep,name=security,proto3" json:"security,omitempty"` // protolint:enable REPEATED_FIELD_NAMES_PLURALIZED
+	// The set of interaction modes that the agent supports across all skills.
+	// This can be overridden per skill. Defined as mime types.
+	DefaultInputModes []string `protobuf:"bytes,10,rep,name=default_input_modes,json=defaultInputModes,proto3" json:"default_input_modes,omitempty"`
+	// The mime types supported as outputs from this agent.
+	DefaultOutputModes []string `protobuf:"bytes,11,rep,name=default_output_modes,json=defaultOutputModes,proto3" json:"default_output_modes,omitempty"`
+	// Skills represent a unit of ability an agent can perform. This may
+	// somewhat abstract but represents a more focused set of actions that the
+	// agent is highly likely to succeed at.
+	Skills []*AgentSkill `protobuf:"bytes,12,rep,name=skills,proto3" json:"skills,omitempty"`
+	// Whether the agent supports providing an extended agent card when
+	// the user is authenticated, i.e. is the card from .well-known
+	// different than the card from GetAgentCard.
+	SupportsAuthenticatedExtendedCard bool `protobuf:"varint,13,opt,name=supports_authenticated_extended_card,json=supportsAuthenticatedExtendedCard,proto3" json:"supports_authenticated_extended_card,omitempty"`
+	// JSON Web Signatures computed for this AgentCard.
+	Signatures []*AgentCardSignature `protobuf:"bytes,17,rep,name=signatures,proto3" json:"signatures,omitempty"`
+	// An optional URL to an icon for the agent.
+	IconUrl       string `protobuf:"bytes,18,opt,name=icon_url,json=iconUrl,proto3" json:"icon_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AgentCard) Reset() {
@@ -1297,10 +1494,15 @@ func (x *AgentCard) GetIconUrl() string {
 	return ""
 }
 
+// Represents information about the service provider of an agent.
 type AgentProvider struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Organization  string                 `protobuf:"bytes,2,opt,name=organization,proto3" json:"organization,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The providers reference url
+	// Example: "https://ai.google.dev"
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// The providers organization name
+	// Example: "Google"
+	Organization  string `protobuf:"bytes,2,opt,name=organization,proto3" json:"organization,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1349,12 +1551,17 @@ func (x *AgentProvider) GetOrganization() string {
 	return ""
 }
 
+// Defines the A2A feature set supported by the agent
 type AgentCapabilities struct {
-	state                  protoimpl.MessageState `protogen:"open.v1"`
-	Streaming              bool                   `protobuf:"varint,1,opt,name=streaming,proto3" json:"streaming,omitempty"`
-	PushNotifications      bool                   `protobuf:"varint,2,opt,name=push_notifications,json=pushNotifications,proto3" json:"push_notifications,omitempty"`
-	Extensions             []*AgentExtension      `protobuf:"bytes,3,rep,name=extensions,proto3" json:"extensions,omitempty"`
-	StateTransitionHistory bool                   `protobuf:"varint,4,opt,name=state_transition_history,json=stateTransitionHistory,proto3" json:"state_transition_history,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// If the agent will support streaming responses
+	Streaming bool `protobuf:"varint,1,opt,name=streaming,proto3" json:"streaming,omitempty"`
+	// If the agent can send push notifications to the clients webhook
+	PushNotifications bool `protobuf:"varint,2,opt,name=push_notifications,json=pushNotifications,proto3" json:"push_notifications,omitempty"`
+	// Extensions supported by this agent.
+	Extensions []*AgentExtension `protobuf:"bytes,3,rep,name=extensions,proto3" json:"extensions,omitempty"`
+	// If the agent provides a history of state transitions for a task.
+	StateTransitionHistory bool `protobuf:"varint,4,opt,name=state_transition_history,json=stateTransitionHistory,proto3" json:"state_transition_history,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -1417,12 +1624,20 @@ func (x *AgentCapabilities) GetStateTransitionHistory() bool {
 	return false
 }
 
+// A declaration of an extension supported by an Agent.
 type AgentExtension struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uri           string                 `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Required      bool                   `protobuf:"varint,3,opt,name=required,proto3" json:"required,omitempty"`
-	Params        *structpb.Struct       `protobuf:"bytes,4,opt,name=params,proto3" json:"params,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The URI of the extension.
+	// Example: "https://developers.google.com/identity/protocols/oauth2"
+	Uri string `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
+	// A description of how this agent uses this extension.
+	// Example: "Google OAuth 2.0 authentication"
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// Whether the client must follow specific requirements of the extension.
+	// Example: false
+	Required bool `protobuf:"varint,3,opt,name=required,proto3" json:"required,omitempty"`
+	// Optional configuration for the extension.
+	Params        *structpb.Struct `protobuf:"bytes,4,opt,name=params,proto3" json:"params,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1485,16 +1700,37 @@ func (x *AgentExtension) GetParams() *structpb.Struct {
 	return nil
 }
 
+// AgentSkill represents a unit of action/solution that the agent can perform.
+// One can think of this as a type of highly reliable solution that an agent
+// can be tasked to provide. Agents have the autonomy to choose how and when
+// to use specific skills, but clients should have confidence that if the
+// skill is defined that unit of action can be reliably performed.
 type AgentSkill struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
-	Examples      []string               `protobuf:"bytes,5,rep,name=examples,proto3" json:"examples,omitempty"`
-	InputModes    []string               `protobuf:"bytes,6,rep,name=input_modes,json=inputModes,proto3" json:"input_modes,omitempty"`
-	OutputModes   []string               `protobuf:"bytes,7,rep,name=output_modes,json=outputModes,proto3" json:"output_modes,omitempty"`
-	Security      []*Security            `protobuf:"bytes,8,rep,name=security,proto3" json:"security,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier of the skill within this agent.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// A human readable name for the skill.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// A human (or llm) readable description of the skill
+	// details and behaviors.
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// A set of tags for the skill to enhance categorization/utilization.
+	// Example: ["cooking", "customer support", "billing"]
+	Tags []string `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
+	// A set of example queries that this skill is designed to address.
+	// These examples should help the caller to understand how to craft requests
+	// to the agent to achieve specific goals.
+	// Example: ["I need a recipe for bread"]
+	Examples []string `protobuf:"bytes,5,rep,name=examples,proto3" json:"examples,omitempty"`
+	// Possible input modalities supported.
+	InputModes []string `protobuf:"bytes,6,rep,name=input_modes,json=inputModes,proto3" json:"input_modes,omitempty"`
+	// Possible output modalities produced
+	OutputModes []string `protobuf:"bytes,7,rep,name=output_modes,json=outputModes,proto3" json:"output_modes,omitempty"` // protolint:disable REPEATED_FIELD_NAMES_PLURALIZED
+	// Security schemes necessary for the agent to leverage this skill.
+	// As in the overall AgentCard.security, this list represents a logical OR of
+	// security requirement objects. Each object is a set of security schemes
+	// that must be used together (a logical AND).
+	Security      []*Security `protobuf:"bytes,8,rep,name=security,proto3" json:"security,omitempty"` // protolint:enable REPEATED_FIELD_NAMES_PLURALIZED
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1585,11 +1821,17 @@ func (x *AgentSkill) GetSecurity() []*Security {
 	return nil
 }
 
+// AgentCardSignature represents a JWS signature of an AgentCard.
+// This follows the JSON format of an RFC 7515 JSON Web Signature (JWS).
 type AgentCardSignature struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Protected     string                 `protobuf:"bytes,1,opt,name=protected,proto3" json:"protected,omitempty"`
-	Signature     string                 `protobuf:"bytes,2,opt,name=signature,proto3" json:"signature,omitempty"`
-	Header        *structpb.Struct       `protobuf:"bytes,3,opt,name=header,proto3" json:"header,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The protected JWS header for the signature. This is always a
+	// base64url-encoded JSON object. Required.
+	Protected string `protobuf:"bytes,1,opt,name=protected,proto3" json:"protected,omitempty"`
+	// The computed signature, base64url-encoded. Required.
+	Signature string `protobuf:"bytes,2,opt,name=signature,proto3" json:"signature,omitempty"`
+	// The unprotected JWS header values.
+	Header        *structpb.Struct `protobuf:"bytes,3,opt,name=header,proto3" json:"header,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1645,9 +1887,14 @@ func (x *AgentCardSignature) GetHeader() *structpb.Struct {
 	return nil
 }
 
+// A push notification configuration for a specific task. It is a resource
+// whose parent is the task.
 type TaskPushNotificationConfig struct {
-	state                  protoimpl.MessageState  `protogen:"open.v1"`
-	Name                   string                  `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the config.
+	// Format: tasks/{task_id}/pushNotificationConfigs/{config_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The push notification configuration details.
 	PushNotificationConfig *PushNotificationConfig `protobuf:"bytes,2,opt,name=push_notification_config,json=pushNotificationConfig,proto3" json:"push_notification_config,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
@@ -1697,9 +1944,12 @@ func (x *TaskPushNotificationConfig) GetPushNotificationConfig() *PushNotificati
 	return nil
 }
 
+// A list of strings. Used as the map value in `Security.schemes` to hold the
+// scopes a security scheme requires.
 type StringList struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	List          []string               `protobuf:"bytes,1,rep,name=list,proto3" json:"list,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The string values.
+	List          []string `protobuf:"bytes,1,rep,name=list,proto3" json:"list,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1741,8 +1991,14 @@ func (x *StringList) GetList() []string {
 	return nil
 }
 
+// A set of security schemes that must all be satisfied together (a logical
+// AND). `AgentCard.security` and `AgentSkill.security` list alternative sets,
+// any one of which is sufficient (a logical OR).
 type Security struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The security schemes to satisfy, keyed by the scheme names declared in
+	// `AgentCard.security_schemes`. Each value lists the scopes required for
+	// that scheme and may be empty.
 	Schemes       map[string]*StringList `protobuf:"bytes,1,rep,name=schemes,proto3" json:"schemes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1785,8 +2041,12 @@ func (x *Security) GetSchemes() map[string]*StringList {
 	return nil
 }
 
+// Defines a security scheme that can be used to authenticate with the agent,
+// based on the OpenAPI Security Scheme Object.
 type SecurityScheme struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The type of security scheme and its settings.
+	//
 	// Types that are valid to be assigned to Scheme:
 	//
 	//	*SecurityScheme_ApiKeySecurityScheme
@@ -1886,22 +2146,27 @@ type isSecurityScheme_Scheme interface {
 }
 
 type SecurityScheme_ApiKeySecurityScheme struct {
+	// API key-based authentication.
 	ApiKeySecurityScheme *APIKeySecurityScheme `protobuf:"bytes,1,opt,name=api_key_security_scheme,json=apiKeySecurityScheme,proto3,oneof"`
 }
 
 type SecurityScheme_HttpAuthSecurityScheme struct {
+	// HTTP authentication, such as Basic or Bearer.
 	HttpAuthSecurityScheme *HTTPAuthSecurityScheme `protobuf:"bytes,2,opt,name=http_auth_security_scheme,json=httpAuthSecurityScheme,proto3,oneof"`
 }
 
 type SecurityScheme_Oauth2SecurityScheme struct {
+	// OAuth 2.0 authentication.
 	Oauth2SecurityScheme *OAuth2SecurityScheme `protobuf:"bytes,3,opt,name=oauth2_security_scheme,json=oauth2SecurityScheme,proto3,oneof"`
 }
 
 type SecurityScheme_OpenIdConnectSecurityScheme struct {
+	// OpenID Connect authentication.
 	OpenIdConnectSecurityScheme *OpenIdConnectSecurityScheme `protobuf:"bytes,4,opt,name=open_id_connect_security_scheme,json=openIdConnectSecurityScheme,proto3,oneof"`
 }
 
 type SecurityScheme_MtlsSecurityScheme struct {
+	// Mutual TLS authentication.
 	MtlsSecurityScheme *MutualTlsSecurityScheme `protobuf:"bytes,5,opt,name=mtls_security_scheme,json=mtlsSecurityScheme,proto3,oneof"`
 }
 
@@ -1915,11 +2180,15 @@ func (*SecurityScheme_OpenIdConnectSecurityScheme) isSecurityScheme_Scheme() {}
 
 func (*SecurityScheme_MtlsSecurityScheme) isSecurityScheme_Scheme() {}
 
+// Defines a security scheme using an API key.
 type APIKeySecurityScheme struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
-	Location      string                 `protobuf:"bytes,2,opt,name=location,proto3" json:"location,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Description of this security scheme.
+	Description string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	// Location of the API key, valid values are "query", "header", or "cookie"
+	Location string `protobuf:"bytes,2,opt,name=location,proto3" json:"location,omitempty"`
+	// Name of the header, query or cookie parameter to be used.
+	Name          string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1975,11 +2244,21 @@ func (x *APIKeySecurityScheme) GetName() string {
 	return ""
 }
 
+// Defines a security scheme using HTTP authentication, such as Basic or
+// Bearer.
 type HTTPAuthSecurityScheme struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
-	Scheme        string                 `protobuf:"bytes,2,opt,name=scheme,proto3" json:"scheme,omitempty"`
-	BearerFormat  string                 `protobuf:"bytes,3,opt,name=bearer_format,json=bearerFormat,proto3" json:"bearer_format,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Description of this security scheme.
+	Description string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	// The name of the HTTP Authentication scheme to be used in the
+	// Authorization header as defined in RFC7235. The values used SHOULD be
+	// registered in the IANA Authentication Scheme registry.
+	// The value is case-insensitive, as defined in RFC7235.
+	Scheme string `protobuf:"bytes,2,opt,name=scheme,proto3" json:"scheme,omitempty"`
+	// A hint to the client to identify how the bearer token is formatted.
+	// Bearer tokens are usually generated by an authorization server, so
+	// this information is primarily for documentation purposes.
+	BearerFormat  string `protobuf:"bytes,3,opt,name=bearer_format,json=bearerFormat,proto3" json:"bearer_format,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2035,11 +2314,16 @@ func (x *HTTPAuthSecurityScheme) GetBearerFormat() string {
 	return ""
 }
 
+// Defines a security scheme using OAuth 2.0.
 type OAuth2SecurityScheme struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	Description       string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
-	Flows             *OAuthFlows            `protobuf:"bytes,2,opt,name=flows,proto3" json:"flows,omitempty"`
-	Oauth2MetadataUrl string                 `protobuf:"bytes,3,opt,name=oauth2_metadata_url,json=oauth2MetadataUrl,proto3" json:"oauth2_metadata_url,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Description of this security scheme.
+	Description string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	// An object containing configuration information for the flow types supported
+	Flows *OAuthFlows `protobuf:"bytes,2,opt,name=flows,proto3" json:"flows,omitempty"`
+	// URL to the oauth2 authorization server metadata
+	// [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414). TLS is required.
+	Oauth2MetadataUrl string `protobuf:"bytes,3,opt,name=oauth2_metadata_url,json=oauth2MetadataUrl,proto3" json:"oauth2_metadata_url,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -2095,10 +2379,14 @@ func (x *OAuth2SecurityScheme) GetOauth2MetadataUrl() string {
 	return ""
 }
 
+// Defines a security scheme using OpenID Connect.
 type OpenIdConnectSecurityScheme struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Description      string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
-	OpenIdConnectUrl string                 `protobuf:"bytes,2,opt,name=open_id_connect_url,json=openIdConnectUrl,proto3" json:"open_id_connect_url,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Description of this security scheme.
+	Description string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	// Well-known URL to discover the [[OpenID-Connect-Discovery]] provider
+	// metadata.
+	OpenIdConnectUrl string `protobuf:"bytes,2,opt,name=open_id_connect_url,json=openIdConnectUrl,proto3" json:"open_id_connect_url,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -2147,9 +2435,11 @@ func (x *OpenIdConnectSecurityScheme) GetOpenIdConnectUrl() string {
 	return ""
 }
 
+// Defines a security scheme using mutual TLS (mTLS) authentication.
 type MutualTlsSecurityScheme struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Description of this security scheme.
+	Description   string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2191,8 +2481,12 @@ func (x *MutualTlsSecurityScheme) GetDescription() string {
 	return ""
 }
 
+// The OAuth 2.0 flow supported by an `OAuth2SecurityScheme`, with its
+// configuration.
 type OAuthFlows struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The OAuth 2.0 flow and its configuration.
+	//
 	// Types that are valid to be assigned to Flow:
 	//
 	//	*OAuthFlows_AuthorizationCode
@@ -2282,18 +2576,22 @@ type isOAuthFlows_Flow interface {
 }
 
 type OAuthFlows_AuthorizationCode struct {
+	// Configuration for the Authorization Code flow.
 	AuthorizationCode *AuthorizationCodeOAuthFlow `protobuf:"bytes,1,opt,name=authorization_code,json=authorizationCode,proto3,oneof"`
 }
 
 type OAuthFlows_ClientCredentials struct {
+	// Configuration for the Client Credentials flow.
 	ClientCredentials *ClientCredentialsOAuthFlow `protobuf:"bytes,2,opt,name=client_credentials,json=clientCredentials,proto3,oneof"`
 }
 
 type OAuthFlows_Implicit struct {
+	// Configuration for the Implicit flow.
 	Implicit *ImplicitOAuthFlow `protobuf:"bytes,3,opt,name=implicit,proto3,oneof"`
 }
 
 type OAuthFlows_Password struct {
+	// Configuration for the Resource Owner Password Credentials flow.
 	Password *PasswordOAuthFlow `protobuf:"bytes,4,opt,name=password,proto3,oneof"`
 }
 
@@ -2305,14 +2603,23 @@ func (*OAuthFlows_Implicit) isOAuthFlows_Flow() {}
 
 func (*OAuthFlows_Password) isOAuthFlows_Flow() {}
 
+// Configuration for the OAuth 2.0 Authorization Code flow.
 type AuthorizationCodeOAuthFlow struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	AuthorizationUrl string                 `protobuf:"bytes,1,opt,name=authorization_url,json=authorizationUrl,proto3" json:"authorization_url,omitempty"`
-	TokenUrl         string                 `protobuf:"bytes,2,opt,name=token_url,json=tokenUrl,proto3" json:"token_url,omitempty"`
-	RefreshUrl       string                 `protobuf:"bytes,3,opt,name=refresh_url,json=refreshUrl,proto3" json:"refresh_url,omitempty"`
-	Scopes           map[string]string      `protobuf:"bytes,4,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The authorization URL to be used for this flow. This MUST be in the
+	// form of a URL. The OAuth2 standard requires the use of TLS
+	AuthorizationUrl string `protobuf:"bytes,1,opt,name=authorization_url,json=authorizationUrl,proto3" json:"authorization_url,omitempty"`
+	// The token URL to be used for this flow. This MUST be in the form of a URL.
+	// The OAuth2 standard requires the use of TLS.
+	TokenUrl string `protobuf:"bytes,2,opt,name=token_url,json=tokenUrl,proto3" json:"token_url,omitempty"`
+	// The URL to be used for obtaining refresh tokens. This MUST be in the
+	// form of a URL. The OAuth2 standard requires the use of TLS.
+	RefreshUrl string `protobuf:"bytes,3,opt,name=refresh_url,json=refreshUrl,proto3" json:"refresh_url,omitempty"`
+	// The available scopes for the OAuth2 security scheme. A map between the
+	// scope name and a short description for it. The map MAY be empty.
+	Scopes        map[string]string `protobuf:"bytes,4,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AuthorizationCodeOAuthFlow) Reset() {
@@ -2373,11 +2680,18 @@ func (x *AuthorizationCodeOAuthFlow) GetScopes() map[string]string {
 	return nil
 }
 
+// Configuration for the OAuth 2.0 Client Credentials flow.
 type ClientCredentialsOAuthFlow struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TokenUrl      string                 `protobuf:"bytes,1,opt,name=token_url,json=tokenUrl,proto3" json:"token_url,omitempty"`
-	RefreshUrl    string                 `protobuf:"bytes,2,opt,name=refresh_url,json=refreshUrl,proto3" json:"refresh_url,omitempty"`
-	Scopes        map[string]string      `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The token URL to be used for this flow. This MUST be in the form of a URL.
+	// The OAuth2 standard requires the use of TLS.
+	TokenUrl string `protobuf:"bytes,1,opt,name=token_url,json=tokenUrl,proto3" json:"token_url,omitempty"`
+	// The URL to be used for obtaining refresh tokens. This MUST be in the
+	// form of a URL. The OAuth2 standard requires the use of TLS.
+	RefreshUrl string `protobuf:"bytes,2,opt,name=refresh_url,json=refreshUrl,proto3" json:"refresh_url,omitempty"`
+	// The available scopes for the OAuth2 security scheme. A map between the
+	// scope name and a short description for it. The map MAY be empty.
+	Scopes        map[string]string `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2433,13 +2747,20 @@ func (x *ClientCredentialsOAuthFlow) GetScopes() map[string]string {
 	return nil
 }
 
+// Configuration for the OAuth 2.0 Implicit flow.
 type ImplicitOAuthFlow struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	AuthorizationUrl string                 `protobuf:"bytes,1,opt,name=authorization_url,json=authorizationUrl,proto3" json:"authorization_url,omitempty"`
-	RefreshUrl       string                 `protobuf:"bytes,2,opt,name=refresh_url,json=refreshUrl,proto3" json:"refresh_url,omitempty"`
-	Scopes           map[string]string      `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The authorization URL to be used for this flow. This MUST be in the
+	// form of a URL. The OAuth2 standard requires the use of TLS
+	AuthorizationUrl string `protobuf:"bytes,1,opt,name=authorization_url,json=authorizationUrl,proto3" json:"authorization_url,omitempty"`
+	// The URL to be used for obtaining refresh tokens. This MUST be in the
+	// form of a URL. The OAuth2 standard requires the use of TLS.
+	RefreshUrl string `protobuf:"bytes,2,opt,name=refresh_url,json=refreshUrl,proto3" json:"refresh_url,omitempty"`
+	// The available scopes for the OAuth2 security scheme. A map between the
+	// scope name and a short description for it. The map MAY be empty.
+	Scopes        map[string]string `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ImplicitOAuthFlow) Reset() {
@@ -2493,11 +2814,18 @@ func (x *ImplicitOAuthFlow) GetScopes() map[string]string {
 	return nil
 }
 
+// Configuration for the OAuth 2.0 Resource Owner Password Credentials flow.
 type PasswordOAuthFlow struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TokenUrl      string                 `protobuf:"bytes,1,opt,name=token_url,json=tokenUrl,proto3" json:"token_url,omitempty"`
-	RefreshUrl    string                 `protobuf:"bytes,2,opt,name=refresh_url,json=refreshUrl,proto3" json:"refresh_url,omitempty"`
-	Scopes        map[string]string      `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The token URL to be used for this flow. This MUST be in the form of a URL.
+	// The OAuth2 standard requires the use of TLS.
+	TokenUrl string `protobuf:"bytes,1,opt,name=token_url,json=tokenUrl,proto3" json:"token_url,omitempty"`
+	// The URL to be used for obtaining refresh tokens. This MUST be in the
+	// form of a URL. The OAuth2 standard requires the use of TLS.
+	RefreshUrl string `protobuf:"bytes,2,opt,name=refresh_url,json=refreshUrl,proto3" json:"refresh_url,omitempty"`
+	// The available scopes for the OAuth2 security scheme. A map between the
+	// scope name and a short description for it. The map MAY be empty.
+	Scopes        map[string]string `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2553,11 +2881,16 @@ func (x *PasswordOAuthFlow) GetScopes() map[string]string {
 	return nil
 }
 
+// Represents a request for the `SendMessage` and `SendStreamingMessage`
+// methods.
 type SendMessageRequest struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Request       *Message                  `protobuf:"bytes,1,opt,name=request,json=message,proto3" json:"request,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The message to send to the agent.
+	Request *Message `protobuf:"bytes,1,opt,name=request,json=message,proto3" json:"request,omitempty"`
+	// Configuration for the send request.
 	Configuration *SendMessageConfiguration `protobuf:"bytes,2,opt,name=configuration,proto3" json:"configuration,omitempty"`
-	Metadata      *structpb.Struct          `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Optional metadata for the request.
+	Metadata      *structpb.Struct `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2613,10 +2946,14 @@ func (x *SendMessageRequest) GetMetadata() *structpb.Struct {
 	return nil
 }
 
+// Represents a request for the `GetTask` method.
 type GetTaskRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	HistoryLength int32                  `protobuf:"varint,2,opt,name=history_length,json=historyLength,proto3" json:"history_length,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the task.
+	// Format: tasks/{task_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The number of most recent messages from the task's history to retrieve.
+	HistoryLength int32 `protobuf:"varint,2,opt,name=history_length,json=historyLength,proto3" json:"history_length,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2665,15 +3002,29 @@ func (x *GetTaskRequest) GetHistoryLength() int32 {
 	return 0
 }
 
+// Represents a request for the `ListTasks` method.
 type ListTasksRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	ContextId        string                 `protobuf:"bytes,1,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
-	Status           TaskState              `protobuf:"varint,2,opt,name=status,proto3,enum=alis.open.agent.v2.TaskState" json:"status,omitempty"`
-	PageSize         int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken        string                 `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	HistoryLength    int32                  `protobuf:"varint,5,opt,name=history_length,json=historyLength,proto3" json:"history_length,omitempty"`
-	LastUpdatedTime  *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=last_updated_time,json=lastUpdatedTime,proto3" json:"last_updated_time,omitempty"`
-	IncludeArtifacts bool                   `protobuf:"varint,7,opt,name=include_artifacts,json=includeArtifacts,proto3" json:"include_artifacts,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Filter tasks by context ID to get tasks from a specific conversation
+	// or session.
+	ContextId string `protobuf:"bytes,1,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
+	// Filter tasks by their current status state.
+	Status TaskState `protobuf:"varint,2,opt,name=status,proto3,enum=alis.open.agent.v2.TaskState" json:"status,omitempty"`
+	// Maximum number of tasks to return. Must be between 1 and 100.
+	// Defaults to 50 if not specified.
+	PageSize int32 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Token for pagination. Use the next_page_token from a previous
+	// ListTasksResponse.
+	PageToken string `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// Number of recent messages to include in each task's history.
+	// Must be non-negative. Defaults to 0 if not specified.
+	HistoryLength int32 `protobuf:"varint,5,opt,name=history_length,json=historyLength,proto3" json:"history_length,omitempty"`
+	// Filter tasks updated after this timestamp. Only tasks with a last
+	// updated time greater than or equal to this value will be returned.
+	LastUpdatedTime *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=last_updated_time,json=lastUpdatedTime,proto3" json:"last_updated_time,omitempty"`
+	// Whether to include artifacts in the returned tasks.
+	// Defaults to false to reduce payload size.
+	IncludeArtifacts bool `protobuf:"varint,7,opt,name=include_artifacts,json=includeArtifacts,proto3" json:"include_artifacts,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -2757,11 +3108,16 @@ func (x *ListTasksRequest) GetIncludeArtifacts() bool {
 	return false
 }
 
+// Represents the response for the `ListTasks` method.
 type ListTasksResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Tasks         []*Task                `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	TotalSize     int32                  `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Array of tasks matching the specified criteria.
+	Tasks []*Task `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	// Token for retrieving the next page of results.
+	// Empty string if no more results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	// Total number of tasks available (before pagination).
+	TotalSize     int32 `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2817,9 +3173,12 @@ func (x *ListTasksResponse) GetTotalSize() int32 {
 	return 0
 }
 
+// Represents a request for the `CancelTask` method.
 type CancelTaskRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the task to cancel.
+	// Format: tasks/{task_id}
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2861,9 +3220,12 @@ func (x *CancelTaskRequest) GetName() string {
 	return ""
 }
 
+// Represents a request for the `GetTaskPushNotificationConfig` method.
 type GetTaskPushNotificationConfigRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the config to retrieve.
+	// Format: tasks/{task_id}/pushNotificationConfigs/{config_id}
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2905,9 +3267,12 @@ func (x *GetTaskPushNotificationConfigRequest) GetName() string {
 	return ""
 }
 
+// Represents a request for the `DeleteTaskPushNotificationConfig` method.
 type DeleteTaskPushNotificationConfigRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the config to delete.
+	// Format: tasks/{task_id}/pushNotificationConfigs/{config_id}
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2949,10 +3314,15 @@ func (x *DeleteTaskPushNotificationConfigRequest) GetName() string {
 	return ""
 }
 
+// Represents a request for the `CreateTaskPushNotificationConfig` method.
 type CreateTaskPushNotificationConfigRequest struct {
-	state         protoimpl.MessageState      `protogen:"open.v1"`
-	Parent        string                      `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	ConfigId      string                      `protobuf:"bytes,2,opt,name=config_id,json=configId,proto3" json:"config_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The parent task resource for this config.
+	// Format: tasks/{task_id}
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The ID for the new config.
+	ConfigId string `protobuf:"bytes,2,opt,name=config_id,json=configId,proto3" json:"config_id,omitempty"`
+	// The configuration to create.
 	Config        *TaskPushNotificationConfig `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3009,9 +3379,12 @@ func (x *CreateTaskPushNotificationConfigRequest) GetConfig() *TaskPushNotificat
 	return nil
 }
 
+// Represents a request for the `TaskSubscription` method.
 type TaskSubscriptionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the task to subscribe to.
+	// Format: tasks/{task_id}
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3053,11 +3426,23 @@ func (x *TaskSubscriptionRequest) GetName() string {
 	return ""
 }
 
+// Represents a request for the `ListTaskPushNotificationConfig` method.
 type ListTaskPushNotificationConfigRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The parent task resource.
+	// Format: tasks/{task_id}
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// For AIP-158 these fields are present. Usually not used/needed.
+	// The maximum number of configurations to return.
+	// If unspecified, all configs will be returned.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token received from a previous
+	// ListTaskPushNotificationConfigRequest call.
+	// Provide this to retrieve the subsequent page.
+	// When paginating, all other parameters provided to
+	// `ListTaskPushNotificationConfigRequest` must match the call that provided
+	// the page token.
+	PageToken     string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3113,6 +3498,7 @@ func (x *ListTaskPushNotificationConfigRequest) GetPageToken() string {
 	return ""
 }
 
+// Represents a request for the `GetAgentCard` method.
 type GetAgentCardRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3149,8 +3535,11 @@ func (*GetAgentCardRequest) Descriptor() ([]byte, []int) {
 	return file_alis_open_agent_v2_a2a_proto_rawDescGZIP(), []int{43}
 }
 
+// Represents the response for the `SendMessage` method.
 type SendMessageResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The result of the message: a task, or a direct reply from the agent.
+	//
 	// Types that are valid to be assigned to Payload:
 	//
 	//	*SendMessageResponse_Task
@@ -3220,10 +3609,12 @@ type isSendMessageResponse_Payload interface {
 }
 
 type SendMessageResponse_Task struct {
+	// The task created or updated by the message.
 	Task *Task `protobuf:"bytes,1,opt,name=task,proto3,oneof"`
 }
 
 type SendMessageResponse_Msg struct {
+	// A message from the agent.
 	Msg *Message `protobuf:"bytes,2,opt,name=msg,json=message,proto3,oneof"`
 }
 
@@ -3231,8 +3622,18 @@ func (*SendMessageResponse_Task) isSendMessageResponse_Payload() {}
 
 func (*SendMessageResponse_Msg) isSendMessageResponse_Payload() {}
 
+// The stream response for a message. The stream should be one of the following
+// sequences:
+// If the response is a message, the stream should contain one, and only one,
+// message and then close
+// If the response is a task lifecycle, the first response should be a Task
+// object followed by zero or more TaskStatusUpdateEvents and
+// TaskArtifactUpdateEvents. The stream should complete when the Task
+// is in an interrupted or terminal state.
 type StreamResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// One item in the stream.
+	//
 	// Types that are valid to be assigned to Payload:
 	//
 	//	*StreamResponse_Task
@@ -3322,18 +3723,24 @@ type isStreamResponse_Payload interface {
 }
 
 type StreamResponse_Task struct {
+	// The task and its current state. Sent first when the response is a task
+	// lifecycle.
 	Task *Task `protobuf:"bytes,1,opt,name=task,proto3,oneof"`
 }
 
 type StreamResponse_Msg struct {
+	// A message from the agent. When the response is a message, this is the
+	// only item in the stream.
 	Msg *Message `protobuf:"bytes,2,opt,name=msg,json=message,proto3,oneof"`
 }
 
 type StreamResponse_StatusUpdate struct {
+	// An update to the task's status.
 	StatusUpdate *TaskStatusUpdateEvent `protobuf:"bytes,3,opt,name=status_update,json=statusUpdate,proto3,oneof"`
 }
 
 type StreamResponse_ArtifactUpdate struct {
+	// An artifact generated or updated by the task.
 	ArtifactUpdate *TaskArtifactUpdateEvent `protobuf:"bytes,4,opt,name=artifact_update,json=artifactUpdate,proto3,oneof"`
 }
 
@@ -3345,10 +3752,14 @@ func (*StreamResponse_StatusUpdate) isStreamResponse_Payload() {}
 
 func (*StreamResponse_ArtifactUpdate) isStreamResponse_Payload() {}
 
+// Represents the response for the `ListTaskPushNotificationConfig` method.
 type ListTaskPushNotificationConfigResponse struct {
-	state         protoimpl.MessageState        `protogen:"open.v1"`
-	Configs       []*TaskPushNotificationConfig `protobuf:"bytes,1,rep,name=configs,proto3" json:"configs,omitempty"`
-	NextPageToken string                        `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of push notification configurations.
+	Configs []*TaskPushNotificationConfig `protobuf:"bytes,1,rep,name=configs,proto3" json:"configs,omitempty"`
+	// A token, which can be sent as `page_token` to retrieve the next page.
+	// If this field is omitted, there are no subsequent pages.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

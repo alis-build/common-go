@@ -4,6 +4,30 @@
 // - protoc             v3.21.12
 // source: alis/open/agent/v2/a2a.proto
 
+// A gRPC binding of the Agent2Agent (A2A) protocol for sending messages to
+// an agent and tracking the tasks it performs, shaped to follow AIP-127
+// where appropriate.
+//
+// `A2AService` works with four nouns:
+//
+// - Messages: sent with `SendMessage` or `SendStreamingMessage`. They are
+//   not stored resources.
+// - `Task` (`tasks/{task_id}`): the unit of work, with a status, output
+//   artifacts, and message history. Read with `GetTask` and `ListTasks`,
+//   cancelled with `CancelTask`, and streamed with `TaskSubscription`.
+// - `TaskPushNotificationConfig`
+//   (`tasks/{task_id}/pushNotificationConfigs/{config_id}`): a webhook that
+//   the agent notifies of updates to one task.
+// - `AgentCard`: the agent's self-description (skills, capabilities,
+//   security requirements), read with `GetAgentCard`.
+//
+// This package defines the same service and messages as
+// `alis.open.agent.v1` with two differences: `Task` has no `name` field
+// (requests still address a task as `tasks/{task_id}`), and `Part` cannot
+// carry an arbitrary `google.protobuf.Any` message. The
+// `alis.a2a.extension` packages build on the vendored `lf.a2a.v1` contract
+// rather than on this package.
+
 package v2
 
 import (
@@ -36,17 +60,47 @@ const (
 // A2AServiceClient is the client API for A2AService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// A2AService defines the gRPC version of the A2A protocol. This has a slightly
+// different shape than the JSONRPC version to better conform to AIP-127,
+// where appropriate. The nouns are AgentCard, Message, Task and
+// TaskPushNotificationConfig.
+//   - Messages are not a standard resource so there is no get/delete/update/list
+//     interface, only a send and stream custom methods.
+//   - Tasks have a get interface and custom cancel and subscribe methods.
+//   - TaskPushNotificationConfig are a resource whose parent is a task.
+//     They have get, list, create and delete methods.
+//   - AgentCard is a static resource with only a get method.
 type A2AServiceClient interface {
+	// Send a message to the agent. The response is either a `Task` or a direct
+	// `Message` from the agent. If `configuration.blocking` is true, the call
+	// waits until the task is completed; otherwise the task is returned
+	// immediately.
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
+	// SendStreamingMessage is a streaming call that will return a stream of
+	// task update events until the Task is in an interrupted or terminal state.
 	SendStreamingMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamResponse], error)
+	// Get the current state of a task from the agent.
 	GetTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*Task, error)
+	// List tasks with optional filtering and pagination.
 	ListTasks(ctx context.Context, in *ListTasksRequest, opts ...grpc.CallOption) (*ListTasksResponse, error)
+	// Cancel a task from the agent. If supported one should expect no
+	// more task updates for the task.
 	CancelTask(ctx context.Context, in *CancelTaskRequest, opts ...grpc.CallOption) (*Task, error)
+	// TaskSubscription is a streaming call that will return a stream of task
+	// update events. This attaches the stream to an existing in process task.
+	// If the task is complete the stream will return the completed task (like
+	// GetTask) and close the stream.
 	TaskSubscription(ctx context.Context, in *TaskSubscriptionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamResponse], error)
+	// Set a push notification config for a task.
 	CreateTaskPushNotificationConfig(ctx context.Context, in *CreateTaskPushNotificationConfigRequest, opts ...grpc.CallOption) (*TaskPushNotificationConfig, error)
+	// Get a push notification config for a task.
 	GetTaskPushNotificationConfig(ctx context.Context, in *GetTaskPushNotificationConfigRequest, opts ...grpc.CallOption) (*TaskPushNotificationConfig, error)
+	// Get a list of push notifications configured for a task.
 	ListTaskPushNotificationConfig(ctx context.Context, in *ListTaskPushNotificationConfigRequest, opts ...grpc.CallOption) (*ListTaskPushNotificationConfigResponse, error)
+	// GetAgentCard returns the agent card for the agent.
 	GetAgentCard(ctx context.Context, in *GetAgentCardRequest, opts ...grpc.CallOption) (*AgentCard, error)
+	// Delete a push notification config for a task.
 	DeleteTaskPushNotificationConfig(ctx context.Context, in *DeleteTaskPushNotificationConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -189,17 +243,47 @@ func (c *a2AServiceClient) DeleteTaskPushNotificationConfig(ctx context.Context,
 // A2AServiceServer is the server API for A2AService service.
 // All implementations must embed UnimplementedA2AServiceServer
 // for forward compatibility.
+//
+// A2AService defines the gRPC version of the A2A protocol. This has a slightly
+// different shape than the JSONRPC version to better conform to AIP-127,
+// where appropriate. The nouns are AgentCard, Message, Task and
+// TaskPushNotificationConfig.
+//   - Messages are not a standard resource so there is no get/delete/update/list
+//     interface, only a send and stream custom methods.
+//   - Tasks have a get interface and custom cancel and subscribe methods.
+//   - TaskPushNotificationConfig are a resource whose parent is a task.
+//     They have get, list, create and delete methods.
+//   - AgentCard is a static resource with only a get method.
 type A2AServiceServer interface {
+	// Send a message to the agent. The response is either a `Task` or a direct
+	// `Message` from the agent. If `configuration.blocking` is true, the call
+	// waits until the task is completed; otherwise the task is returned
+	// immediately.
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
+	// SendStreamingMessage is a streaming call that will return a stream of
+	// task update events until the Task is in an interrupted or terminal state.
 	SendStreamingMessage(*SendMessageRequest, grpc.ServerStreamingServer[StreamResponse]) error
+	// Get the current state of a task from the agent.
 	GetTask(context.Context, *GetTaskRequest) (*Task, error)
+	// List tasks with optional filtering and pagination.
 	ListTasks(context.Context, *ListTasksRequest) (*ListTasksResponse, error)
+	// Cancel a task from the agent. If supported one should expect no
+	// more task updates for the task.
 	CancelTask(context.Context, *CancelTaskRequest) (*Task, error)
+	// TaskSubscription is a streaming call that will return a stream of task
+	// update events. This attaches the stream to an existing in process task.
+	// If the task is complete the stream will return the completed task (like
+	// GetTask) and close the stream.
 	TaskSubscription(*TaskSubscriptionRequest, grpc.ServerStreamingServer[StreamResponse]) error
+	// Set a push notification config for a task.
 	CreateTaskPushNotificationConfig(context.Context, *CreateTaskPushNotificationConfigRequest) (*TaskPushNotificationConfig, error)
+	// Get a push notification config for a task.
 	GetTaskPushNotificationConfig(context.Context, *GetTaskPushNotificationConfigRequest) (*TaskPushNotificationConfig, error)
+	// Get a list of push notifications configured for a task.
 	ListTaskPushNotificationConfig(context.Context, *ListTaskPushNotificationConfigRequest) (*ListTaskPushNotificationConfigResponse, error)
+	// GetAgentCard returns the agent card for the agent.
 	GetAgentCard(context.Context, *GetAgentCardRequest) (*AgentCard, error)
+	// Delete a push notification config for a task.
 	DeleteTaskPushNotificationConfig(context.Context, *DeleteTaskPushNotificationConfigRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedA2AServiceServer()
 }

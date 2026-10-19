@@ -3,31 +3,31 @@
 // Source: alis/open/agent/v2/a2a.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:30:41 UTC
+// Generated on: 2026-10-19 08:22:14 UTC
 
 package v2
 
 const (
 	// A2AService_SendMessage_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.SendMessage method.
-	A2AService_SendMessage_FullMethodDescription = ""
+	A2AService_SendMessage_FullMethodDescription = "Send a message to the agent. The response is either a `Task` or a direct\n `Message` from the agent. If `configuration.blocking` is true, the call\n waits until the task is completed; otherwise the task is returned\n immediately."
 	// A2AService_SendStreamingMessage_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.SendStreamingMessage method.
-	A2AService_SendStreamingMessage_FullMethodDescription = ""
+	A2AService_SendStreamingMessage_FullMethodDescription = "SendStreamingMessage is a streaming call that will return a stream of\n task update events until the Task is in an interrupted or terminal state."
 	// A2AService_GetTask_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.GetTask method.
-	A2AService_GetTask_FullMethodDescription = ""
+	A2AService_GetTask_FullMethodDescription = "Get the current state of a task from the agent."
 	// A2AService_ListTasks_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.ListTasks method.
-	A2AService_ListTasks_FullMethodDescription = ""
+	A2AService_ListTasks_FullMethodDescription = "List tasks with optional filtering and pagination."
 	// A2AService_CancelTask_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.CancelTask method.
-	A2AService_CancelTask_FullMethodDescription = ""
+	A2AService_CancelTask_FullMethodDescription = "Cancel a task from the agent. If supported one should expect no\n more task updates for the task."
 	// A2AService_TaskSubscription_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.TaskSubscription method.
-	A2AService_TaskSubscription_FullMethodDescription = ""
+	A2AService_TaskSubscription_FullMethodDescription = "TaskSubscription is a streaming call that will return a stream of task\n update events. This attaches the stream to an existing in process task.\n If the task is complete the stream will return the completed task (like\n GetTask) and close the stream."
 	// A2AService_CreateTaskPushNotificationConfig_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.CreateTaskPushNotificationConfig method.
-	A2AService_CreateTaskPushNotificationConfig_FullMethodDescription = ""
+	A2AService_CreateTaskPushNotificationConfig_FullMethodDescription = "Set a push notification config for a task."
 	// A2AService_GetTaskPushNotificationConfig_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.GetTaskPushNotificationConfig method.
-	A2AService_GetTaskPushNotificationConfig_FullMethodDescription = ""
+	A2AService_GetTaskPushNotificationConfig_FullMethodDescription = "Get a push notification config for a task."
 	// A2AService_ListTaskPushNotificationConfig_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.ListTaskPushNotificationConfig method.
-	A2AService_ListTaskPushNotificationConfig_FullMethodDescription = ""
+	A2AService_ListTaskPushNotificationConfig_FullMethodDescription = "Get a list of push notifications configured for a task."
 	// A2AService_GetAgentCard_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.GetAgentCard method.
-	A2AService_GetAgentCard_FullMethodDescription = ""
+	A2AService_GetAgentCard_FullMethodDescription = "GetAgentCard returns the agent card for the agent."
 	// A2AService_DeleteTaskPushNotificationConfig_FullMethodDescription returns the description of the alis.open.agent.v2.A2AService.DeleteTaskPushNotificationConfig method.
-	A2AService_DeleteTaskPushNotificationConfig_FullMethodDescription = ""
+	A2AService_DeleteTaskPushNotificationConfig_FullMethodDescription = "Delete a push notification config for a task."
 )
