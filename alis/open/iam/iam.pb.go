@@ -21,12 +21,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The request message for the AddIamBindings method
 type AddIamBindingsRequest struct {
-	state                protoimpl.MessageState `protogen:"open.v1"`
-	Resource             string                 `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
-	Principals           []string               `protobuf:"bytes,2,rep,name=principals,proto3" json:"principals,omitempty"`
-	Roles                []string               `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
-	RemoveFromOtherRoles bool                   `protobuf:"varint,4,opt,name=remove_from_other_roles,json=removeFromOtherRoles,proto3" json:"remove_from_other_roles,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The iam protected resource to add the bindings to
+	Resource string `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
+	// The principals (users, service accounts or groups)
+	// E.g: user:123456789, serviceAccount:alis-build@..., builders,builders:alis,builders:alis.os,admins,admins:alis.os
+	Principals []string `protobuf:"bytes,2,rep,name=principals,proto3" json:"principals,omitempty"`
+	// The roles to grant to the principals. At least one role must be provided.
+	// Format: ['roles/*', ...]
+	// Example: ['roles/owner', 'roles/admin']
+	Roles []string `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
+	// Whether to remove each principal from any other roles they have
+	RemoveFromOtherRoles bool `protobuf:"varint,4,opt,name=remove_from_other_roles,json=removeFromOtherRoles,proto3" json:"remove_from_other_roles,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -89,11 +97,19 @@ func (x *AddIamBindingsRequest) GetRemoveFromOtherRoles() bool {
 	return false
 }
 
+// The request message for the RemoveIamBindings method
 type RemoveIamBindingsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Resource      string                 `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
-	Principals    []string               `protobuf:"bytes,2,rep,name=principals,proto3" json:"principals,omitempty"`
-	Roles         []string               `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The iam protected resource to remove the bindings from
+	Resource string `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
+	// The principals (users, service accounts or groups)
+	// E.g: user:123456789, serviceAccount:alis-build@..., builders,builders:alis,builders:alis.os,admins,admins:alis.os
+	Principals []string `protobuf:"bytes,2,rep,name=principals,proto3" json:"principals,omitempty"`
+	// The roles to remove the principals from
+	// If empty, the principals will be removed from all roles
+	// Format: ['roles/*', ...]
+	// Example: ['roles/owner', 'roles/admin']
+	Roles         []string `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -149,10 +165,17 @@ func (x *RemoveIamBindingsRequest) GetRoles() []string {
 	return nil
 }
 
+// Request message for `BatchTestIamPermissions` method.
 type BatchTestIamPermissionsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Resources     []string               `protobuf:"bytes,1,rep,name=resources,proto3" json:"resources,omitempty"`
-	Permissions   []string               `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED: The resources for which the policy detail is being requested.
+	// See the operation documentation for the appropriate value for this field.
+	Resources []string `protobuf:"bytes,1,rep,name=resources,proto3" json:"resources,omitempty"`
+	// The set of permissions to check for the `resources`. Permissions with
+	// wildcards (such as '*' or 'storage.*') are not allowed. For more
+	// information see
+	// [IAM Overview](https://cloud.google.com/iam/docs/overview#permissions).
+	Permissions   []string `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -201,8 +224,10 @@ func (x *BatchTestIamPermissionsRequest) GetPermissions() []string {
 	return nil
 }
 
+// Response message for `BatchTestIamPermissions` method.
 type BatchTestIamPermissionsResponse struct {
-	state               protoimpl.MessageState                                 `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The permissions the requester has for each requested resource.
 	ResourcePermissions []*BatchTestIamPermissionsResponse_ResourcePermissions `protobuf:"bytes,1,rep,name=resource_permissions,json=resourcePermissions,proto3" json:"resource_permissions,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
@@ -245,10 +270,13 @@ func (x *BatchTestIamPermissionsResponse) GetResourcePermissions() []*BatchTestI
 	return nil
 }
 
+// The permissions the requester has on a resource.
 type BatchTestIamPermissionsResponse_ResourcePermissions struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Resource      string                 `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
-	Permissions   []string               `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource.
+	Resource string `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
+	// The permissions.
+	Permissions   []string `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

@@ -3,31 +3,31 @@
 // Source: alis/open/iam/v1/group.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:38:57 UTC
+// Generated on: 2026-10-19 08:23:55 UTC
 
 package iam
 
 const (
 	// GroupsService_GetIamPolicy_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.GetIamPolicy method.
-	GroupsService_GetIamPolicy_FullMethodDescription = ""
+	GroupsService_GetIamPolicy_FullMethodDescription = "Gets the IAM policy for a resource implemented in this service."
 	// GroupsService_SetIamPolicy_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.SetIamPolicy method.
-	GroupsService_SetIamPolicy_FullMethodDescription = ""
+	GroupsService_SetIamPolicy_FullMethodDescription = "Sets the IAM policy for a resource implemented in this service."
 	// GroupsService_TestIamPermissions_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.TestIamPermissions method.
-	GroupsService_TestIamPermissions_FullMethodDescription = ""
+	GroupsService_TestIamPermissions_FullMethodDescription = "Returns permissions that a caller has on the specified resource."
 	// GroupsService_AddIamBindings_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.AddIamBindings method.
-	GroupsService_AddIamBindings_FullMethodDescription = ""
+	GroupsService_AddIamBindings_FullMethodDescription = "Adds principals or updates the roles existing principals have on an IAM Policy protected resource."
 	// GroupsService_RemoveIamBindings_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.RemoveIamBindings method.
-	GroupsService_RemoveIamBindings_FullMethodDescription = ""
+	GroupsService_RemoveIamBindings_FullMethodDescription = "Removes principals or some of the roles they have on an IAM Policy protected resource."
 	// GroupsService_GetGroup_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.GetGroup method.
-	GroupsService_GetGroup_FullMethodDescription = ""
+	GroupsService_GetGroup_FullMethodDescription = "Gets information about a Group."
 	// GroupsService_CreateGroup_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.CreateGroup method.
-	GroupsService_CreateGroup_FullMethodDescription = ""
+	GroupsService_CreateGroup_FullMethodDescription = "Creates a new Group."
 	// GroupsService_UpdateGroup_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.UpdateGroup method.
-	GroupsService_UpdateGroup_FullMethodDescription = ""
+	GroupsService_UpdateGroup_FullMethodDescription = "Updates a Group."
 	// GroupsService_DeleteGroup_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.DeleteGroup method.
-	GroupsService_DeleteGroup_FullMethodDescription = ""
+	GroupsService_DeleteGroup_FullMethodDescription = "Deletes a Group."
 	// GroupsService_ListGroups_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.ListGroups method.
-	GroupsService_ListGroups_FullMethodDescription = ""
+	GroupsService_ListGroups_FullMethodDescription = "Lists Groups. Results are sorted by name, ascending."
 	// GroupsService_SyncGroup_FullMethodDescription returns the description of the alis.open.iam.v1.GroupsService.SyncGroup method.
-	GroupsService_SyncGroup_FullMethodDescription = ""
+	GroupsService_SyncGroup_FullMethodDescription = "Syncs the specified group to its list of users"
 )

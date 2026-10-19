@@ -3,59 +3,59 @@
 // Source: alis/open/iam/v1/user.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:38:57 UTC
+// Generated on: 2026-10-19 08:23:55 UTC
 
 package iam
 
 const (
 	// UsersService_ValidateMessage_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.ValidateMessage method.
-	UsersService_ValidateMessage_FullMethodDescription = ""
+	UsersService_ValidateMessage_FullMethodDescription = "Validates any proto message that is used directly or indirectly by this service.\n Most common use case is to validate request messages from a client-side application."
 	// UsersService_RetrieveRules_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.RetrieveRules method.
-	UsersService_RetrieveRules_FullMethodDescription = ""
+	UsersService_RetrieveRules_FullMethodDescription = "Retrieves the validation rules for any proto message that is used directly or indirectly by this service.\n Serves as live auto-documentation of the validation rules in this service."
 	// UsersService_GetIamPolicy_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.GetIamPolicy method.
-	UsersService_GetIamPolicy_FullMethodDescription = ""
+	UsersService_GetIamPolicy_FullMethodDescription = "Gets the IAM policy for a resource implemented in this service."
 	// UsersService_SetIamPolicy_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.SetIamPolicy method.
-	UsersService_SetIamPolicy_FullMethodDescription = ""
+	UsersService_SetIamPolicy_FullMethodDescription = "Sets the IAM policy for a resource implemented in this service."
 	// UsersService_TestIamPermissions_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.TestIamPermissions method.
-	UsersService_TestIamPermissions_FullMethodDescription = ""
+	UsersService_TestIamPermissions_FullMethodDescription = "Returns permissions that a caller has on the specified resource."
 	// UsersService_AddIamBindings_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.AddIamBindings method.
-	UsersService_AddIamBindings_FullMethodDescription = ""
+	UsersService_AddIamBindings_FullMethodDescription = "Adds principals or updates the roles existing principals have on an IAM Policy protected resource."
 	// UsersService_RemoveIamBindings_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.RemoveIamBindings method.
-	UsersService_RemoveIamBindings_FullMethodDescription = ""
+	UsersService_RemoveIamBindings_FullMethodDescription = "Removes principals or some of the roles they have on an IAM Policy protected resource."
 	// UsersService_GetUser_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.GetUser method.
-	UsersService_GetUser_FullMethodDescription = ""
+	UsersService_GetUser_FullMethodDescription = "Gets information about a User."
 	// UsersService_CreateUser_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.CreateUser method.
-	UsersService_CreateUser_FullMethodDescription = ""
+	UsersService_CreateUser_FullMethodDescription = "Creates a new User."
 	// UsersService_UpdateUser_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.UpdateUser method.
-	UsersService_UpdateUser_FullMethodDescription = ""
+	UsersService_UpdateUser_FullMethodDescription = "Updates a User."
 	// UsersService_DeleteUser_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.DeleteUser method.
-	UsersService_DeleteUser_FullMethodDescription = ""
+	UsersService_DeleteUser_FullMethodDescription = "Deletes a User."
 	// UsersService_ListUsers_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.ListUsers method.
-	UsersService_ListUsers_FullMethodDescription = ""
+	UsersService_ListUsers_FullMethodDescription = "Lists Users. Results are sorted by name, ascending."
 	// UsersService_RetrieveUserByEmail_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.RetrieveUserByEmail method.
-	UsersService_RetrieveUserByEmail_FullMethodDescription = ""
+	UsersService_RetrieveUserByEmail_FullMethodDescription = "Retrieve a User by their email."
 	// UsersService_LookupUser_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.LookupUser method.
-	UsersService_LookupUser_FullMethodDescription = ""
+	UsersService_LookupUser_FullMethodDescription = "Look up a User based on a search text. This method retrieves a set of results, which are Users, based on the request.\n The lookup for these Users are done across the given_name, family_name, email and contact number."
 	// UsersService_BatchRetrieveMaskedUsers_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.BatchRetrieveMaskedUsers method.
-	UsersService_BatchRetrieveMaskedUsers_FullMethodDescription = ""
+	UsersService_BatchRetrieveMaskedUsers_FullMethodDescription = "Retrieves the set of Users requested, with only a\n subset of the User information returned. This is equivalent to a BatchGet method, but only a subset of the User information,\n which does not contain any sensitive information such as email or group configurations.\n\n Differs from the RetrieveMaskedUsers method in that it returns only\n the Users that were specified in the request."
 	// UsersService_RetrieveMaskedUsers_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.RetrieveMaskedUsers method.
-	UsersService_RetrieveMaskedUsers_FullMethodDescription = ""
+	UsersService_RetrieveMaskedUsers_FullMethodDescription = "Retrieves all Users that match the filter criteria, if specified,\n with only a subset of the User information. This is equivalent to a List method, but only a subset of the User information,\n which does not contain any sensitive information such as email or group configurations.\n\n Differs from the BatchRetrieveMaskedUsers method in that it returns all\n the Users that match the filter, if the filter is specified.\n\n This is useful for displaying a list of Users without revealing sensitive information like email."
 	// UsersService_RetrieveMaskedUser_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.RetrieveMaskedUser method.
-	UsersService_RetrieveMaskedUser_FullMethodDescription = ""
+	UsersService_RetrieveMaskedUser_FullMethodDescription = "Retrieves a User with some of their details hidden.\n This is useful for displaying a User without revealing sensitive information like email.\n Both name and email can be used to retrieve the User."
 	// UsersService_EditUserInfo_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.EditUserInfo method.
-	UsersService_EditUserInfo_FullMethodDescription = ""
+	UsersService_EditUserInfo_FullMethodDescription = "Edits a User's non-auth related information like family name and picture."
 	// UsersService_EditUserMetadata_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.EditUserMetadata method.
-	UsersService_EditUserMetadata_FullMethodDescription = ""
+	UsersService_EditUserMetadata_FullMethodDescription = "Edits a User's metadata"
 	// UsersService_RetrieveMyUser_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.RetrieveMyUser method.
-	UsersService_RetrieveMyUser_FullMethodDescription = ""
+	UsersService_RetrieveMyUser_FullMethodDescription = "Retrieves the currently signed in user.\n This is useful for client-side applications to get the signed in user's information."
 	// UsersService_EditMyInfo_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.EditMyInfo method.
-	UsersService_EditMyInfo_FullMethodDescription = ""
+	UsersService_EditMyInfo_FullMethodDescription = "Edits the info of the currently signed in user.\n This is useful for client-side applications to edit the signed in user's information.\n Allows the user to edit their given_name, family_name, picture, contact_number, position, education and linkedin_uri."
 	// UsersService_EditMyMetadata_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.EditMyMetadata method.
-	UsersService_EditMyMetadata_FullMethodDescription = ""
+	UsersService_EditMyMetadata_FullMethodDescription = "Edits the metadata of the currently signed in user.\n This is useful for client-side applications to edit the signed in user's metadata."
 	// UsersService_RemoveMyUser_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.RemoveMyUser method.
-	UsersService_RemoveMyUser_FullMethodDescription = ""
+	UsersService_RemoveMyUser_FullMethodDescription = "Removes the currently signed in user.\n This is useful if a user wants to delete their account."
 	// UsersService_SyncToGoogleGroup_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.SyncToGoogleGroup method.
-	UsersService_SyncToGoogleGroup_FullMethodDescription = ""
+	UsersService_SyncToGoogleGroup_FullMethodDescription = "Syncs all google User's to the google group configured in the IamConfig.\n Will not delete service accounts."
 	// UsersService_SetUserPicture_FullMethodDescription returns the description of the alis.open.iam.v1.UsersService.SetUserPicture method.
-	UsersService_SetUserPicture_FullMethodDescription = ""
+	UsersService_SetUserPicture_FullMethodDescription = "Sets the user's profile picture"
 )

@@ -27,15 +27,22 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Available identity providers.
 type IdentityProvider int32
 
 const (
+	// Unspecified identity provider.
 	IdentityProvider_IDENTITY_PROVIDER_UNSPECIFIED IdentityProvider = 0
-	IdentityProvider_GOOGLE                        IdentityProvider = 1
-	IdentityProvider_MICROSOFT                     IdentityProvider = 2
-	IdentityProvider_EMAIL                         IdentityProvider = 3
-	IdentityProvider_LINKEDIN                      IdentityProvider = 4
-	IdentityProvider_APPLE                         IdentityProvider = 5
+	// Google identity provider.
+	IdentityProvider_GOOGLE IdentityProvider = 1
+	// Microsoft identity provider.
+	IdentityProvider_MICROSOFT IdentityProvider = 2
+	// Email identity provider.
+	IdentityProvider_EMAIL IdentityProvider = 3
+	// LinkedIn identity provider.
+	IdentityProvider_LINKEDIN IdentityProvider = 4
+	// Apple identity provider.
+	IdentityProvider_APPLE IdentityProvider = 5
 )
 
 // Enum value maps for IdentityProvider.
@@ -85,11 +92,21 @@ func (IdentityProvider) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_iam_v1_user_proto_rawDescGZIP(), []int{0}
 }
 
+// The request message for the `SetUserPicture` method.
 type SetUserPictureRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          string                 `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
-	MimeType      string                 `protobuf:"bytes,3,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The user to set the picture for
+	// Format: users/*
+	User string `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	// The image data as bytes.
+	Data []byte `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	// The image mime type.
+	//
+	// The current types supported are:
+	// - image/jpeg,
+	// - image/jpg
+	// - image/png,
+	MimeType      string `protobuf:"bytes,3,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -145,9 +162,11 @@ func (x *SetUserPictureRequest) GetMimeType() string {
 	return ""
 }
 
+// The response message for the `SetUserPicture` method.
 type SetUserPictureResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PublicUri     string                 `protobuf:"bytes,1,opt,name=public_uri,json=publicUri,proto3" json:"public_uri,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The uri link to the original image.
+	PublicUri     string `protobuf:"bytes,1,opt,name=public_uri,json=publicUri,proto3" json:"public_uri,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -189,36 +208,78 @@ func (x *SetUserPictureResponse) GetPublicUri() string {
 	return ""
 }
 
+// A User of a deployment
 type User struct {
-	state             protoimpl.MessageState   `protogen:"open.v1"`
-	Name              string                   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Email             string                   `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	GivenName         string                   `protobuf:"bytes,7,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
-	FamilyName        string                   `protobuf:"bytes,8,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
-	Picture           string                   `protobuf:"bytes,9,opt,name=picture,proto3" json:"picture,omitempty"`
-	ContactNumber     string                   `protobuf:"bytes,10,opt,name=contact_number,json=contactNumber,proto3" json:"contact_number,omitempty"`
-	Position          string                   `protobuf:"bytes,13,opt,name=position,proto3" json:"position,omitempty"`
-	Education         string                   `protobuf:"bytes,14,opt,name=education,proto3" json:"education,omitempty"`
-	LinkedinUri       string                   `protobuf:"bytes,15,opt,name=linkedin_uri,json=linkedinUri,proto3" json:"linkedin_uri,omitempty"`
-	VerifiedEmail     bool                     `protobuf:"varint,5,opt,name=verified_email,json=verifiedEmail,proto3" json:"verified_email,omitempty"`
-	IdentityProvider  IdentityProvider         `protobuf:"varint,6,opt,name=identity_provider,json=identityProvider,proto3,enum=alis.open.iam.v1.IdentityProvider" json:"identity_provider,omitempty"`
-	GoogleGroup       string                   `protobuf:"bytes,12,opt,name=google_group,json=googleGroup,proto3" json:"google_group,omitempty"`
-	Metadata          *anypb.Any               `protobuf:"bytes,11,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	InternalMetadata  *anypb.Any               `protobuf:"bytes,19,opt,name=internal_metadata,json=internalMetadata,proto3" json:"internal_metadata,omitempty"`
-	CreateTime        *timestamppb.Timestamp   `protobuf:"bytes,2,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	UpdateTime        *timestamppb.Timestamp   `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	LastSignInTime    *timestamppb.Timestamp   `protobuf:"bytes,16,opt,name=last_sign_in_time,json=lastSignInTime,proto3" json:"last_sign_in_time,omitempty"`
-	LastRefreshTime   *timestamppb.Timestamp   `protobuf:"bytes,20,opt,name=last_refresh_time,json=lastRefreshTime,proto3" json:"last_refresh_time,omitempty"`
-	GoogleIdentity    *User_GoogleIdentity     `protobuf:"bytes,17,opt,name=google_identity,json=googleIdentity,proto3" json:"google_identity,omitempty"`
-	MicrosoftIdentity *User_MicrosoftIdentity  `protobuf:"bytes,18,opt,name=microsoft_identity,json=microsoftIdentity,proto3" json:"microsoft_identity,omitempty"`
-	LinkedinIdentity  *User_LinkedinIdentity   `protobuf:"bytes,21,opt,name=linkedin_identity,json=linkedinIdentity,proto3" json:"linkedin_identity,omitempty"`
-	Subscriptions     []*User_Subscription     `protobuf:"bytes,22,rep,name=subscriptions,proto3" json:"subscriptions,omitempty"`
-	GroupIds          []string                 `protobuf:"bytes,23,rep,name=group_ids,json=groupIds,proto3" json:"group_ids,omitempty"`
-	AppleIdentity     *User_AppleIdentity      `protobuf:"bytes,24,opt,name=apple_identity,json=appleIdentity,proto3" json:"apple_identity,omitempty"`
-	Accounts          map[string]*User_Account `protobuf:"bytes,99,rep,name=accounts,proto3" json:"accounts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Etag              string                   `protobuf:"bytes,97,opt,name=etag,proto3" json:"etag,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the User which cannot be changed.
+	// Format: users/([a-z0-9-]{2,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The email of the User.
+	Email string `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	// The given name of the User
+	GivenName string `protobuf:"bytes,7,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
+	// The family name of the User
+	FamilyName string `protobuf:"bytes,8,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
+	// The picture of the User
+	// Format: https://...
+	Picture string `protobuf:"bytes,9,opt,name=picture,proto3" json:"picture,omitempty"`
+	// The contact number of the User
+	ContactNumber string `protobuf:"bytes,10,opt,name=contact_number,json=contactNumber,proto3" json:"contact_number,omitempty"`
+	// Current position
+	// Example: Senior Build Engineer at Alis Exchange.
+	Position string `protobuf:"bytes,13,opt,name=position,proto3" json:"position,omitempty"`
+	// Education
+	// Example: PhD in Astrophysics
+	Education string `protobuf:"bytes,14,opt,name=education,proto3" json:"education,omitempty"`
+	// LinkedIn profile
+	// Example: https://www.linkedin.com/in/jankrynauw/
+	LinkedinUri string `protobuf:"bytes,15,opt,name=linkedin_uri,json=linkedinUri,proto3" json:"linkedin_uri,omitempty"`
+	// Whether the User's email has been verified.
+	// The email might be masked if synched from alis but the User has not signed in yet.
+	// The email might also be unverified if the User self-signed up with email but has not
+	// yet signed in with a link sent to their email.
+	VerifiedEmail bool `protobuf:"varint,5,opt,name=verified_email,json=verifiedEmail,proto3" json:"verified_email,omitempty"`
+	// The default identity provider of the User
+	// When a user enters their email to sign in, the default identity provider is used to redirect them
+	// or send them an email link.
+	IdentityProvider IdentityProvider `protobuf:"varint,6,opt,name=identity_provider,json=identityProvider,proto3,enum=alis.open.iam.v1.IdentityProvider" json:"identity_provider,omitempty"`
+	// The last google group (if any) that the User was synched to.
+	// This field is used to track if there are any Users that have not yet been
+	// successfully synched to the relevant google group since it was added/changed in the config
+	GoogleGroup string `protobuf:"bytes,12,opt,name=google_group,json=googleGroup,proto3" json:"google_group,omitempty"`
+	// Any metadata about the User. The user can edit this using EditMyMetadata.
+	Metadata *anypb.Any `protobuf:"bytes,11,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Any internal metadata about the User. The user can not edit this, but can see it.
+	InternalMetadata *anypb.Any `protobuf:"bytes,19,opt,name=internal_metadata,json=internalMetadata,proto3" json:"internal_metadata,omitempty"`
+	// The creation time of the User.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// The last time the User was updated.
+	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	// The last time the user signed in.
+	// This does not include refreshing of tokens.
+	LastSignInTime *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=last_sign_in_time,json=lastSignInTime,proto3" json:"last_sign_in_time,omitempty"`
+	// The last time the user's access token was refreshed.
+	// Since this is done every 5 minutes, it is a good indicator of the user's activity.
+	LastRefreshTime *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=last_refresh_time,json=lastRefreshTime,proto3" json:"last_refresh_time,omitempty"`
+	// The google identity of the user if any.
+	GoogleIdentity *User_GoogleIdentity `protobuf:"bytes,17,opt,name=google_identity,json=googleIdentity,proto3" json:"google_identity,omitempty"`
+	// The microsoft identity of the user if any.
+	MicrosoftIdentity *User_MicrosoftIdentity `protobuf:"bytes,18,opt,name=microsoft_identity,json=microsoftIdentity,proto3" json:"microsoft_identity,omitempty"`
+	// The linkedin identity of the user if any.
+	LinkedinIdentity *User_LinkedinIdentity `protobuf:"bytes,21,opt,name=linkedin_identity,json=linkedinIdentity,proto3" json:"linkedin_identity,omitempty"`
+	// The subscriptions that the user is part of
+	Subscriptions []*User_Subscription `protobuf:"bytes,22,rep,name=subscriptions,proto3" json:"subscriptions,omitempty"`
+	// The ids of the groups the user is part of
+	GroupIds []string `protobuf:"bytes,23,rep,name=group_ids,json=groupIds,proto3" json:"group_ids,omitempty"`
+	// The apple identity of the user if any.
+	AppleIdentity *User_AppleIdentity `protobuf:"bytes,24,opt,name=apple_identity,json=appleIdentity,proto3" json:"apple_identity,omitempty"`
+	// The details of each account this user belongs to if multiple accounts are
+	// supported. Key is the account id.
+	Accounts map[string]*User_Account `protobuf:"bytes,99,rep,name=accounts,proto3" json:"accounts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Entity tag
+	Etag          string `protobuf:"bytes,97,opt,name=etag,proto3" json:"etag,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
@@ -433,9 +494,14 @@ func (x *User) GetEtag() string {
 	return ""
 }
 
+// The request message for the GetUser method.
 type GetUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the User.
+	// Format: users/([a-z0-9-]{2,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -485,9 +551,12 @@ func (x *GetUserRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the CreateUser method.
 type CreateUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The user to create
+	// Email is the only required field.
+	User          *User `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -529,9 +598,12 @@ func (x *CreateUserRequest) GetUser() *User {
 	return nil
 }
 
+// Request message for the UpdateUser method.
 type UpdateUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The user to update
+	User *User `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	// The set of fields that should be updated
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -581,9 +653,12 @@ func (x *UpdateUserRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the DeleteUser method.
 type DeleteUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the User.
+	// Format: users/([a-z0-9-]{2,50})
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -625,12 +700,18 @@ func (x *DeleteUserRequest) GetName() string {
 	return ""
 }
 
+// The request message for the ListUsers method.
 type ListUsersRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of Users to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous ListUsers call.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// The filter to apply.
+	Filter        string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -693,10 +774,13 @@ func (x *ListUsersRequest) GetFilter() string {
 	return ""
 }
 
+// The response message for the ListUsers method.
 type ListUsersResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Users.
+	Users []*User `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -745,9 +829,13 @@ func (x *ListUsersResponse) GetNextPageToken() string {
 	return ""
 }
 
+// The request message for the RetrieveUserByEmail method.
 type RetrieveUserByEmailRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The email of the User.
+	Email string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -797,9 +885,14 @@ func (x *RetrieveUserByEmailRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request message for the BatchRetrieveMaskedUsers method.
 type BatchRetrieveMaskedUsersRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Users         []string               `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The names of the Users to retrieve.
+	// A maximum of 1000 Users can be retrieved in a single batch.
+	// Format: [users/*, users/*, ...]
+	Users []string `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	// Fields to retrieve from the Resource. Defaults to all fields.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -849,9 +942,11 @@ func (x *BatchRetrieveMaskedUsersRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Response message for the BatchRetrieveMaskedUsers method.
 type BatchRetrieveMaskedUsersResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MaskedUsers   []*MaskedUser          `protobuf:"bytes,1,rep,name=masked_users,json=maskedUsers,proto3" json:"masked_users,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of Users.
+	MaskedUsers   []*MaskedUser `protobuf:"bytes,1,rep,name=masked_users,json=maskedUsers,proto3" json:"masked_users,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -893,9 +988,16 @@ func (x *BatchRetrieveMaskedUsersResponse) GetMaskedUsers() []*MaskedUser {
 	return nil
 }
 
+// Request message for the LookupUser method.
 type LookupUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SearchText    string                 `protobuf:"bytes,1,opt,name=search_text,json=searchText,proto3" json:"search_text,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The text that will be used to filter the set of Users.
+	//
+	// Example: "rua"
+	// Will attempt to get all the Users that contain
+	// the text 'rua' across the various fields in
+	// the User resource
+	SearchText    string `protobuf:"bytes,1,opt,name=search_text,json=searchText,proto3" json:"search_text,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -937,8 +1039,10 @@ func (x *LookupUserRequest) GetSearchText() string {
 	return ""
 }
 
+// Response message for the LookupUser method.
 type LookupUserResponse struct {
-	state         protoimpl.MessageState       `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of results which match the search text
 	Results       []*LookupUserResponse_Result `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -981,12 +1085,18 @@ func (x *LookupUserResponse) GetResults() []*LookupUserResponse_Result {
 	return nil
 }
 
+// The request message for the RetrieveMaskedUsers method.
 type RetrieveMaskedUsersRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of Users to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous RetrieveMaskedUsers call.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// The filter to apply.
+	Filter        string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1049,10 +1159,13 @@ func (x *RetrieveMaskedUsersRequest) GetFilter() string {
 	return ""
 }
 
+// The response message for the RetrieveMaskedUsers method.
 type RetrieveMaskedUsersResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Users         []*MaskedUser          `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Users with their emails masked.
+	Users []*MaskedUser `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1101,8 +1214,11 @@ func (x *RetrieveMaskedUsersResponse) GetNextPageToken() string {
 	return ""
 }
 
+// The request message for the RetrieveMaskedUser method.
 type RetrieveMaskedUserRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Identifies the User to retrieve, either by resource name or by email.
+	//
 	// Types that are valid to be assigned to Identifier:
 	//
 	//	*RetrieveMaskedUserRequest_User
@@ -1172,10 +1288,13 @@ type isRetrieveMaskedUserRequest_Identifier interface {
 }
 
 type RetrieveMaskedUserRequest_User struct {
+	// The unique name of the User.
+	// Format: users/([a-z0-9-]{2,50})
 	User string `protobuf:"bytes,1,opt,name=user,proto3,oneof"`
 }
 
 type RetrieveMaskedUserRequest_Email struct {
+	// The email of the User.
 	Email string `protobuf:"bytes,2,opt,name=email,proto3,oneof"`
 }
 
@@ -1183,21 +1302,38 @@ func (*RetrieveMaskedUserRequest_User) isRetrieveMaskedUserRequest_Identifier() 
 
 func (*RetrieveMaskedUserRequest_Email) isRetrieveMaskedUserRequest_Identifier() {}
 
+// A User of a deployment with their email masked.
 type MaskedUser struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Name             string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	CreateTime       *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	UpdateTime       *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	MaskedEmail      string                 `protobuf:"bytes,4,opt,name=masked_email,json=maskedEmail,proto3" json:"masked_email,omitempty"`
-	IdentityProvider IdentityProvider       `protobuf:"varint,6,opt,name=identity_provider,json=identityProvider,proto3,enum=alis.open.iam.v1.IdentityProvider" json:"identity_provider,omitempty"`
-	GivenName        string                 `protobuf:"bytes,7,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
-	FamilyName       string                 `protobuf:"bytes,8,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
-	Picture          string                 `protobuf:"bytes,9,opt,name=picture,proto3" json:"picture,omitempty"`
-	Position         string                 `protobuf:"bytes,10,opt,name=position,proto3" json:"position,omitempty"`
-	Education        string                 `protobuf:"bytes,11,opt,name=education,proto3" json:"education,omitempty"`
-	LinkedinUri      string                 `protobuf:"bytes,12,opt,name=linkedin_uri,json=linkedinUri,proto3" json:"linkedin_uri,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the User which cannot be changed.
+	// Format: users/([a-z0-9-]{2,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The creation time of the User.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// The last time the User was updated.
+	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	// The masked email of the User. Alis will never overwrite this field.
+	MaskedEmail string `protobuf:"bytes,4,opt,name=masked_email,json=maskedEmail,proto3" json:"masked_email,omitempty"`
+	// The identity provider of the User.
+	IdentityProvider IdentityProvider `protobuf:"varint,6,opt,name=identity_provider,json=identityProvider,proto3,enum=alis.open.iam.v1.IdentityProvider" json:"identity_provider,omitempty"`
+	// The given name of the User.
+	GivenName string `protobuf:"bytes,7,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
+	// The family name of the User.
+	FamilyName string `protobuf:"bytes,8,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
+	// The picture of the User.
+	// Format: https://...
+	Picture string `protobuf:"bytes,9,opt,name=picture,proto3" json:"picture,omitempty"`
+	// Current position
+	// Example: Senior Build Engineer at Alis Exchange.
+	Position string `protobuf:"bytes,10,opt,name=position,proto3" json:"position,omitempty"`
+	// Education
+	// Example: PhD in Astrophysics
+	Education string `protobuf:"bytes,11,opt,name=education,proto3" json:"education,omitempty"`
+	// LinkedIn profile
+	// Example: https://www.linkedin.com/in/jankrynauw/
+	LinkedinUri   string `protobuf:"bytes,12,opt,name=linkedin_uri,json=linkedinUri,proto3" json:"linkedin_uri,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *MaskedUser) Reset() {
@@ -1307,16 +1443,31 @@ func (x *MaskedUser) GetLinkedinUri() string {
 	return ""
 }
 
+// The request message for the EditUserInfo method.
 type EditUserInfoRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          string                 `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	GivenName     string                 `protobuf:"bytes,2,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
-	FamilyName    string                 `protobuf:"bytes,3,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
-	Picture       string                 `protobuf:"bytes,4,opt,name=picture,proto3" json:"picture,omitempty"`
-	ContactNumber string                 `protobuf:"bytes,5,opt,name=contact_number,json=contactNumber,proto3" json:"contact_number,omitempty"`
-	Position      string                 `protobuf:"bytes,6,opt,name=position,proto3" json:"position,omitempty"`
-	Education     string                 `protobuf:"bytes,7,opt,name=education,proto3" json:"education,omitempty"`
-	LinkedinUri   string                 `protobuf:"bytes,8,opt,name=linkedin_uri,json=linkedinUri,proto3" json:"linkedin_uri,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the User.
+	// Format: users/([a-z0-9-]{2,50})
+	User string `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	// The given name of the User
+	GivenName string `protobuf:"bytes,2,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
+	// The family name of the User
+	FamilyName string `protobuf:"bytes,3,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
+	// The profile picture of the User
+	// Format: https://...
+	Picture string `protobuf:"bytes,4,opt,name=picture,proto3" json:"picture,omitempty"`
+	// The contact number of the User
+	ContactNumber string `protobuf:"bytes,5,opt,name=contact_number,json=contactNumber,proto3" json:"contact_number,omitempty"`
+	// Current position
+	// Example: Senior Build Engineer at Alis Exchange.
+	Position string `protobuf:"bytes,6,opt,name=position,proto3" json:"position,omitempty"`
+	// Education
+	// Example: PhD in Astrophysics
+	Education string `protobuf:"bytes,7,opt,name=education,proto3" json:"education,omitempty"`
+	// LinkedIn profile
+	// Example: https://www.linkedin.com/in/jankrynauw/
+	LinkedinUri string `protobuf:"bytes,8,opt,name=linkedin_uri,json=linkedinUri,proto3" json:"linkedin_uri,omitempty"`
+	// The set of fields that should be updated
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,99,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1415,10 +1566,14 @@ func (x *EditUserInfoRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the EditUserMetadata method.
 type EditUserMetadataRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          string                 `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	Metadata      *anypb.Any             `protobuf:"bytes,2,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the User.
+	// Format: users/([a-z0-9-]{2,50})
+	User string `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	// The metadata to update.
+	Metadata      *anypb.Any `protobuf:"bytes,2,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1467,6 +1622,7 @@ func (x *EditUserMetadataRequest) GetMetadata() *anypb.Any {
 	return nil
 }
 
+// The request message for the RetrieveMyUser method.
 type RetrieveMyUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1503,15 +1659,28 @@ func (*RetrieveMyUserRequest) Descriptor() ([]byte, []int) {
 	return file_alis_open_iam_v1_user_proto_rawDescGZIP(), []int{20}
 }
 
+// The request message for the EditMyInfo method.
 type EditMyInfoRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	GivenName     string                 `protobuf:"bytes,1,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
-	FamilyName    string                 `protobuf:"bytes,2,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
-	Picture       string                 `protobuf:"bytes,3,opt,name=picture,proto3" json:"picture,omitempty"`
-	ContactNumber string                 `protobuf:"bytes,4,opt,name=contact_number,json=contactNumber,proto3" json:"contact_number,omitempty"`
-	Position      string                 `protobuf:"bytes,5,opt,name=position,proto3" json:"position,omitempty"`
-	Education     string                 `protobuf:"bytes,6,opt,name=education,proto3" json:"education,omitempty"`
-	LinkedinUri   string                 `protobuf:"bytes,7,opt,name=linkedin_uri,json=linkedinUri,proto3" json:"linkedin_uri,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The given name of the User
+	GivenName string `protobuf:"bytes,1,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
+	// The family name of the User
+	FamilyName string `protobuf:"bytes,2,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
+	// The profile picture of the User
+	// Format: https://...
+	Picture string `protobuf:"bytes,3,opt,name=picture,proto3" json:"picture,omitempty"`
+	// The contact number of the User
+	ContactNumber string `protobuf:"bytes,4,opt,name=contact_number,json=contactNumber,proto3" json:"contact_number,omitempty"`
+	// Current position
+	// Example: Senior Build Engineer at Alis Exchange.
+	Position string `protobuf:"bytes,5,opt,name=position,proto3" json:"position,omitempty"`
+	// Education
+	// Example: PhD in Astrophysics
+	Education string `protobuf:"bytes,6,opt,name=education,proto3" json:"education,omitempty"`
+	// LinkedIn profile
+	// Example: https://www.linkedin.com/in/jankrynauw/
+	LinkedinUri string `protobuf:"bytes,7,opt,name=linkedin_uri,json=linkedinUri,proto3" json:"linkedin_uri,omitempty"`
+	// The set of fields that should be updated
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,10,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1603,9 +1772,11 @@ func (x *EditMyInfoRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the EditMyMetadata method.
 type EditMyMetadataRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Metadata      *anypb.Any             `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The metadata to update.
+	Metadata      *anypb.Any `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1647,6 +1818,7 @@ func (x *EditMyMetadataRequest) GetMetadata() *anypb.Any {
 	return nil
 }
 
+// The request message for the RemoveMyUser method.
 type RemoveMyUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1683,6 +1855,7 @@ func (*RemoveMyUserRequest) Descriptor() ([]byte, []int) {
 	return file_alis_open_iam_v1_user_proto_rawDescGZIP(), []int{23}
 }
 
+// The request message for the SyncToGoogleGroup method.
 type SyncToGoogleGroupRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1719,10 +1892,13 @@ func (*SyncToGoogleGroupRequest) Descriptor() ([]byte, []int) {
 	return file_alis_open_iam_v1_user_proto_rawDescGZIP(), []int{24}
 }
 
+// The response message for the SyncToGoogleGroup method.
 type SyncToGoogleGroupResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	NrAdded       int32                  `protobuf:"varint,1,opt,name=nr_added,json=nrAdded,proto3" json:"nr_added,omitempty"`
-	NrRemoved     int32                  `protobuf:"varint,2,opt,name=nr_removed,json=nrRemoved,proto3" json:"nr_removed,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The number of Users that were added.
+	NrAdded int32 `protobuf:"varint,1,opt,name=nr_added,json=nrAdded,proto3" json:"nr_added,omitempty"`
+	// The number of Users that were removed.
+	NrRemoved     int32 `protobuf:"varint,2,opt,name=nr_removed,json=nrRemoved,proto3" json:"nr_removed,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1771,9 +1947,11 @@ func (x *SyncToGoogleGroupResponse) GetNrRemoved() int32 {
 	return 0
 }
 
+// Definition of Google Identity
 type User_GoogleIdentity struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The google id of the user.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1815,9 +1993,11 @@ func (x *User_GoogleIdentity) GetId() string {
 	return ""
 }
 
+// Definition of Microsoft Identity
 type User_MicrosoftIdentity struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The microsoft id of the user.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1859,9 +2039,11 @@ func (x *User_MicrosoftIdentity) GetId() string {
 	return ""
 }
 
+// Definition of Linkedin Identity
 type User_LinkedinIdentity struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The linkedin id of the user.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1903,10 +2085,14 @@ func (x *User_LinkedinIdentity) GetId() string {
 	return ""
 }
 
+// Definition of Subscription
 type User_Subscription struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Plan          string                 `protobuf:"bytes,2,opt,name=plan,proto3" json:"plan,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the subscription
+	// Format: accounts/*/customers/*/subscriptions/*
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The code of the plan that is part of the subscription
+	Plan          string `protobuf:"bytes,2,opt,name=plan,proto3" json:"plan,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1955,9 +2141,11 @@ func (x *User_Subscription) GetPlan() string {
 	return ""
 }
 
+// Definition of Apple Identity
 type User_AppleIdentity struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The apple id of the user.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1999,8 +2187,10 @@ func (x *User_AppleIdentity) GetId() string {
 	return ""
 }
 
+// The User's details within one account, keyed by account id in `accounts`.
 type User_Account struct {
-	state         protoimpl.MessageState       `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The seat the user has for each of the product's offerings.
 	Seats         map[int32]*User_Account_Seat `protobuf:"bytes,1,rep,name=seats,proto3" json:"seats,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2043,10 +2233,13 @@ func (x *User_Account) GetSeats() map[int32]*User_Account_Seat {
 	return nil
 }
 
+// A seat
 type User_Account_Seat struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Plan          int32                  `protobuf:"varint,1,opt,name=plan,proto3" json:"plan,omitempty"`
-	Seat          int32                  `protobuf:"varint,2,opt,name=seat,proto3" json:"seat,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The plan of the account for this offering.
+	Plan int32 `protobuf:"varint,1,opt,name=plan,proto3" json:"plan,omitempty"`
+	// The seat the user has for this offering.
+	Seat          int32 `protobuf:"varint,2,opt,name=seat,proto3" json:"seat,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2095,11 +2288,19 @@ func (x *User_Account_Seat) GetSeat() int32 {
 	return 0
 }
 
+// Definition of a result
 type LookupUserResponse_Result struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          string                 `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	MaskedEmail   string                 `protobuf:"bytes,3,opt,name=masked_email,json=maskedEmail,proto3" json:"masked_email,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The full name of the User
+	//
+	// Format: users/{user}
+	User string `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	// The display name of the User.
+	// Concatenated given_name and family_name
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// Masked primary email address
+	// Eg. ru***@alisx.com
+	MaskedEmail   string `protobuf:"bytes,3,opt,name=masked_email,json=maskedEmail,proto3" json:"masked_email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

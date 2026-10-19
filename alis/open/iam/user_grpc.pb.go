@@ -52,31 +52,87 @@ const (
 // UsersServiceClient is the client API for UsersService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// UsersService provides RPCs for managing User resources.
 type UsersServiceClient interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(ctx context.Context, in *AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(ctx context.Context, in *RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Gets information about a User.
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
+	// Creates a new User.
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
+	// Updates a User.
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
+	// Deletes a User.
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Lists Users. Results are sorted by name, ascending.
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
+	// Retrieve a User by their email.
 	RetrieveUserByEmail(ctx context.Context, in *RetrieveUserByEmailRequest, opts ...grpc.CallOption) (*User, error)
+	// Look up a User based on a search text.
+	//
+	// This method retrieves a set of results, which are Users, based on the request.
+	// The lookup for these Users are done across the given_name, family_name, email and contact number.
 	LookupUser(ctx context.Context, in *LookupUserRequest, opts ...grpc.CallOption) (*LookupUserResponse, error)
+	// Retrieves the set of Users requested, with only a
+	// subset of the User information returned.
+	//
+	// This is equivalent to a BatchGet method, but only a subset of the User information,
+	// which does not contain any sensitive information such as email or group configurations.
+	//
+	// Differs from the RetrieveMaskedUsers method in that it returns only
+	// the Users that were specified in the request.
 	BatchRetrieveMaskedUsers(ctx context.Context, in *BatchRetrieveMaskedUsersRequest, opts ...grpc.CallOption) (*BatchRetrieveMaskedUsersResponse, error)
+	// Retrieves all Users that match the filter criteria, if specified,
+	// with only a subset of the User information.
+	//
+	// This is equivalent to a List method, but only a subset of the User information,
+	// which does not contain any sensitive information such as email or group configurations.
+	//
+	// Differs from the BatchRetrieveMaskedUsers method in that it returns all
+	// the Users that match the filter, if the filter is specified.
+	//
+	// This is useful for displaying a list of Users without revealing sensitive information like email.
 	RetrieveMaskedUsers(ctx context.Context, in *RetrieveMaskedUsersRequest, opts ...grpc.CallOption) (*RetrieveMaskedUsersResponse, error)
+	// Retrieves a User with some of their details hidden.
+	// This is useful for displaying a User without revealing sensitive information like email.
+	// Both name and email can be used to retrieve the User.
 	RetrieveMaskedUser(ctx context.Context, in *RetrieveMaskedUserRequest, opts ...grpc.CallOption) (*MaskedUser, error)
+	// Edits a User's non-auth related information like family name and picture.
 	EditUserInfo(ctx context.Context, in *EditUserInfoRequest, opts ...grpc.CallOption) (*User, error)
+	// Edits a User's metadata
 	EditUserMetadata(ctx context.Context, in *EditUserMetadataRequest, opts ...grpc.CallOption) (*User, error)
+	// Retrieves the currently signed in user.
+	// This is useful for client-side applications to get the signed in user's information.
 	RetrieveMyUser(ctx context.Context, in *RetrieveMyUserRequest, opts ...grpc.CallOption) (*User, error)
+	// Edits the info of the currently signed in user.
+	// This is useful for client-side applications to edit the signed in user's information.
+	// Allows the user to edit their given_name, family_name, picture, contact_number, position, education and linkedin_uri.
 	EditMyInfo(ctx context.Context, in *EditMyInfoRequest, opts ...grpc.CallOption) (*User, error)
+	// Edits the metadata of the currently signed in user.
+	// This is useful for client-side applications to edit the signed in user's metadata.
 	EditMyMetadata(ctx context.Context, in *EditMyMetadataRequest, opts ...grpc.CallOption) (*User, error)
+	// Removes the currently signed in user.
+	// This is useful if a user wants to delete their account.
 	RemoveMyUser(ctx context.Context, in *RemoveMyUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Syncs all google User's to the google group configured in the IamConfig.
+	// Will not delete service accounts.
 	SyncToGoogleGroup(ctx context.Context, in *SyncToGoogleGroupRequest, opts ...grpc.CallOption) (*SyncToGoogleGroupResponse, error)
+	// Sets the user's profile picture
 	SetUserPicture(ctx context.Context, in *SetUserPictureRequest, opts ...grpc.CallOption) (*SetUserPictureResponse, error)
 }
 
@@ -341,31 +397,87 @@ func (c *usersServiceClient) SetUserPicture(ctx context.Context, in *SetUserPict
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility.
+//
+// UsersService provides RPCs for managing User resources.
 type UsersServiceServer interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(context.Context, *AddIamBindingsRequest) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(context.Context, *RemoveIamBindingsRequest) (*v1.Policy, error)
+	// Gets information about a User.
 	GetUser(context.Context, *GetUserRequest) (*User, error)
+	// Creates a new User.
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
+	// Updates a User.
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
+	// Deletes a User.
 	DeleteUser(context.Context, *DeleteUserRequest) (*emptypb.Empty, error)
+	// Lists Users. Results are sorted by name, ascending.
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	// Retrieve a User by their email.
 	RetrieveUserByEmail(context.Context, *RetrieveUserByEmailRequest) (*User, error)
+	// Look up a User based on a search text.
+	//
+	// This method retrieves a set of results, which are Users, based on the request.
+	// The lookup for these Users are done across the given_name, family_name, email and contact number.
 	LookupUser(context.Context, *LookupUserRequest) (*LookupUserResponse, error)
+	// Retrieves the set of Users requested, with only a
+	// subset of the User information returned.
+	//
+	// This is equivalent to a BatchGet method, but only a subset of the User information,
+	// which does not contain any sensitive information such as email or group configurations.
+	//
+	// Differs from the RetrieveMaskedUsers method in that it returns only
+	// the Users that were specified in the request.
 	BatchRetrieveMaskedUsers(context.Context, *BatchRetrieveMaskedUsersRequest) (*BatchRetrieveMaskedUsersResponse, error)
+	// Retrieves all Users that match the filter criteria, if specified,
+	// with only a subset of the User information.
+	//
+	// This is equivalent to a List method, but only a subset of the User information,
+	// which does not contain any sensitive information such as email or group configurations.
+	//
+	// Differs from the BatchRetrieveMaskedUsers method in that it returns all
+	// the Users that match the filter, if the filter is specified.
+	//
+	// This is useful for displaying a list of Users without revealing sensitive information like email.
 	RetrieveMaskedUsers(context.Context, *RetrieveMaskedUsersRequest) (*RetrieveMaskedUsersResponse, error)
+	// Retrieves a User with some of their details hidden.
+	// This is useful for displaying a User without revealing sensitive information like email.
+	// Both name and email can be used to retrieve the User.
 	RetrieveMaskedUser(context.Context, *RetrieveMaskedUserRequest) (*MaskedUser, error)
+	// Edits a User's non-auth related information like family name and picture.
 	EditUserInfo(context.Context, *EditUserInfoRequest) (*User, error)
+	// Edits a User's metadata
 	EditUserMetadata(context.Context, *EditUserMetadataRequest) (*User, error)
+	// Retrieves the currently signed in user.
+	// This is useful for client-side applications to get the signed in user's information.
 	RetrieveMyUser(context.Context, *RetrieveMyUserRequest) (*User, error)
+	// Edits the info of the currently signed in user.
+	// This is useful for client-side applications to edit the signed in user's information.
+	// Allows the user to edit their given_name, family_name, picture, contact_number, position, education and linkedin_uri.
 	EditMyInfo(context.Context, *EditMyInfoRequest) (*User, error)
+	// Edits the metadata of the currently signed in user.
+	// This is useful for client-side applications to edit the signed in user's metadata.
 	EditMyMetadata(context.Context, *EditMyMetadataRequest) (*User, error)
+	// Removes the currently signed in user.
+	// This is useful if a user wants to delete their account.
 	RemoveMyUser(context.Context, *RemoveMyUserRequest) (*emptypb.Empty, error)
+	// Syncs all google User's to the google group configured in the IamConfig.
+	// Will not delete service accounts.
 	SyncToGoogleGroup(context.Context, *SyncToGoogleGroupRequest) (*SyncToGoogleGroupResponse, error)
+	// Sets the user's profile picture
 	SetUserPicture(context.Context, *SetUserPictureRequest) (*SetUserPictureResponse, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }

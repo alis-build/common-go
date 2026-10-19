@@ -4,6 +4,33 @@
 // - protoc             v3.21.12
 // source: alis/open/iam/v1/group.proto
 
+// Manages the users, groups, and roles of an Alis product deployment, and
+// configures how its users sign in.
+//
+// Services:
+//
+// - `UsersService` manages `User` resources (`users/{user}`). Besides the
+//   standard methods it has self-service RPCs for the signed-in user
+//   (`RetrieveMyUser`, `EditMyInfo`, `EditMyMetadata`, `RemoveMyUser`) and
+//   masked reads (`MaskedUser`) that hide sensitive details such as the email
+//   address.
+// - `GroupsService` manages `Group` resources (`groups/{group}`), groups of
+//   users.
+//
+// Both services expose the `google.iam.v1` policy RPCs plus `AddIamBindings`
+// and `RemoveIamBindings`. The request messages for those two RPCs are defined
+// here and reused by other packages for their own IAM-protected resources.
+//
+// Other types:
+//
+// - `Role` (`roles/{role}`): a set of permissions, usually gRPC method names,
+//   that can be bound to principals on the listed resource types.
+// - `IamConfig`: optional deployment config that creates an Alis-managed OAuth
+//   reverse proxy endpoint, with its auth providers, self-signup rules and
+//   cookie domains.
+// - `IdentityProvider`: the providers a user can sign in with (Google,
+//   Microsoft, email, LinkedIn, Apple).
+
 package iam
 
 import (
@@ -37,17 +64,30 @@ const (
 // GroupsServiceClient is the client API for GroupsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// GroupsService provides RPCs for managing group resources.
 type GroupsServiceClient interface {
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(ctx context.Context, in *AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(ctx context.Context, in *RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Gets information about a Group.
 	GetGroup(ctx context.Context, in *GetGroupRequest, opts ...grpc.CallOption) (*Group, error)
+	// Creates a new Group.
 	CreateGroup(ctx context.Context, in *CreateGroupRequest, opts ...grpc.CallOption) (*Group, error)
+	// Updates a Group.
 	UpdateGroup(ctx context.Context, in *UpdateGroupRequest, opts ...grpc.CallOption) (*Group, error)
+	// Deletes a Group.
 	DeleteGroup(ctx context.Context, in *DeleteGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Lists Groups. Results are sorted by name, ascending.
 	ListGroups(ctx context.Context, in *ListGroupsRequest, opts ...grpc.CallOption) (*ListGroupsResponse, error)
+	// Syncs the specified group to its list of users
 	SyncGroup(ctx context.Context, in *SyncGroupRequest, opts ...grpc.CallOption) (*SyncGroupResponse, error)
 }
 
@@ -172,17 +212,30 @@ func (c *groupsServiceClient) SyncGroup(ctx context.Context, in *SyncGroupReques
 // GroupsServiceServer is the server API for GroupsService service.
 // All implementations must embed UnimplementedGroupsServiceServer
 // for forward compatibility.
+//
+// GroupsService provides RPCs for managing group resources.
 type GroupsServiceServer interface {
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(context.Context, *AddIamBindingsRequest) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(context.Context, *RemoveIamBindingsRequest) (*v1.Policy, error)
+	// Gets information about a Group.
 	GetGroup(context.Context, *GetGroupRequest) (*Group, error)
+	// Creates a new Group.
 	CreateGroup(context.Context, *CreateGroupRequest) (*Group, error)
+	// Updates a Group.
 	UpdateGroup(context.Context, *UpdateGroupRequest) (*Group, error)
+	// Deletes a Group.
 	DeleteGroup(context.Context, *DeleteGroupRequest) (*emptypb.Empty, error)
+	// Lists Groups. Results are sorted by name, ascending.
 	ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsResponse, error)
+	// Syncs the specified group to its list of users
 	SyncGroup(context.Context, *SyncGroupRequest) (*SyncGroupResponse, error)
 	mustEmbedUnimplementedGroupsServiceServer()
 }

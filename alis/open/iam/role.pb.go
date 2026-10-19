@@ -22,17 +22,34 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The definition of a role in the context of a product
 type Role struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	Etag          []byte                 `protobuf:"bytes,4,opt,name=etag,proto3" json:"etag,omitempty"`
-	Title         string                 `protobuf:"bytes,5,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
-	Permissions   []string               `protobuf:"bytes,7,rep,name=permissions,proto3" json:"permissions,omitempty"`
-	ResourceTypes []string               `protobuf:"bytes,8,rep,name=resource_types,json=resourceTypes,proto3" json:"resource_types,omitempty"`
-	AllUsers      bool                   `protobuf:"varint,9,opt,name=all_users,json=allUsers,proto3" json:"all_users,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the role
+	// Format: roles/([a-z][a-zA-Z0-9.]{3,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The creation time of the Role.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// The last time the Role was updated.
+	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	// Used to perform a consistent read-modify-write.
+	Etag []byte `protobuf:"bytes,4,opt,name=etag,proto3" json:"etag,omitempty"`
+	// The title of the role
+	Title string `protobuf:"bytes,5,opt,name=title,proto3" json:"title,omitempty"`
+	// The description of the role
+	Description string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	// The permissions that this role grants
+	// Almost always uses the format of the grpc method name
+	// E.g. /alis.open.iam.v1.RolesService/ListRoles and/or /someorg.ab.library.v1.BookService/GetBook
+	Permissions []string `protobuf:"bytes,7,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	// The proto message types of the resources' policies that this role can be bound to
+	// E.g. alis.open.iam.v1.Role and/or someorg.ab.library.v1.Book
+	ResourceTypes []string `protobuf:"bytes,8,rep,name=resource_types,json=resourceTypes,proto3" json:"resource_types,omitempty"`
+	// Whether the role is given to all users by default.
+	// This is used to group RPCs that are available to any user that has access to the deployment.
+	// If this is true, resource_types must be empty.
+	// The alternative would be to create a role that gets assigned to any new users.
+	AllUsers      bool `protobuf:"varint,9,opt,name=all_users,json=allUsers,proto3" json:"all_users,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

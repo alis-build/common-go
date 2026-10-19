@@ -22,13 +22,24 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The enum for the SameSite setting
 type IamConfig_CookieDomain_SameSite int32
 
 const (
+	// Not specified; `SAME_SITE_LAX` is used.
 	IamConfig_CookieDomain_SAME_SITE_UNSPECIFIED IamConfig_CookieDomain_SameSite = 0
-	IamConfig_CookieDomain_SAME_SITE_STRICT      IamConfig_CookieDomain_SameSite = 1
-	IamConfig_CookieDomain_SAME_SITE_LAX         IamConfig_CookieDomain_SameSite = 2
-	IamConfig_CookieDomain_SAME_SITE_NONE        IamConfig_CookieDomain_SameSite = 3
+	// The cookie is sent in the request
+	// if the request is for the same site
+	// as the cookie.
+	IamConfig_CookieDomain_SAME_SITE_STRICT IamConfig_CookieDomain_SameSite = 1
+	// The cookie is sent in the request
+	// if the request is for the same site
+	// as the cookie, or if the request is
+	// from a top-level navigation.
+	IamConfig_CookieDomain_SAME_SITE_LAX IamConfig_CookieDomain_SameSite = 2
+	// The cookie is sent in the request
+	// regardless of the site.
+	IamConfig_CookieDomain_SAME_SITE_NONE IamConfig_CookieDomain_SameSite = 3
 )
 
 // Enum value maps for IamConfig_CookieDomain_SameSite.
@@ -74,15 +85,71 @@ func (IamConfig_CookieDomain_SameSite) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_iam_v1_oauth_proto_rawDescGZIP(), []int{0, 2, 0}
 }
 
+// Optional IAM config to use on a product deployment which, if set, will create an alis managed oauth reverse proxy endpoint
+// This endpoint can be used by backend-for-frontend services to authenticate users
 type IamConfig struct {
-	state          protoimpl.MessageState    `protogen:"open.v1"`
-	AuthProviders  *IamConfig_AuthProviders  `protobuf:"bytes,1,opt,name=auth_providers,json=authProviders,proto3" json:"auth_providers,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The set of valid oauth providers
+	AuthProviders *IamConfig_AuthProviders `protobuf:"bytes,1,opt,name=auth_providers,json=authProviders,proto3" json:"auth_providers,omitempty"`
+	// Specification of self signup requirements
+	//
+	// If empty, then self signup is not allowed.
 	SelfSignupSpec *IamConfig_SelfSignupSpec `protobuf:"bytes,2,opt,name=self_signup_spec,json=selfSignupSpec,proto3" json:"self_signup_spec,omitempty"`
-	LogoUri        string                    `protobuf:"bytes,3,opt,name=logo_uri,json=logoUri,proto3" json:"logo_uri,omitempty"`
-	CookieDomains  []*IamConfig_CookieDomain `protobuf:"bytes,4,rep,name=cookie_domains,json=cookieDomains,proto3" json:"cookie_domains,omitempty"`
-	GoogleGroup    string                    `protobuf:"bytes,5,opt,name=google_group,json=googleGroup,proto3" json:"google_group,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// The uri to the logo to use on the signin & signup pages.
+	// Suggested that the image has aspect ratio 1:1 (eg 32x32, 64x64, ...)
+	// Format: https://...
+	LogoUri string `protobuf:"bytes,3,opt,name=logo_uri,json=logoUri,proto3" json:"logo_uri,omitempty"`
+	// Once a user has successfully been authenticated using the relevant
+	// auth provider, various cookies will be set that will be used for
+	// authenticating any calls that the user makes to the API.
+	//
+	// Cookies are set BY a specific host and FOR a specific domain.
+	//
+	// The host and domain combination can be best
+	// explained using the following examples:
+	//
+	//		 Host: app.example.com
+	//		 Domain: Unspecified
+	//			In this example, the authentication is hosted on
+	//			app.example.com and, since the domain is not
+	//			specified, the domain will default to the host. This means
+	//			that the auth cookies will only be valid for
+	//			app.example.com and can NOT be used by any other
+	//			domains, such as reports.example.com
+	//
+	//		 Host: one.app.example.com
+	//		 Domain: app.example.com
+	//			In this example, the authentication is hosted on
+	//			one.app.example.com and the domain specified is one
+	//			level higher, ie. app.example.com. This means that
+	//			the auth cookies will be valid for <b>any</b> sub-domains of
+	//			app.example.com, such as
+	//			one.app.example.com, two.app.example.com,
+	//			anything.app.example.com.
+	//	     The cookies are however NOT valid for any other sub-domain of
+	//			example.com, such as reports.example.com
+	//
+	//		 Host: abc.app.example.com
+	//		 Domain: example.com
+	//			In this example, the authentication is hosted on
+	//			abc.app.example.com and the domain specified is at
+	//			the top most level, ie. example.com. This means that
+	//			the auth cookies will be valid for <b>any</b> sub-domains of
+	//			example.com, such as abc.app.example.com,
+	//			xyz.app.example.com,
+	//			anything.app.example.com
+	//			As well as:
+	//			some.reports.example.com,
+	//			reports.example.com, example.com, etc.
+	CookieDomains []*IamConfig_CookieDomain `protobuf:"bytes,4,rep,name=cookie_domains,json=cookieDomains,proto3" json:"cookie_domains,omitempty"`
+	// The google group that all users that have Google as their identity provider are added to.
+	// If empty, no group is used.
+	// If specified, the members of this group will be kept in sync with the users that have Google as their identity provider.
+	//
+	// Example: builders@alis.exchange
+	GoogleGroup   string `protobuf:"bytes,5,opt,name=google_group,json=googleGroup,proto3" json:"google_group,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *IamConfig) Reset() {
@@ -150,6 +217,7 @@ func (x *IamConfig) GetGoogleGroup() string {
 	return ""
 }
 
+// The UI config is used by the Vue Console to dynamically configure the UI
 type UiConfig struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -186,10 +254,13 @@ func (*UiConfig) Descriptor() ([]byte, []int) {
 	return file_alis_open_iam_v1_oauth_proto_rawDescGZIP(), []int{1}
 }
 
+// Definition of an OAuth provider
 type OauthProvider struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClientId      string                 `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
-	ClientSecret  string                 `protobuf:"bytes,2,opt,name=client_secret,json=clientSecret,proto3" json:"client_secret,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The client id of the oauth provider.
+	ClientId string `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	// The client secret of the oauth provider.
+	ClientSecret  string `protobuf:"bytes,2,opt,name=client_secret,json=clientSecret,proto3" json:"client_secret,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -238,12 +309,22 @@ func (x *OauthProvider) GetClientSecret() string {
 	return ""
 }
 
+// Email provider
 type EmailAuthProvider struct {
-	state            protoimpl.MessageState    `protogen:"open.v1"`
-	FromEmail        string                    `protobuf:"bytes,1,opt,name=from_email,json=fromEmail,proto3" json:"from_email,omitempty"`
-	Server           *EmailAuthProvider_Server `protobuf:"bytes,2,opt,name=server,proto3" json:"server,omitempty"`
-	ThrottleDuration *durationpb.Duration      `protobuf:"bytes,3,opt,name=throttle_duration,json=throttleDuration,proto3" json:"throttle_duration,omitempty"`
-	SignedInDuration *durationpb.Duration      `protobuf:"bytes,4,opt,name=signed_in_duration,json=signedInDuration,proto3" json:"signed_in_duration,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The email address that the email will be received _from_.
+	// E.g. noreply@alis.build
+	FromEmail string `protobuf:"bytes,1,opt,name=from_email,json=fromEmail,proto3" json:"from_email,omitempty"`
+	// In order to enable sign up using email, a server is required
+	// to send the emails on your behalf.
+	Server *EmailAuthProvider_Server `protobuf:"bytes,2,opt,name=server,proto3" json:"server,omitempty"`
+	// The time that needs to pass before a user can request another email.
+	// Default is none, but highly recommended to set to prevent spam.
+	ThrottleDuration *durationpb.Duration `protobuf:"bytes,3,opt,name=throttle_duration,json=throttleDuration,proto3" json:"throttle_duration,omitempty"`
+	// The duration that a user is auto signed in for after clicking the sign in link.
+	// This corresponds directly to the expiry date on the refresh token.
+	// If not set, a user is signed in for 8 hours.
+	SignedInDuration *durationpb.Duration `protobuf:"bytes,4,opt,name=signed_in_duration,json=signedInDuration,proto3" json:"signed_in_duration,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -306,12 +387,17 @@ func (x *EmailAuthProvider) GetSignedInDuration() *durationpb.Duration {
 	return nil
 }
 
+// Apple provider
 type AppleAuthProvider struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TeamId        string                 `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
-	ClientId      string                 `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
-	ClientSecret  string                 `protobuf:"bytes,3,opt,name=client_secret,json=clientSecret,proto3" json:"client_secret,omitempty"`
-	KeyId         string                 `protobuf:"bytes,4,opt,name=key_id,json=keyId,proto3" json:"key_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The team id of the apple provider.
+	TeamId string `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
+	// The client id of the oauth provider.
+	ClientId string `protobuf:"bytes,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	// The client secret of the oauth provider.
+	ClientSecret string `protobuf:"bytes,3,opt,name=client_secret,json=clientSecret,proto3" json:"client_secret,omitempty"`
+	// The key id of the private/secret key.
+	KeyId         string `protobuf:"bytes,4,opt,name=key_id,json=keyId,proto3" json:"key_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -374,11 +460,15 @@ func (x *AppleAuthProvider) GetKeyId() string {
 	return ""
 }
 
+// Structure of the alis.build generated refresh token
 type RefreshToken struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	Provider      IdentityProvider       `protobuf:"varint,2,opt,name=provider,proto3,enum=alis.open.iam.v1.IdentityProvider" json:"provider,omitempty"`
-	RedirectUri   string                 `protobuf:"bytes,3,opt,name=redirect_uri,json=redirectUri,proto3" json:"redirect_uri,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The provider's refresh token
+	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	// The provider
+	Provider IdentityProvider `protobuf:"varint,2,opt,name=provider,proto3,enum=alis.open.iam.v1.IdentityProvider" json:"provider,omitempty"`
+	// The redirect uri used to get the refresh token
+	RedirectUri   string `protobuf:"bytes,3,opt,name=redirect_uri,json=redirectUri,proto3" json:"redirect_uri,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -434,13 +524,19 @@ func (x *RefreshToken) GetRedirectUri() string {
 	return ""
 }
 
+// Definition of the Oauth providers for the Config
 type IamConfig_AuthProviders struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Google        *OauthProvider         `protobuf:"bytes,1,opt,name=google,proto3" json:"google,omitempty"`
-	Microsoft     *OauthProvider         `protobuf:"bytes,2,opt,name=microsoft,proto3" json:"microsoft,omitempty"`
-	Email         *EmailAuthProvider     `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Linkedin      *OauthProvider         `protobuf:"bytes,4,opt,name=linkedin,proto3" json:"linkedin,omitempty"`
-	Apple         *AppleAuthProvider     `protobuf:"bytes,5,opt,name=apple,proto3" json:"apple,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Google oauth provider
+	Google *OauthProvider `protobuf:"bytes,1,opt,name=google,proto3" json:"google,omitempty"`
+	// Microsoft oauth provider
+	Microsoft *OauthProvider `protobuf:"bytes,2,opt,name=microsoft,proto3" json:"microsoft,omitempty"`
+	// Email auth provider
+	Email *EmailAuthProvider `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	// LinkedIn auth provider
+	Linkedin *OauthProvider `protobuf:"bytes,4,opt,name=linkedin,proto3" json:"linkedin,omitempty"`
+	// Apple auth provider
+	Apple         *AppleAuthProvider `protobuf:"bytes,5,opt,name=apple,proto3" json:"apple,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -510,12 +606,19 @@ func (x *IamConfig_AuthProviders) GetApple() *AppleAuthProvider {
 	return nil
 }
 
+// The description of self signup
 type IamConfig_SelfSignupSpec struct {
-	state           protoimpl.MessageState                     `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The domains and associated providers (optional)
+	// which are allowed to self signup.
+	//
+	// If no DomainProviders are specified, self signup is not allowed.
 	DomainProviders []*IamConfig_SelfSignupSpec_DomainProvider `protobuf:"bytes,1,rep,name=domain_providers,json=domainProviders,proto3" json:"domain_providers,omitempty"`
-	DefaultRoles    []string                                   `protobuf:"bytes,2,rep,name=default_roles,json=defaultRoles,proto3" json:"default_roles,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// The default roles assigned to a user when they self sign up
+	// Format: ["roles/*", ...]
+	DefaultRoles  []string `protobuf:"bytes,2,rep,name=default_roles,json=defaultRoles,proto3" json:"default_roles,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *IamConfig_SelfSignupSpec) Reset() {
@@ -562,10 +665,21 @@ func (x *IamConfig_SelfSignupSpec) GetDefaultRoles() []string {
 	return nil
 }
 
+// The definition of the cookie domain
 type IamConfig_CookieDomain struct {
-	state         protoimpl.MessageState          `protogen:"open.v1"`
-	Host          string                          `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
-	Domain        string                          `protobuf:"bytes,2,opt,name=domain,proto3" json:"domain,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The host refers to the sub-domain which will host
+	// the authentication, ie. require users to sign in or sign up.
+	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	// The domain refers to the domain for
+	// which the auth cookies are valid.
+	//
+	// By default, the domain is set to the host, but may
+	// be specified to use a higher level domain.
+	Domain string `protobuf:"bytes,2,opt,name=domain,proto3" json:"domain,omitempty"`
+	// The same site setting to use for the refresh_token and id_token cookies.
+	// If none is specified, lax is used.
+	// For embedded applications, like the excel addin, none must be used.
 	SameSite      IamConfig_CookieDomain_SameSite `protobuf:"varint,3,opt,name=same_site,json=sameSite,proto3,enum=alis.open.iam.v1.IamConfig_CookieDomain_SameSite" json:"same_site,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -622,13 +736,37 @@ func (x *IamConfig_CookieDomain) GetSameSite() IamConfig_CookieDomain_SameSite {
 	return IamConfig_CookieDomain_SAME_SITE_UNSPECIFIED
 }
 
+// Definition of a Domain Provider that allows
+// a mapping between a domain and Identity Provider.
+//
+// This allows auto redirect to the relevant IdP when a user
+// from the specific domain signs up
 type IamConfig_SelfSignupSpec_DomainProvider struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Domain           string                 `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
-	IdentityProvider IdentityProvider       `protobuf:"varint,2,opt,name=identity_provider,json=identityProvider,proto3,enum=alis.open.iam.v1.IdentityProvider" json:"identity_provider,omitempty"`
-	ForceLogin       bool                   `protobuf:"varint,3,opt,name=force_login,json=forceLogin,proto3" json:"force_login,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The relevant domain which is allowed to self signup
+	// "*" indicates all domains are allowed.
+	Domain string `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
+	// The associated Identity Provider (IdP)
+	//
+	// In the case that the IdP is:
+	//
+	//	UNSPECIFIED - will provide options of available IdPs for sign up
+	//	(Any specified) - will automatically redirect to the relevant IdP for sign up
+	//
+	// In the case that the domain is specified as '*'
+	// then this field needs to be UNSPECIFIED
+	IdentityProvider IdentityProvider `protobuf:"varint,2,opt,name=identity_provider,json=identityProvider,proto3,enum=alis.open.iam.v1.IdentityProvider" json:"identity_provider,omitempty"`
+	// Whether to force users to provide their credentials when signing in.
+	//
+	// The default (false) behaviour is that users are allowed to select
+	// and account from a corporate identity for which they are already
+	// signed in for. Some organisations may however require users to
+	// follow an entire authentication flow when signing in,
+	// rather than just selecting the relevant account from the
+	// already signed in corporate identities.
+	ForceLogin    bool `protobuf:"varint,3,opt,name=force_login,json=forceLogin,proto3" json:"force_login,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *IamConfig_SelfSignupSpec_DomainProvider) Reset() {
@@ -682,8 +820,11 @@ func (x *IamConfig_SelfSignupSpec_DomainProvider) GetForceLogin() bool {
 	return false
 }
 
+// The available servers.
 type EmailAuthProvider_Server struct {
-	state         protoimpl.MessageState      `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Usage of the SendGrid Email API to send
+	// through the sign in information.
 	Sendgrid      *EmailAuthProvider_Sendgrid `protobuf:"bytes,1,opt,name=sendgrid,proto3" json:"sendgrid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -726,9 +867,17 @@ func (x *EmailAuthProvider_Server) GetSendgrid() *EmailAuthProvider_Sendgrid {
 	return nil
 }
 
+// Definition of the Sendgrid email server
 type EmailAuthProvider_Sendgrid struct {
-	state  protoimpl.MessageState `protogen:"open.v1"`
-	ApiKey string                 `protobuf:"bytes,1,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The SendGrid API key to use.
+	//
+	// The key should be created (https://app.sendgrid.com/settings/api_keys)
+	// to have Restricted Access and needs to have the following permissions:
+	//   - Mail Send
+	ApiKey string `protobuf:"bytes,1,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
+	// The template to use for sending the email
+	//
 	// Types that are valid to be assigned to Template:
 	//
 	//	*EmailAuthProvider_Sendgrid_DynamicTemplateId
@@ -795,7 +944,16 @@ type isEmailAuthProvider_Sendgrid_Template interface {
 }
 
 type EmailAuthProvider_Sendgrid_DynamicTemplateId struct {
-	DynamicTemplateId string `protobuf:"bytes,2,opt,name=dynamic_template_id,json=dynamicTemplateId,proto3,oneof"`
+	// The SendGrid Dynamic Template ID to use.
+	// Create template at https://mc.sendgrid.com/dynamic-templates.
+	//
+	// In order for the template to work, it should include
+	// the following data variables:
+	//   - data.signInUrl
+	//
+	// The `data.signInUrl` can be added to a button for example that
+	// allows the user to click to.
+	DynamicTemplateId string `protobuf:"bytes,2,opt,name=dynamic_template_id,json=dynamicTemplateId,proto3,oneof"` // TODO: other templates like html
 }
 
 func (*EmailAuthProvider_Sendgrid_DynamicTemplateId) isEmailAuthProvider_Sendgrid_Template() {}

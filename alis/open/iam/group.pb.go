@@ -4,6 +4,33 @@
 // 	protoc        v3.21.12
 // source: alis/open/iam/v1/group.proto
 
+// Manages the users, groups, and roles of an Alis product deployment, and
+// configures how its users sign in.
+//
+// Services:
+//
+// - `UsersService` manages `User` resources (`users/{user}`). Besides the
+//   standard methods it has self-service RPCs for the signed-in user
+//   (`RetrieveMyUser`, `EditMyInfo`, `EditMyMetadata`, `RemoveMyUser`) and
+//   masked reads (`MaskedUser`) that hide sensitive details such as the email
+//   address.
+// - `GroupsService` manages `Group` resources (`groups/{group}`), groups of
+//   users.
+//
+// Both services expose the `google.iam.v1` policy RPCs plus `AddIamBindings`
+// and `RemoveIamBindings`. The request messages for those two RPCs are defined
+// here and reused by other packages for their own IAM-protected resources.
+//
+// Other types:
+//
+// - `Role` (`roles/{role}`): a set of permissions, usually gRPC method names,
+//   that can be bound to principals on the listed resource types.
+// - `IamConfig`: optional deployment config that creates an Alis-managed OAuth
+//   reverse proxy endpoint, with its auth providers, self-signup rules and
+//   cookie domains.
+// - `IdentityProvider`: the providers a user can sign in with (Google,
+//   Microsoft, email, LinkedIn, Apple).
+
 package iam
 
 import (
@@ -25,12 +52,19 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// A group of users
 type Group struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the Group which cannot be changed.
+	// Format: groups/([a-z0-9-]{2,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The display name of the group
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// The description of the group
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// The time the group was last updated
+	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	// The time the group was created
 	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -101,9 +135,14 @@ func (x *Group) GetCreateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// The request message for the GetGroup method.
 type GetGroupRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the Group.
+	// Format: groups/([a-z0-9-]{2,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -153,9 +192,11 @@ func (x *GetGroupRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the CreateGroup method.
 type CreateGroupRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Group         *Group                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The group to create
+	Group         *Group `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -197,9 +238,12 @@ func (x *CreateGroupRequest) GetGroup() *Group {
 	return nil
 }
 
+// Request message for the UpdateGroup method.
 type UpdateGroupRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Group         *Group                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The group to update
+	Group *Group `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	// The set of fields that should be updated
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -249,9 +293,12 @@ func (x *UpdateGroupRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the DeleteGroup method.
 type DeleteGroupRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the Group.
+	// Format: groups/([a-z0-9-]{2,50})
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -293,12 +340,18 @@ func (x *DeleteGroupRequest) GetName() string {
 	return ""
 }
 
+// The request message for the ListGroups method.
 type ListGroupsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of Groups to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous ListGroups call.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// The filter to apply.
+	Filter        string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -361,10 +414,13 @@ func (x *ListGroupsRequest) GetFilter() string {
 	return ""
 }
 
+// The response message for the ListGroups method.
 type ListGroupsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Groups        []*Group               `protobuf:"bytes,1,rep,name=groups,proto3" json:"groups,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Groups.
+	Groups []*Group `protobuf:"bytes,1,rep,name=groups,proto3" json:"groups,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -413,9 +469,12 @@ func (x *ListGroupsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// The request message for the SyncGroup method.
 type SyncGroupRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Group         string                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The group to sync
+	// Format: groups/*
+	Group         string `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -457,6 +516,7 @@ func (x *SyncGroupRequest) GetGroup() string {
 	return ""
 }
 
+// The response message for the SyncGroup method.
 type SyncGroupResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
