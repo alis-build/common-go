@@ -4,6 +4,26 @@
 // - protoc             v3.21.12
 // source: alis/a2a/extension/scheduler/v1/scheduler.proto
 
+// Schedules prompts to an A2A agent, either on a recurring cron schedule or
+// once at a set time.
+//
+// `SchedulerService` manages `Cron` resources (`crons/{cron_id}`). Each `Cron`
+// holds the prompt to send, the owner the agent is invoked on behalf of, and
+// one of two schedule types:
+//
+// - `TYPE_CRON`: recurring, driven by a unix-cron `expr` and a tz database
+//   `timezone`. An optional `initial_prompt` is sent before the recurring
+//   prompt to establish context.
+// - `TYPE_AT`: a single run at the `at` timestamp. The Cron is typically
+//   archived after a successful run.
+//
+// Setting `context_id` sends every run into the same A2A conversation; leaving
+// it empty starts a new conversation on each run. `RunCron` runs a Cron
+// immediately, regardless of its schedule.
+//
+// `alis.agui.scheduler.v1` offers the same `Cron` model for AG-UI agents,
+// targeting AG-UI threads instead of A2A contexts.
+
 package scheduler
 
 import (
@@ -31,12 +51,20 @@ const (
 // SchedulerServiceClient is the client API for SchedulerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Manages scheduled invocations of an A2A agent via Cron Jobs
 type SchedulerServiceClient interface {
+	// Creates a Cron.
 	CreateCron(ctx context.Context, in *CreateCronRequest, opts ...grpc.CallOption) (*Cron, error)
+	// Lists all Crons.
 	ListCrons(ctx context.Context, in *ListCronsRequest, opts ...grpc.CallOption) (*ListCronsResponse, error)
+	// Gets a Cron.
 	GetCron(ctx context.Context, in *GetCronRequest, opts ...grpc.CallOption) (*Cron, error)
+	// Updates a Cron.
 	UpdateCron(ctx context.Context, in *UpdateCronRequest, opts ...grpc.CallOption) (*Cron, error)
+	// Deletes a Cron.
 	DeleteCron(ctx context.Context, in *DeleteCronRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Runs a Cron. This ignores any schedule details and runs the Cron immediately.
 	RunCron(ctx context.Context, in *RunCronRequest, opts ...grpc.CallOption) (*RunCronResponse, error)
 }
 
@@ -111,12 +139,20 @@ func (c *schedulerServiceClient) RunCron(ctx context.Context, in *RunCronRequest
 // SchedulerServiceServer is the server API for SchedulerService service.
 // All implementations must embed UnimplementedSchedulerServiceServer
 // for forward compatibility.
+//
+// Manages scheduled invocations of an A2A agent via Cron Jobs
 type SchedulerServiceServer interface {
+	// Creates a Cron.
 	CreateCron(context.Context, *CreateCronRequest) (*Cron, error)
+	// Lists all Crons.
 	ListCrons(context.Context, *ListCronsRequest) (*ListCronsResponse, error)
+	// Gets a Cron.
 	GetCron(context.Context, *GetCronRequest) (*Cron, error)
+	// Updates a Cron.
 	UpdateCron(context.Context, *UpdateCronRequest) (*Cron, error)
+	// Deletes a Cron.
 	DeleteCron(context.Context, *DeleteCronRequest) (*emptypb.Empty, error)
+	// Runs a Cron. This ignores any schedule details and runs the Cron immediately.
 	RunCron(context.Context, *RunCronRequest) (*RunCronResponse, error)
 	mustEmbedUnimplementedSchedulerServiceServer()
 }

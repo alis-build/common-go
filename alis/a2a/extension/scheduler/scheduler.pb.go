@@ -4,6 +4,26 @@
 // 	protoc        v3.21.12
 // source: alis/a2a/extension/scheduler/v1/scheduler.proto
 
+// Schedules prompts to an A2A agent, either on a recurring cron schedule or
+// once at a set time.
+//
+// `SchedulerService` manages `Cron` resources (`crons/{cron_id}`). Each `Cron`
+// holds the prompt to send, the owner the agent is invoked on behalf of, and
+// one of two schedule types:
+//
+// - `TYPE_CRON`: recurring, driven by a unix-cron `expr` and a tz database
+//   `timezone`. An optional `initial_prompt` is sent before the recurring
+//   prompt to establish context.
+// - `TYPE_AT`: a single run at the `at` timestamp. The Cron is typically
+//   archived after a successful run.
+//
+// Setting `context_id` sends every run into the same A2A conversation; leaving
+// it empty starts a new conversation on each run. `RunCron` runs a Cron
+// immediately, regardless of its schedule.
+//
+// `alis.agui.scheduler.v1` offers the same `Cron` model for AG-UI agents,
+// targeting AG-UI threads instead of A2A contexts.
+
 package scheduler
 
 import (
@@ -24,12 +44,16 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Supported schedule types for a Cron.
 type Cron_Type int32
 
 const (
+	// Default value. Indicates the type has not been specified.
 	Cron_TYPE_UNSPECIFIED Cron_Type = 0
-	Cron_TYPE_CRON        Cron_Type = 1
-	Cron_TYPE_AT          Cron_Type = 2
+	// Recurring schedule using the cron expression and timezone fields.
+	Cron_TYPE_CRON Cron_Type = 1
+	// One-off schedule that runs once at the specified `at` timestamp.
+	Cron_TYPE_AT Cron_Type = 2
 )
 
 // Enum value maps for Cron_Type.
@@ -73,12 +97,16 @@ func (Cron_Type) EnumDescriptor() ([]byte, []int) {
 	return file_alis_a2a_extension_scheduler_v1_scheduler_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// Lifecycle states for a Cron.
 type Cron_State int32
 
 const (
+	// Default value. Indicates the lifecycle state has not been specified.
 	Cron_STATE_UNSPECIFIED Cron_State = 0
-	Cron_STATE_ACTIVE      Cron_State = 1
-	Cron_STATE_ARCHIVED    Cron_State = 2
+	// The Cron is scheduled and eligible to run.
+	Cron_STATE_ACTIVE Cron_State = 1
+	// The Cron has been archived and is no longer eligible to run.
+	Cron_STATE_ARCHIVED Cron_State = 2
 )
 
 // Enum value maps for Cron_State.
@@ -122,22 +150,54 @@ func (Cron_State) EnumDescriptor() ([]byte, []int) {
 	return file_alis_a2a_extension_scheduler_v1_scheduler_proto_rawDescGZIP(), []int{0, 1}
 }
 
+// A Cron resource representing a scheduled CRON job.
 type Cron struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Prompt        string                 `protobuf:"bytes,2,opt,name=prompt,proto3" json:"prompt,omitempty"`
-	InitialPrompt string                 `protobuf:"bytes,13,opt,name=initial_prompt,json=initialPrompt,proto3" json:"initial_prompt,omitempty"`
-	Expr          string                 `protobuf:"bytes,3,opt,name=expr,proto3" json:"expr,omitempty"`
-	Timezone      string                 `protobuf:"bytes,4,opt,name=timezone,proto3" json:"timezone,omitempty"`
-	At            *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=at,proto3" json:"at,omitempty"`
-	Type          Cron_Type              `protobuf:"varint,6,opt,name=type,proto3,enum=alis.a2a.extension.scheduler.v1.Cron_Type" json:"type,omitempty"`
-	Owner         string                 `protobuf:"bytes,7,opt,name=owner,proto3" json:"owner,omitempty"`
-	Email         string                 `protobuf:"bytes,8,opt,name=email,proto3" json:"email,omitempty"`
-	ContextId     string                 `protobuf:"bytes,9,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
-	State         Cron_State             `protobuf:"varint,10,opt,name=state,proto3,enum=alis.a2a.extension.scheduler.v1.Cron_State" json:"state,omitempty"`
-	LastRunTime   *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=last_run_time,json=lastRunTime,proto3" json:"last_run_time,omitempty"`
-	ArchiveTime   *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=archive_time,json=archiveTime,proto3" json:"archive_time,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the Cron.
+	// Format: crons/{cron_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The prompt payload that the agent will be invoked with when the Cron runs.
+	Prompt string `protobuf:"bytes,2,opt,name=prompt,proto3" json:"prompt,omitempty"`
+	// Optional initial prompt for TYPE_CRON jobs.
+	// When set, this prompt is sent before the recurring prompt to establish context
+	// for future executions.
+	// Example initial_prompt: "You need to summarise my emails and tell me if there is anything urgent."
+	// Example prompt: "Anything new I need to be aware of?"
+	InitialPrompt string `protobuf:"bytes,13,opt,name=initial_prompt,json=initialPrompt,proto3" json:"initial_prompt,omitempty"`
+	// The unix-cron string format expression (* * * * *) for recurring jobs.
+	// Required when using type='TYPE_CRON'.
+	// See https://docs.cloud.google.com/scheduler/docs/configuring/cron-job-schedules for details.
+	Expr string `protobuf:"bytes,3,opt,name=expr,proto3" json:"expr,omitempty"`
+	// Timezone to be used in interpreting the cron expr. Must exist within the tz database.
+	// Required when using type='TYPE_CRON'.
+	// See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for list of valid values.
+	// Example: Europe/London, America/New_York, etc.
+	Timezone string `protobuf:"bytes,4,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	// The specified (once-off) timestamp for when this Cron will be invoked.
+	// Required when using type='TYPE_AT'.
+	At *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=at,proto3" json:"at,omitempty"`
+	// The Cron type.
+	Type Cron_Type `protobuf:"varint,6,opt,name=type,proto3,enum=alis.a2a.extension.scheduler.v1.Cron_Type" json:"type,omitempty"`
+	// Cron owner. Used for 'on-behalf-of' when invoking agent.
+	// Format: users/*
+	Owner string `protobuf:"bytes,7,opt,name=owner,proto3" json:"owner,omitempty"`
+	// Cron owner email. Used in combination with owner for 'on-behalf-of'
+	// E.g. me@email.com
+	Email string `protobuf:"bytes,8,opt,name=email,proto3" json:"email,omitempty"`
+	// Optional A2A context to send the scheduled message into.
+	// When set, executions attach to the existing conversation/thread for this context.
+	// When empty, each execution starts a new conversation/context.
+	ContextId string `protobuf:"bytes,9,opt,name=context_id,json=contextId,proto3" json:"context_id,omitempty"`
+	// The lifecycle state of the Cron.
+	State Cron_State `protobuf:"varint,10,opt,name=state,proto3,enum=alis.a2a.extension.scheduler.v1.Cron_State" json:"state,omitempty"`
+	// When this Cron was last executed.
+	LastRunTime *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=last_run_time,json=lastRunTime,proto3" json:"last_run_time,omitempty"`
+	// When this Cron was archived.
+	// For TYPE_AT jobs this is typically set automatically after successful execution.
+	ArchiveTime *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=archive_time,json=archiveTime,proto3" json:"archive_time,omitempty"`
+	// When this Cron was created.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// When this Cron was last updated.
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -278,9 +338,11 @@ func (x *Cron) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Request to the CreateCron method.
 type CreateCronRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cron          *Cron                  `protobuf:"bytes,1,opt,name=cron,proto3" json:"cron,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The cron to create.
+	Cron          *Cron `protobuf:"bytes,1,opt,name=cron,proto3" json:"cron,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -322,9 +384,12 @@ func (x *CreateCronRequest) GetCron() *Cron {
 	return nil
 }
 
+// Request to the UpdateCron method.
 type UpdateCronRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cron          *Cron                  `protobuf:"bytes,1,opt,name=cron,proto3" json:"cron,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Cron to update.
+	Cron *Cron `protobuf:"bytes,1,opt,name=cron,proto3" json:"cron,omitempty"`
+	// The set of fields that should be updated.
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -374,9 +439,14 @@ func (x *UpdateCronRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to the GetCron method.
 type GetCronRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the Cron to retrieve.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A read mask to specify which fields to return.
+	// If not specified, the server's default view determines the fields
+	// returned.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -426,9 +496,11 @@ func (x *GetCronRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to the DeleteCron method.
 type DeleteCronRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the Cron to delete.
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -470,10 +542,16 @@ func (x *DeleteCronRequest) GetName() string {
 	return ""
 }
 
+// Request to the ListCrons method.
 type ListCronsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of Crons to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token to retrieve the next page of results.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// A read mask to specify which fields to return.
+	// If not specified, the server's default view determines the fields
+	// returned.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -530,10 +608,13 @@ func (x *ListCronsRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Response to the ListCrons method.
 type ListCronsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Crons         []*Cron                `protobuf:"bytes,1,rep,name=crons,proto3" json:"crons,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of Crons.
+	Crons []*Cron `protobuf:"bytes,1,rep,name=crons,proto3" json:"crons,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -582,9 +663,11 @@ func (x *ListCronsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// Request to the RunCron method.
 type RunCronRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID of the Cron to run.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -626,6 +709,7 @@ func (x *RunCronRequest) GetId() string {
 	return ""
 }
 
+// Response to RunCron.
 type RunCronResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -666,7 +750,7 @@ var File_alis_a2a_extension_scheduler_v1_scheduler_proto protoreflect.FileDescri
 
 const file_alis_a2a_extension_scheduler_v1_scheduler_proto_rawDesc = "" +
 	"\n" +
-	"/alis/a2a/extension/scheduler/v1/scheduler.proto\x12\x1falis.a2a.extension.scheduler.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/field_mask.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xfc\x05\n" +
+	"/alis/a2a/extension/scheduler/v1/scheduler.proto\x12\x1falis.a2a.extension.scheduler.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfc\x05\n" +
 	"\x04Cron\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
 	"\x06prompt\x18\x02 \x01(\tR\x06prompt\x12%\n" +

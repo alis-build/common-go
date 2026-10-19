@@ -3,21 +3,21 @@
 // Source: alis/a2a/extension/scheduler/v1/scheduler.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:27:45 UTC
+// Generated on: 2026-10-19 08:00:04 UTC
 
 package scheduler
 
 const (
 	// SchedulerService_CreateCron_FullMethodDescription returns the description of the alis.a2a.extension.scheduler.v1.SchedulerService.CreateCron method.
-	SchedulerService_CreateCron_FullMethodDescription = ""
+	SchedulerService_CreateCron_FullMethodDescription = "Creates a Cron."
 	// SchedulerService_ListCrons_FullMethodDescription returns the description of the alis.a2a.extension.scheduler.v1.SchedulerService.ListCrons method.
-	SchedulerService_ListCrons_FullMethodDescription = ""
+	SchedulerService_ListCrons_FullMethodDescription = "Lists all Crons."
 	// SchedulerService_GetCron_FullMethodDescription returns the description of the alis.a2a.extension.scheduler.v1.SchedulerService.GetCron method.
-	SchedulerService_GetCron_FullMethodDescription = ""
+	SchedulerService_GetCron_FullMethodDescription = "Gets a Cron."
 	// SchedulerService_UpdateCron_FullMethodDescription returns the description of the alis.a2a.extension.scheduler.v1.SchedulerService.UpdateCron method.
-	SchedulerService_UpdateCron_FullMethodDescription = ""
+	SchedulerService_UpdateCron_FullMethodDescription = "Updates a Cron."
 	// SchedulerService_DeleteCron_FullMethodDescription returns the description of the alis.a2a.extension.scheduler.v1.SchedulerService.DeleteCron method.
-	SchedulerService_DeleteCron_FullMethodDescription = ""
+	SchedulerService_DeleteCron_FullMethodDescription = "Deletes a Cron."
 	// SchedulerService_RunCron_FullMethodDescription returns the description of the alis.a2a.extension.scheduler.v1.SchedulerService.RunCron method.
-	SchedulerService_RunCron_FullMethodDescription = ""
+	SchedulerService_RunCron_FullMethodDescription = "Runs a Cron. This ignores any schedule details and runs the Cron immediately."
 )
