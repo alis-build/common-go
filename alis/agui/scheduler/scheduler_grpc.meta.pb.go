@@ -3,29 +3,29 @@
 // Source: alis/agui/scheduler/v1/scheduler.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:36:14 UTC
+// Generated on: 2026-10-19 08:23:20 UTC
 
 package scheduler
 
 const (
 	// SchedulerService_GetIamPolicy_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.GetIamPolicy method.
-	SchedulerService_GetIamPolicy_FullMethodDescription = ""
+	SchedulerService_GetIamPolicy_FullMethodDescription = "Gets the IAM policy for a resource implemented in this service."
 	// SchedulerService_SetIamPolicy_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.SetIamPolicy method.
-	SchedulerService_SetIamPolicy_FullMethodDescription = ""
+	SchedulerService_SetIamPolicy_FullMethodDescription = "Sets the IAM policy for a resource implemented in this service."
 	// SchedulerService_AddIamBindings_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.AddIamBindings method.
-	SchedulerService_AddIamBindings_FullMethodDescription = ""
+	SchedulerService_AddIamBindings_FullMethodDescription = "Adds principals or updates the roles existing principals have on an IAM Policy protected resource."
 	// SchedulerService_RemoveIamBindings_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.RemoveIamBindings method.
-	SchedulerService_RemoveIamBindings_FullMethodDescription = ""
+	SchedulerService_RemoveIamBindings_FullMethodDescription = "Removes principals or some of the roles they have on an IAM Policy protected resource."
 	// SchedulerService_CreateCron_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.CreateCron method.
-	SchedulerService_CreateCron_FullMethodDescription = ""
+	SchedulerService_CreateCron_FullMethodDescription = "Creates a Cron."
 	// SchedulerService_ListCrons_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.ListCrons method.
-	SchedulerService_ListCrons_FullMethodDescription = ""
+	SchedulerService_ListCrons_FullMethodDescription = "Lists all Crons."
 	// SchedulerService_GetCron_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.GetCron method.
-	SchedulerService_GetCron_FullMethodDescription = ""
+	SchedulerService_GetCron_FullMethodDescription = "Gets a Cron."
 	// SchedulerService_UpdateCron_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.UpdateCron method.
-	SchedulerService_UpdateCron_FullMethodDescription = ""
+	SchedulerService_UpdateCron_FullMethodDescription = "Updates a Cron."
 	// SchedulerService_DeleteCron_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.DeleteCron method.
-	SchedulerService_DeleteCron_FullMethodDescription = ""
+	SchedulerService_DeleteCron_FullMethodDescription = "Deletes a Cron."
 	// SchedulerService_RunCron_FullMethodDescription returns the description of the alis.agui.scheduler.v1.SchedulerService.RunCron method.
-	SchedulerService_RunCron_FullMethodDescription = ""
+	SchedulerService_RunCron_FullMethodDescription = "Runs a Cron. This ignores any schedule details and runs the Cron immediately."
 )

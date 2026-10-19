@@ -4,6 +4,28 @@
 // - protoc             v3.21.12
 // source: alis/agui/scheduler/v1/scheduler.proto
 
+// Schedules runs of AG-UI agents, either on a recurring cron schedule or once
+// at a set time.
+//
+// `SchedulerService` manages `Cron` resources (`crons/{cron_id}`) and exposes
+// IAM policy methods for them. Each `Cron` holds the prompt to send, the owner
+// the agent is invoked on behalf of, an optional `agent_id` (the launcher's
+// default app when empty), and one of two schedule types:
+//
+// - `TYPE_CRON`: recurring, driven by a unix-cron `expr` and a tz database
+//   `timezone`. An optional `initial_prompt` is sent before the recurring
+//   prompt to establish context.
+// - `TYPE_AT`: a single run at the `at` timestamp. The Cron is archived after
+//   a successful run or a terminal failure.
+//
+// Runs go into the AG-UI thread named by `thread` (`threads/{thread_id}`, where
+// `{thread_id}` is the ADK session ID). When `thread` is empty, the launcher
+// assigns a thread ID after the first successful run. The most recent failure
+// is recorded in `last_failure_time` and `last_failure_message`. `RunCron`
+// runs a Cron immediately, regardless of its schedule.
+//
+// `alis.a2a.extension.scheduler.v1` is the equivalent for A2A agents.
+
 package scheduler
 
 import (
@@ -37,16 +59,28 @@ const (
 // SchedulerServiceClient is the client API for SchedulerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Manages scheduled AG-UI agent runs (recurring and one-shot).
 type SchedulerServiceClient interface {
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Creates a Cron.
 	CreateCron(ctx context.Context, in *CreateCronRequest, opts ...grpc.CallOption) (*Cron, error)
+	// Lists all Crons.
 	ListCrons(ctx context.Context, in *ListCronsRequest, opts ...grpc.CallOption) (*ListCronsResponse, error)
+	// Gets a Cron.
 	GetCron(ctx context.Context, in *GetCronRequest, opts ...grpc.CallOption) (*Cron, error)
+	// Updates a Cron.
 	UpdateCron(ctx context.Context, in *UpdateCronRequest, opts ...grpc.CallOption) (*Cron, error)
+	// Deletes a Cron.
 	DeleteCron(ctx context.Context, in *DeleteCronRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Runs a Cron. This ignores any schedule details and runs the Cron immediately.
 	RunCron(ctx context.Context, in *RunCronRequest, opts ...grpc.CallOption) (*RunCronResponse, error)
 }
 
@@ -161,16 +195,28 @@ func (c *schedulerServiceClient) RunCron(ctx context.Context, in *RunCronRequest
 // SchedulerServiceServer is the server API for SchedulerService service.
 // All implementations must embed UnimplementedSchedulerServiceServer
 // for forward compatibility.
+//
+// Manages scheduled AG-UI agent runs (recurring and one-shot).
 type SchedulerServiceServer interface {
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
+	// Creates a Cron.
 	CreateCron(context.Context, *CreateCronRequest) (*Cron, error)
+	// Lists all Crons.
 	ListCrons(context.Context, *ListCronsRequest) (*ListCronsResponse, error)
+	// Gets a Cron.
 	GetCron(context.Context, *GetCronRequest) (*Cron, error)
+	// Updates a Cron.
 	UpdateCron(context.Context, *UpdateCronRequest) (*Cron, error)
+	// Deletes a Cron.
 	DeleteCron(context.Context, *DeleteCronRequest) (*emptypb.Empty, error)
+	// Runs a Cron. This ignores any schedule details and runs the Cron immediately.
 	RunCron(context.Context, *RunCronRequest) (*RunCronResponse, error)
 	mustEmbedUnimplementedSchedulerServiceServer()
 }
