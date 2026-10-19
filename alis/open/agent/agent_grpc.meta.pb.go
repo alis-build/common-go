@@ -3,7 +3,7 @@
 // Source: alis/open/agent/v1/agent.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-10-19 08:22:06 UTC
+// Generated on: 2026-10-19 08:57:44 UTC
 
 package agent
 
