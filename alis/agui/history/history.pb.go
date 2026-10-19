@@ -4,6 +4,27 @@
 // 	protoc        v3.21.12
 // source: alis/agui/history/v1/history.proto
 
+// Keeps thread-level metadata for AG-UI conversations: display names, agent
+// identity, run counts, and each user's read and pin state.
+//
+// Messages and tool calls are not stored here; ADK sessions remain the source
+// of truth for conversation history.
+//
+// `ThreadService` manages two resources:
+//
+// - `Thread` (`threads/{thread_id}`): one AG-UI conversation, created by the
+//   AG-UI launcher on the first `/run_sse` request for a thread ID.
+// - `UserThreadState` (`threads/{thread_id}/userStates/{user_id}`): one user's
+//   read position and pin state for a thread.
+//
+// Each completed `/run_sse` run increments the thread's `run_count`. A thread
+// is unread for a user while `run_count` exceeds their `read_run_count`;
+// `ListThreads` reports this on the caller-scoped `ThreadView`. The service
+// also exposes IAM policy methods for its resources.
+//
+// `alis.a2a.extension.history.v1` is the A2A counterpart, which also stores
+// the conversation events themselves.
+
 package history
 
 import (
@@ -26,17 +47,30 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// A Thread resource representing an AG-UI conversation thread.
+// Thread metadata is created automatically by the AG-UI launcher on the first
+// /run_sse request for a given threadId.
 type Thread struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Name             string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName      string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	AgentId          string                 `protobuf:"bytes,3,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
-	AgentDisplayName string                 `protobuf:"bytes,4,opt,name=agent_display_name,json=agentDisplayName,proto3" json:"agent_display_name,omitempty"`
-	RunCount         int64                  `protobuf:"varint,5,opt,name=run_count,json=runCount,proto3" json:"run_count,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the thread.
+	// Format: threads/{thread_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The display name of the thread. Generated at creation from the first user
+	// message, and may be changed afterwards via UpdateThread.
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// The agent identifier, e.g. "finance-agent-v1".
+	AgentId string `protobuf:"bytes,3,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	// The agent display name, e.g. "Finance Agent".
+	AgentDisplayName string `protobuf:"bytes,4,opt,name=agent_display_name,json=agentDisplayName,proto3" json:"agent_display_name,omitempty"`
+	// Monotonic counter incremented on each /run_sse completion for this thread.
+	// Used with UserThreadState.read_run_count for unread detection.
+	RunCount int64 `protobuf:"varint,5,opt,name=run_count,json=runCount,proto3" json:"run_count,omitempty"`
+	// When this thread last had activity (updated each /run_sse).
 	LastActivityTime *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=last_activity_time,json=lastActivityTime,proto3" json:"last_activity_time,omitempty"`
-	CreateTime       *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// When this thread was created.
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Thread) Reset() {
@@ -118,15 +152,27 @@ func (x *Thread) GetCreateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Per-user state for a thread. Tracks read position and pinning.
 type UserThreadState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Thread        string                 `protobuf:"bytes,2,opt,name=thread,proto3" json:"thread,omitempty"`
-	User          string                 `protobuf:"bytes,3,opt,name=user,proto3" json:"user,omitempty"`
-	ReadRunCount  int64                  `protobuf:"varint,4,opt,name=read_run_count,json=readRunCount,proto3" json:"read_run_count,omitempty"`
-	LastReadTime  *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=last_read_time,json=lastReadTime,proto3" json:"last_read_time,omitempty"`
-	Pinned        bool                   `protobuf:"varint,6,opt,name=pinned,proto3" json:"pinned,omitempty"`
-	PinnedTime    *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=pinned_time,json=pinnedTime,proto3" json:"pinned_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the user-thread-state row.
+	// Format: threads/{thread_id}/userStates/{user_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The parent thread resource name.
+	// Format: threads/{thread_id}
+	Thread string `protobuf:"bytes,2,opt,name=thread,proto3" json:"thread,omitempty"`
+	// The user resource name this state belongs to.
+	// Format: users/{user_id}
+	User string `protobuf:"bytes,3,opt,name=user,proto3" json:"user,omitempty"`
+	// Highest run_count acknowledged by this user.
+	ReadRunCount int64 `protobuf:"varint,4,opt,name=read_run_count,json=readRunCount,proto3" json:"read_run_count,omitempty"`
+	// When this user last read the thread.
+	LastReadTime *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=last_read_time,json=lastReadTime,proto3" json:"last_read_time,omitempty"`
+	// True when this user has pinned the thread.
+	Pinned bool `protobuf:"varint,6,opt,name=pinned,proto3" json:"pinned,omitempty"`
+	// When this user pinned the thread. Unset when pinned is false.
+	PinnedTime *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=pinned_time,json=pinnedTime,proto3" json:"pinned_time,omitempty"`
+	// When this user-thread state was last updated.
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -218,12 +264,19 @@ func (x *UserThreadState) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Caller-scoped thread projection returned by `ListThreads`.
+// Merges the shared Thread resource with the caller's UserThreadState.
 type ThreadView struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Thread        *Thread                `protobuf:"bytes,1,opt,name=thread,proto3" json:"thread,omitempty"`
-	ReadRunCount  int64                  `protobuf:"varint,2,opt,name=read_run_count,json=readRunCount,proto3" json:"read_run_count,omitempty"`
-	HasUnread     bool                   `protobuf:"varint,3,opt,name=has_unread,json=hasUnread,proto3" json:"has_unread,omitempty"`
-	Pinned        bool                   `protobuf:"varint,4,opt,name=pinned,proto3" json:"pinned,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The shared thread resource.
+	Thread *Thread `protobuf:"bytes,1,opt,name=thread,proto3" json:"thread,omitempty"`
+	// Highest run_count acknowledged by the caller.
+	ReadRunCount int64 `protobuf:"varint,2,opt,name=read_run_count,json=readRunCount,proto3" json:"read_run_count,omitempty"`
+	// True when thread.run_count is greater than read_run_count.
+	HasUnread bool `protobuf:"varint,3,opt,name=has_unread,json=hasUnread,proto3" json:"has_unread,omitempty"`
+	// True when the caller has pinned this thread.
+	Pinned bool `protobuf:"varint,4,opt,name=pinned,proto3" json:"pinned,omitempty"`
+	// When the caller pinned this thread.
 	PinnedTime    *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=pinned_time,json=pinnedTime,proto3" json:"pinned_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -294,11 +347,16 @@ func (x *ThreadView) GetPinnedTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Request to list threads.
 type ListThreadsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	AgentId       string                 `protobuf:"bytes,4,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of threads to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token to retrieve the next page of results.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// Optional filtering by the agent_id that produced the thread.
+	AgentId string `protobuf:"bytes,4,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	// A read mask to specify which fields to return.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -362,10 +420,13 @@ func (x *ListThreadsRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Response for ListThreads.
 type ListThreadsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Threads       []*ThreadView          `protobuf:"bytes,1,rep,name=threads,proto3" json:"threads,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of caller-scoped thread views.
+	Threads []*ThreadView `protobuf:"bytes,1,rep,name=threads,proto3" json:"threads,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -414,9 +475,13 @@ func (x *ListThreadsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// Request to get a thread.
 type GetThreadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the thread to retrieve.
+	// Format: threads/{thread_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A read mask to specify which fields to return.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -466,9 +531,12 @@ func (x *GetThreadRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to delete a thread.
 type DeleteThreadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the thread to delete.
+	// Format: threads/{thread_id}
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -510,9 +578,15 @@ func (x *DeleteThreadRequest) GetName() string {
 	return ""
 }
 
+// Request to update a thread.
 type UpdateThreadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Thread        *Thread                `protobuf:"bytes,1,opt,name=thread,proto3" json:"thread,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The thread resource to update.
+	// The resource name is required.
+	// Format: threads/{thread_id}
+	Thread *Thread `protobuf:"bytes,1,opt,name=thread,proto3" json:"thread,omitempty"`
+	// A field mask controlling which fields are updated.
+	// Only "display_name" is supported. Defaults to "display_name" when unset.
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -562,9 +636,13 @@ func (x *UpdateThreadRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to get per-user thread state.
 type GetUserThreadStateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the user-thread state to retrieve.
+	// Format: threads/{thread_id}/userStates/{user_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A read mask to specify which fields to return.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -614,12 +692,15 @@ func (x *GetUserThreadStateRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to update per-user thread state.
 type UpdateUserThreadStateRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	UserThreadState *UserThreadState       `protobuf:"bytes,1,opt,name=user_thread_state,json=userThreadState,proto3" json:"user_thread_state,omitempty"`
-	UpdateMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The user-thread-state resource to update.
+	UserThreadState *UserThreadState `protobuf:"bytes,1,opt,name=user_thread_state,json=userThreadState,proto3" json:"user_thread_state,omitempty"`
+	// A field mask controlling which fields are updated.
+	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateUserThreadStateRequest) Reset() {

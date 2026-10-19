@@ -4,6 +4,27 @@
 // - protoc             v3.21.12
 // source: alis/agui/history/v1/history.proto
 
+// Keeps thread-level metadata for AG-UI conversations: display names, agent
+// identity, run counts, and each user's read and pin state.
+//
+// Messages and tool calls are not stored here; ADK sessions remain the source
+// of truth for conversation history.
+//
+// `ThreadService` manages two resources:
+//
+// - `Thread` (`threads/{thread_id}`): one AG-UI conversation, created by the
+//   AG-UI launcher on the first `/run_sse` request for a thread ID.
+// - `UserThreadState` (`threads/{thread_id}/userStates/{user_id}`): one user's
+//   read position and pin state for a thread.
+//
+// Each completed `/run_sse` run increments the thread's `run_count`. A thread
+// is unread for a user while `run_count` exceeds their `read_run_count`;
+// `ListThreads` reports this on the caller-scoped `ThreadView`. The service
+// also exposes IAM policy methods for its resources.
+//
+// `alis.a2a.extension.history.v1` is the A2A counterpart, which also stores
+// the conversation events themselves.
+
 package history
 
 import (
@@ -37,16 +58,34 @@ const (
 // ThreadServiceClient is the client API for ThreadService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Manages persisted AG-UI conversation thread metadata, including thread
+// listing, per-user state (unread tracking, pinning), and IAM policy access.
+//
+// Events (messages, tool calls) are NOT stored here; ADK sessions are the
+// source of truth for conversation history. This service stores only the
+// thread-level metadata that ADK sessions do not provide: display names,
+// agent identity, run counts, and per-user read/pin state.
 type ThreadServiceClient interface {
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Lists all threads visible to the caller.
 	ListThreads(ctx context.Context, in *ListThreadsRequest, opts ...grpc.CallOption) (*ListThreadsResponse, error)
+	// Gets a thread by its resource name.
 	GetThread(ctx context.Context, in *GetThreadRequest, opts ...grpc.CallOption) (*Thread, error)
+	// Deletes a thread.
 	DeleteThread(ctx context.Context, in *DeleteThreadRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Gets per-user state for a thread.
 	GetUserThreadState(ctx context.Context, in *GetUserThreadStateRequest, opts ...grpc.CallOption) (*UserThreadState, error)
+	// Updates per-user state for a thread.
 	UpdateUserThreadState(ctx context.Context, in *UpdateUserThreadStateRequest, opts ...grpc.CallOption) (*UserThreadState, error)
+	// Updates mutable thread metadata.
 	UpdateThread(ctx context.Context, in *UpdateThreadRequest, opts ...grpc.CallOption) (*Thread, error)
 }
 
@@ -161,16 +200,34 @@ func (c *threadServiceClient) UpdateThread(ctx context.Context, in *UpdateThread
 // ThreadServiceServer is the server API for ThreadService service.
 // All implementations must embed UnimplementedThreadServiceServer
 // for forward compatibility.
+//
+// Manages persisted AG-UI conversation thread metadata, including thread
+// listing, per-user state (unread tracking, pinning), and IAM policy access.
+//
+// Events (messages, tool calls) are NOT stored here; ADK sessions are the
+// source of truth for conversation history. This service stores only the
+// thread-level metadata that ADK sessions do not provide: display names,
+// agent identity, run counts, and per-user read/pin state.
 type ThreadServiceServer interface {
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
+	// Lists all threads visible to the caller.
 	ListThreads(context.Context, *ListThreadsRequest) (*ListThreadsResponse, error)
+	// Gets a thread by its resource name.
 	GetThread(context.Context, *GetThreadRequest) (*Thread, error)
+	// Deletes a thread.
 	DeleteThread(context.Context, *DeleteThreadRequest) (*emptypb.Empty, error)
+	// Gets per-user state for a thread.
 	GetUserThreadState(context.Context, *GetUserThreadStateRequest) (*UserThreadState, error)
+	// Updates per-user state for a thread.
 	UpdateUserThreadState(context.Context, *UpdateUserThreadStateRequest) (*UserThreadState, error)
+	// Updates mutable thread metadata.
 	UpdateThread(context.Context, *UpdateThreadRequest) (*Thread, error)
 	mustEmbedUnimplementedThreadServiceServer()
 }

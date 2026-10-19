@@ -3,29 +3,29 @@
 // Source: alis/agui/history/v1/history.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:36:13 UTC
+// Generated on: 2026-10-19 08:23:20 UTC
 
 package history
 
 const (
 	// ThreadService_GetIamPolicy_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.GetIamPolicy method.
-	ThreadService_GetIamPolicy_FullMethodDescription = ""
+	ThreadService_GetIamPolicy_FullMethodDescription = "Gets the IAM policy for a resource implemented in this service."
 	// ThreadService_SetIamPolicy_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.SetIamPolicy method.
-	ThreadService_SetIamPolicy_FullMethodDescription = ""
+	ThreadService_SetIamPolicy_FullMethodDescription = "Sets the IAM policy for a resource implemented in this service."
 	// ThreadService_AddIamBindings_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.AddIamBindings method.
-	ThreadService_AddIamBindings_FullMethodDescription = ""
+	ThreadService_AddIamBindings_FullMethodDescription = "Adds principals or updates the roles existing principals have on an IAM Policy protected resource."
 	// ThreadService_RemoveIamBindings_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.RemoveIamBindings method.
-	ThreadService_RemoveIamBindings_FullMethodDescription = ""
+	ThreadService_RemoveIamBindings_FullMethodDescription = "Removes principals or some of the roles they have on an IAM Policy protected resource."
 	// ThreadService_ListThreads_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.ListThreads method.
-	ThreadService_ListThreads_FullMethodDescription = ""
+	ThreadService_ListThreads_FullMethodDescription = "Lists all threads visible to the caller."
 	// ThreadService_GetThread_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.GetThread method.
-	ThreadService_GetThread_FullMethodDescription = ""
+	ThreadService_GetThread_FullMethodDescription = "Gets a thread by its resource name."
 	// ThreadService_DeleteThread_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.DeleteThread method.
-	ThreadService_DeleteThread_FullMethodDescription = ""
+	ThreadService_DeleteThread_FullMethodDescription = "Deletes a thread."
 	// ThreadService_GetUserThreadState_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.GetUserThreadState method.
-	ThreadService_GetUserThreadState_FullMethodDescription = ""
+	ThreadService_GetUserThreadState_FullMethodDescription = "Gets per-user state for a thread."
 	// ThreadService_UpdateUserThreadState_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.UpdateUserThreadState method.
-	ThreadService_UpdateUserThreadState_FullMethodDescription = ""
+	ThreadService_UpdateUserThreadState_FullMethodDescription = "Updates per-user state for a thread."
 	// ThreadService_UpdateThread_FullMethodDescription returns the description of the alis.agui.history.v1.ThreadService.UpdateThread method.
-	ThreadService_UpdateThread_FullMethodDescription = ""
+	ThreadService_UpdateThread_FullMethodDescription = "Updates mutable thread metadata."
 )
