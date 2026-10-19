@@ -4,6 +4,27 @@
 // - protoc             v3.21.12
 // source: alis/a2a/extension/history/v1/history.proto
 
+// Stores A2A conversations as threads of events that clients can list and
+// stream, and tracks what each user has read.
+//
+// `ThreadService` manages three resources:
+//
+// - `Thread` (`threads/{context_id}`): one conversation, keyed by its A2A
+//   context ID.
+// - `ThreadEvent` (`threads/{context_id}/events/{event_id}`): one recorded
+//   `lf.a2a.v1` payload: a `Task`, `Message`, `TaskStatusUpdateEvent`, or
+//   `TaskArtifactUpdateEvent`.
+// - `UserThreadState` (`threads/{context_id}/userStates/{userId}`): one
+//   user's read position and pin state for a thread.
+//
+// Each event gets a monotonic `sequence` within its thread. A thread is unread
+// for a user while its `latest_sequence` exceeds their `read_sequence`;
+// `ListThreads` reports this on the caller-scoped `ThreadView`. The service
+// also exposes IAM policy methods for its resources.
+//
+// `alis.agui.history.v1` is the AG-UI counterpart; it keeps only thread
+// metadata and leaves event history to ADK sessions.
+
 package history
 
 import (
@@ -40,19 +61,35 @@ const (
 // ThreadServiceClient is the client API for ThreadService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Manages persisted A2A conversation threads and their events, including
+// thread listing, event appends, event streaming, and IAM policy access.
 type ThreadServiceClient interface {
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Lists all Threads.
 	ListThreads(ctx context.Context, in *ListThreadsRequest, opts ...grpc.CallOption) (*ListThreadsResponse, error)
+	// Gets an Thread by its resource name.
 	GetThread(ctx context.Context, in *GetThreadRequest, opts ...grpc.CallOption) (*Thread, error)
+	// Deletes an Thread.
 	DeleteThread(ctx context.Context, in *DeleteThreadRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Appends an event to a given Thread
 	AppendThreadEvent(ctx context.Context, in *AppendThreadEventRequest, opts ...grpc.CallOption) (*AppendThreadEventResponse, error)
+	// Gets per-user state for a Thread.
 	GetUserThreadState(ctx context.Context, in *GetUserThreadStateRequest, opts ...grpc.CallOption) (*UserThreadState, error)
+	// Updates per-user state for a Thread.
 	UpdateUserThreadState(ctx context.Context, in *UpdateUserThreadStateRequest, opts ...grpc.CallOption) (*UserThreadState, error)
+	// Lists all events.
 	ListThreadEvents(ctx context.Context, in *ListThreadEventsRequest, opts ...grpc.CallOption) (*ListThreadEventsResponse, error)
+	// Stream events.
 	StreamThreadEvents(ctx context.Context, in *StreamThreadEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ThreadEvent], error)
+	// Set thread display name.
 	SetThreadDisplayName(ctx context.Context, in *SetThreadDisplayNameRequest, opts ...grpc.CallOption) (*Thread, error)
 }
 
@@ -206,19 +243,35 @@ func (c *threadServiceClient) SetThreadDisplayName(ctx context.Context, in *SetT
 // ThreadServiceServer is the server API for ThreadService service.
 // All implementations must embed UnimplementedThreadServiceServer
 // for forward compatibility.
+//
+// Manages persisted A2A conversation threads and their events, including
+// thread listing, event appends, event streaming, and IAM policy access.
 type ThreadServiceServer interface {
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
+	// Lists all Threads.
 	ListThreads(context.Context, *ListThreadsRequest) (*ListThreadsResponse, error)
+	// Gets an Thread by its resource name.
 	GetThread(context.Context, *GetThreadRequest) (*Thread, error)
+	// Deletes an Thread.
 	DeleteThread(context.Context, *DeleteThreadRequest) (*emptypb.Empty, error)
+	// Appends an event to a given Thread
 	AppendThreadEvent(context.Context, *AppendThreadEventRequest) (*AppendThreadEventResponse, error)
+	// Gets per-user state for a Thread.
 	GetUserThreadState(context.Context, *GetUserThreadStateRequest) (*UserThreadState, error)
+	// Updates per-user state for a Thread.
 	UpdateUserThreadState(context.Context, *UpdateUserThreadStateRequest) (*UserThreadState, error)
+	// Lists all events.
 	ListThreadEvents(context.Context, *ListThreadEventsRequest) (*ListThreadEventsResponse, error)
+	// Stream events.
 	StreamThreadEvents(*StreamThreadEventsRequest, grpc.ServerStreamingServer[ThreadEvent]) error
+	// Set thread display name.
 	SetThreadDisplayName(context.Context, *SetThreadDisplayNameRequest) (*Thread, error)
 	mustEmbedUnimplementedThreadServiceServer()
 }

@@ -4,6 +4,27 @@
 // 	protoc        v3.21.12
 // source: alis/a2a/extension/history/v1/history.proto
 
+// Stores A2A conversations as threads of events that clients can list and
+// stream, and tracks what each user has read.
+//
+// `ThreadService` manages three resources:
+//
+// - `Thread` (`threads/{context_id}`): one conversation, keyed by its A2A
+//   context ID.
+// - `ThreadEvent` (`threads/{context_id}/events/{event_id}`): one recorded
+//   `lf.a2a.v1` payload: a `Task`, `Message`, `TaskStatusUpdateEvent`, or
+//   `TaskArtifactUpdateEvent`.
+// - `UserThreadState` (`threads/{context_id}/userStates/{userId}`): one
+//   user's read position and pin state for a thread.
+//
+// Each event gets a monotonic `sequence` within its thread. A thread is unread
+// for a user while its `latest_sequence` exceeds their `read_sequence`;
+// `ListThreads` reports this on the caller-scoped `ThreadView`. The service
+// also exposes IAM policy methods for its resources.
+//
+// `alis.agui.history.v1` is the AG-UI counterpart; it keeps only thread
+// metadata and leaves event history to ADK sessions.
+
 package history
 
 import (
@@ -27,17 +48,28 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// A persisted A2A conversation, identified by its A2A context ID. The
+// conversation's content is stored as child `ThreadEvent` resources.
 type Thread struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Name             string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName      string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	AgentId          string                 `protobuf:"bytes,3,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
-	AgentDisplayName string                 `protobuf:"bytes,4,opt,name=agent_display_name,json=agentDisplayName,proto3" json:"agent_display_name,omitempty"`
-	NextSequence     int64                  `protobuf:"varint,5,opt,name=next_sequence,json=nextSequence,proto3" json:"next_sequence,omitempty"`
-	LatestSequence   int64                  `protobuf:"varint,6,opt,name=latest_sequence,json=latestSequence,proto3" json:"latest_sequence,omitempty"`
-	CreateTime       *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the Thread.
+	// threads/{context_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Generated display name from the first event in a Thread.
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// The agent_id, e.g. finance-agent-v1
+	AgentId string `protobuf:"bytes,3,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	// The agent display name, e.g. Finance Agent
+	AgentDisplayName string `protobuf:"bytes,4,opt,name=agent_display_name,json=agentDisplayName,proto3" json:"agent_display_name,omitempty"`
+	// Internal monotonic counter for assigning event sequence numbers.
+	NextSequence int64 `protobuf:"varint,5,opt,name=next_sequence,json=nextSequence,proto3" json:"next_sequence,omitempty"`
+	// Highest event sequence currently present in the thread.
+	// This is shared thread state and is the source of truth for unread calculations.
+	LatestSequence int64 `protobuf:"varint,6,opt,name=latest_sequence,json=latestSequence,proto3" json:"latest_sequence,omitempty"`
+	// When this Thread was created.
+	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Thread) Reset() {
@@ -119,17 +151,27 @@ func (x *Thread) GetCreateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// One entry in a thread: an A2A task snapshot, message, status update, or
+// artifact update, stored with its position in the thread.
 type ThreadEvent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The resource name of the event.
+	// threads/{context_id}/events/{event_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The A2A payload recorded by this event. The choices mirror the payload of
+	// `lf.a2a.v1.StreamResponse`.
+	//
 	// Types that are valid to be assigned to Payload:
 	//
 	//	*ThreadEvent_Task
 	//	*ThreadEvent_Message
 	//	*ThreadEvent_StatusUpdate
 	//	*ThreadEvent_ArtifactUpdate
-	Payload       isThreadEvent_Payload  `protobuf_oneof:"payload"`
-	Sequence      int64                  `protobuf:"varint,6,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	Payload isThreadEvent_Payload `protobuf_oneof:"payload"`
+	// Monotonic sequence number within a thread.
+	// Clients can use this as a stable read cursor.
+	Sequence int64 `protobuf:"varint,6,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	// When this event was created.
 	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -234,18 +276,22 @@ type isThreadEvent_Payload interface {
 }
 
 type ThreadEvent_Task struct {
+	// A Task object containing the current state of the task.
 	Task *v1.Task `protobuf:"bytes,2,opt,name=task,proto3,oneof"`
 }
 
 type ThreadEvent_Message struct {
+	// A Message object containing a message from the client/user.
 	Message *v1.Message `protobuf:"bytes,3,opt,name=message,proto3,oneof"`
 }
 
 type ThreadEvent_StatusUpdate struct {
+	// An event indicating a task status update.
 	StatusUpdate *v1.TaskStatusUpdateEvent `protobuf:"bytes,4,opt,name=status_update,json=statusUpdate,proto3,oneof"`
 }
 
 type ThreadEvent_ArtifactUpdate struct {
+	// An event indicating a task artifact update.
 	ArtifactUpdate *v1.TaskArtifactUpdateEvent `protobuf:"bytes,5,opt,name=artifact_update,json=artifactUpdate,proto3,oneof"`
 }
 
@@ -257,14 +303,26 @@ func (*ThreadEvent_StatusUpdate) isThreadEvent_Payload() {}
 
 func (*ThreadEvent_ArtifactUpdate) isThreadEvent_Payload() {}
 
+// Per-user state for a Thread.
 type UserThreadState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Thread        string                 `protobuf:"bytes,2,opt,name=thread,proto3" json:"thread,omitempty"`
-	User          string                 `protobuf:"bytes,3,opt,name=user,proto3" json:"user,omitempty"`
-	ReadSequence  int64                  `protobuf:"varint,4,opt,name=read_sequence,json=readSequence,proto3" json:"read_sequence,omitempty"`
-	Pinned        bool                   `protobuf:"varint,5,opt,name=pinned,proto3" json:"pinned,omitempty"`
-	PinnedTime    *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=pinned_time,json=pinnedTime,proto3" json:"pinned_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the user-thread-state row.
+	// threads/{context_id}/userStates/{userId}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The parent Thread resource name.
+	// threads/{context_id}
+	Thread string `protobuf:"bytes,2,opt,name=thread,proto3" json:"thread,omitempty"`
+	// The user resource name this user-thread state belongs to.
+	// Format: users/{user}
+	User string `protobuf:"bytes,3,opt,name=user,proto3" json:"user,omitempty"`
+	// Highest event sequence acknowledged by this user.
+	ReadSequence int64 `protobuf:"varint,4,opt,name=read_sequence,json=readSequence,proto3" json:"read_sequence,omitempty"`
+	// True when this user has pinned the thread.
+	Pinned bool `protobuf:"varint,5,opt,name=pinned,proto3" json:"pinned,omitempty"`
+	// When this user pinned the thread.
+	// Unset when pinned is false.
+	PinnedTime *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=pinned_time,json=pinnedTime,proto3" json:"pinned_time,omitempty"`
+	// When this user-thread state was last updated.
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -349,9 +407,14 @@ func (x *UserThreadState) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Request to get an Thread.
 type GetThreadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the Thread to retrieve.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A read mask to specify which fields to return.
+	// If not specified, the server's default view determines the fields
+	// returned.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -401,9 +464,15 @@ func (x *GetThreadRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to get UserThreadState.
 type GetUserThreadStateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the user-thread state to retrieve.
+	// Format: threads/{context_id}/userStates/{userId}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A read mask to specify which fields to return.
+	// If not specified, the server's default view determines the fields
+	// returned.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -453,9 +522,11 @@ func (x *GetUserThreadStateRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to delete an Thread.
 type DeleteThreadRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the Thread to delete.
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -497,11 +568,19 @@ func (x *DeleteThreadRequest) GetName() string {
 	return ""
 }
 
+// Request to list Threads.
 type ListThreadsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	AgentId       string                 `protobuf:"bytes,4,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of A2A Threads to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token to retrieve the next page of results.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// Optional filtering of Threads by the "agent_id" who produced the underlying Events.
+	// Example: my-agent-v1. However, this can be any unique identifier that client decides to use.
+	AgentId string `protobuf:"bytes,4,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	// A read mask to specify which fields to return.
+	// If not specified, the server's default view determines the fields
+	// returned.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -565,12 +644,18 @@ func (x *ListThreadsRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Caller-scoped thread projection returned by list/read APIs.
 type ThreadView struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Thread        *Thread                `protobuf:"bytes,1,opt,name=thread,proto3" json:"thread,omitempty"`
-	ReadSequence  int64                  `protobuf:"varint,2,opt,name=read_sequence,json=readSequence,proto3" json:"read_sequence,omitempty"`
-	HasUnread     bool                   `protobuf:"varint,3,opt,name=has_unread,json=hasUnread,proto3" json:"has_unread,omitempty"`
-	Pinned        bool                   `protobuf:"varint,4,opt,name=pinned,proto3" json:"pinned,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The shared thread resource.
+	Thread *Thread `protobuf:"bytes,1,opt,name=thread,proto3" json:"thread,omitempty"`
+	// Highest event sequence acknowledged by the caller.
+	ReadSequence int64 `protobuf:"varint,2,opt,name=read_sequence,json=readSequence,proto3" json:"read_sequence,omitempty"`
+	// True when latest_sequence is greater than read_sequence.
+	HasUnread bool `protobuf:"varint,3,opt,name=has_unread,json=hasUnread,proto3" json:"has_unread,omitempty"`
+	// True when the caller has pinned this thread.
+	Pinned bool `protobuf:"varint,4,opt,name=pinned,proto3" json:"pinned,omitempty"`
+	// When the caller pinned this thread.
 	PinnedTime    *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=pinned_time,json=pinnedTime,proto3" json:"pinned_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -641,10 +726,13 @@ func (x *ThreadView) GetPinnedTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Response for ListThreads.
 type ListThreadsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Threads       []*ThreadView          `protobuf:"bytes,1,rep,name=threads,proto3" json:"threads,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of caller-scoped thread views.
+	Threads []*ThreadView `protobuf:"bytes,1,rep,name=threads,proto3" json:"threads,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -693,9 +781,15 @@ func (x *ListThreadsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// Request to get an event.
 type GetThreadEventRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the event to retrieve.
+	// Format: threads/{context_id}/events/{event_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// A read mask to specify which fields to return.
+	// If not specified, the server's default view determines the fields
+	// returned.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -745,11 +839,19 @@ func (x *GetThreadEventRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to list events.
 type ListThreadEventsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The parent Thread resource name.
+	// Format: threads/{context_id}
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The maximum number of events to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token to retrieve the next page of results.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// A read mask to specify which fields to return.
+	// If not specified, the server's default view determines the fields
+	// returned.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -813,10 +915,13 @@ func (x *ListThreadEventsRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Response for ListThreadEvents.
 type ListThreadEventsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Events        []*ThreadEvent         `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of events.
+	Events []*ThreadEvent `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -865,12 +970,15 @@ func (x *ListThreadEventsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// Request to update UserThreadState.
 type UpdateUserThreadStateRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	UserThreadState *UserThreadState       `protobuf:"bytes,1,opt,name=user_thread_state,json=userThreadState,proto3" json:"user_thread_state,omitempty"`
-	UpdateMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The user-thread-state resource to update.
+	UserThreadState *UserThreadState `protobuf:"bytes,1,opt,name=user_thread_state,json=userThreadState,proto3" json:"user_thread_state,omitempty"`
+	// A field mask controlling which fields are updated.
+	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateUserThreadStateRequest) Reset() {
@@ -917,9 +1025,15 @@ func (x *UpdateUserThreadStateRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to stream events.
 type StreamThreadEventsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The parent Thread resource name
+	// Format: threads/{context_id}
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// A read mask to specify which fields to return.
+	// If not specified, the server's default view determines the fields
+	// returned.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -969,10 +1083,15 @@ func (x *StreamThreadEventsRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// Request to appending an event.
 type AppendThreadEventRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Event         *ThreadEvent           `protobuf:"bytes,2,opt,name=event,proto3" json:"event,omitempty"`
-	AgentId       string                 `protobuf:"bytes,3,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The event to create.
+	// Parent Thread deduced from the event-provided context_id.
+	Event *ThreadEvent `protobuf:"bytes,2,opt,name=event,proto3" json:"event,omitempty"`
+	// The agent_id, e.g. finance-agent-v1
+	// Only used on first event in a Thread.
+	AgentId       string `protobuf:"bytes,3,opt,name=agent_id,json=agentId,proto3" json:"agent_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1021,6 +1140,7 @@ func (x *AppendThreadEventRequest) GetAgentId() string {
 	return ""
 }
 
+// Response to appending an event.
 type AppendThreadEventResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1057,10 +1177,14 @@ func (*AppendThreadEventResponse) Descriptor() ([]byte, []int) {
 	return file_alis_a2a_extension_history_v1_history_proto_rawDescGZIP(), []int{15}
 }
 
+// Request to set thread display name.
 type SetThreadDisplayNameRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Thread resource name.
+	// Format: threads/{context_id}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The new display name.
+	DisplayName   string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

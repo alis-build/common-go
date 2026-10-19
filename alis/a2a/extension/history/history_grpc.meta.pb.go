@@ -3,35 +3,35 @@
 // Source: alis/a2a/extension/history/v1/history.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:36:12 UTC
+// Generated on: 2026-10-19 08:23:20 UTC
 
 package history
 
 const (
 	// ThreadService_GetIamPolicy_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.GetIamPolicy method.
-	ThreadService_GetIamPolicy_FullMethodDescription = ""
+	ThreadService_GetIamPolicy_FullMethodDescription = "Gets the IAM policy for a resource implemented in this service."
 	// ThreadService_SetIamPolicy_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.SetIamPolicy method.
-	ThreadService_SetIamPolicy_FullMethodDescription = ""
+	ThreadService_SetIamPolicy_FullMethodDescription = "Sets the IAM policy for a resource implemented in this service."
 	// ThreadService_AddIamBindings_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.AddIamBindings method.
-	ThreadService_AddIamBindings_FullMethodDescription = ""
+	ThreadService_AddIamBindings_FullMethodDescription = "Adds principals or updates the roles existing principals have on an IAM Policy protected resource."
 	// ThreadService_RemoveIamBindings_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.RemoveIamBindings method.
-	ThreadService_RemoveIamBindings_FullMethodDescription = ""
+	ThreadService_RemoveIamBindings_FullMethodDescription = "Removes principals or some of the roles they have on an IAM Policy protected resource."
 	// ThreadService_ListThreads_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.ListThreads method.
-	ThreadService_ListThreads_FullMethodDescription = ""
+	ThreadService_ListThreads_FullMethodDescription = "Lists all Threads."
 	// ThreadService_GetThread_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.GetThread method.
-	ThreadService_GetThread_FullMethodDescription = ""
+	ThreadService_GetThread_FullMethodDescription = "Gets an Thread by its resource name."
 	// ThreadService_DeleteThread_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.DeleteThread method.
-	ThreadService_DeleteThread_FullMethodDescription = ""
+	ThreadService_DeleteThread_FullMethodDescription = "Deletes an Thread."
 	// ThreadService_AppendThreadEvent_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.AppendThreadEvent method.
-	ThreadService_AppendThreadEvent_FullMethodDescription = ""
+	ThreadService_AppendThreadEvent_FullMethodDescription = "Appends an event to a given Thread"
 	// ThreadService_GetUserThreadState_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.GetUserThreadState method.
-	ThreadService_GetUserThreadState_FullMethodDescription = ""
+	ThreadService_GetUserThreadState_FullMethodDescription = "Gets per-user state for a Thread."
 	// ThreadService_UpdateUserThreadState_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.UpdateUserThreadState method.
-	ThreadService_UpdateUserThreadState_FullMethodDescription = ""
+	ThreadService_UpdateUserThreadState_FullMethodDescription = "Updates per-user state for a Thread."
 	// ThreadService_ListThreadEvents_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.ListThreadEvents method.
-	ThreadService_ListThreadEvents_FullMethodDescription = ""
+	ThreadService_ListThreadEvents_FullMethodDescription = "Lists all events."
 	// ThreadService_StreamThreadEvents_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.StreamThreadEvents method.
-	ThreadService_StreamThreadEvents_FullMethodDescription = ""
+	ThreadService_StreamThreadEvents_FullMethodDescription = "Stream events."
 	// ThreadService_SetThreadDisplayName_FullMethodDescription returns the description of the alis.a2a.extension.history.v1.ThreadService.SetThreadDisplayName method.
-	ThreadService_SetThreadDisplayName_FullMethodDescription = ""
+	ThreadService_SetThreadDisplayName_FullMethodDescription = "Set thread display name."
 )
