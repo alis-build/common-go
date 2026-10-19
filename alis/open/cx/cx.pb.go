@@ -4,6 +4,27 @@
 // 	protoc        v3.21.12
 // source: alis/open/cx/v1/cx.proto
 
+// Holds the attributes the Compliance Exchange (CX) engine uses to classify a
+// financial instrument under regulatory and industry classification sets.
+//
+// The package defines no service. Its one top-level message, `Instrument`
+// (`instruments/{instrument}`, keyed by a Bloomberg or custom FIGI), is
+// embedded in the IN instrument (`alis.open.in.v1.Instrument`) as
+// `engines.cx`. Besides basic reference data (market sector, exchange,
+// currency, country, issuer), it carries one nested message per set:
+//
+// - `asisa`: ASISA asset class and category, credit ratings, and related
+//   attributes.
+// - `mifid`: MiFID asset class.
+// - `ucits`: UCITS eligibility attributes.
+// - `reg28`: Reg 28 category and issuer attributes.
+// - `cisca`: CISCA category, leverage, and index weight.
+// - `reg30`: Regulation 30 (Annexure B of the Medical Schemes Act) category.
+// - `sarbC23`: SARB (South African Reserve Bank) C23 form rows.
+//
+// Each set has a `Validation` recording whether the instrument's attributes
+// meet that set's requirements and which fields need attention.
+
 package cx
 
 import (
@@ -23,20 +44,32 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The instrument market sector
 type Instrument_MarketSector int32
 
 const (
+	// Market Sector not specified
 	Instrument_MARKET_SECTOR_UNSPECIFIED Instrument_MarketSector = 0
-	Instrument_COMMODITY                 Instrument_MarketSector = 1
-	Instrument_CORPORATE                 Instrument_MarketSector = 2
-	Instrument_CURRENCY                  Instrument_MarketSector = 3
-	Instrument_EQUITY                    Instrument_MarketSector = 4
-	Instrument_INDEX                     Instrument_MarketSector = 5
-	Instrument_MONEY_MARKET              Instrument_MarketSector = 6
-	Instrument_GOVERNMENT                Instrument_MarketSector = 7
-	Instrument_MTGE                      Instrument_MarketSector = 8
-	Instrument_MUNI                      Instrument_MarketSector = 9
-	Instrument_PFD                       Instrument_MarketSector = 10
+	// Commodities
+	Instrument_COMMODITY Instrument_MarketSector = 1
+	// Corporate Bonds
+	Instrument_CORPORATE Instrument_MarketSector = 2
+	// Currency
+	Instrument_CURRENCY Instrument_MarketSector = 3
+	// Equity
+	Instrument_EQUITY Instrument_MarketSector = 4
+	// Market index
+	Instrument_INDEX Instrument_MarketSector = 5
+	// Money Market
+	Instrument_MONEY_MARKET Instrument_MarketSector = 6
+	// Government Bonds
+	Instrument_GOVERNMENT Instrument_MarketSector = 7
+	// Mortgage Backed
+	Instrument_MTGE Instrument_MarketSector = 8
+	// Municipal Bonds
+	Instrument_MUNI Instrument_MarketSector = 9
+	// Preferred Stock
+	Instrument_PFD Instrument_MarketSector = 10
 )
 
 // Enum value maps for Instrument_MarketSector.
@@ -96,53 +129,98 @@ func (Instrument_MarketSector) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// Credit rating scale
 type Instrument_CreditRatingScale int32
 
 const (
+	// Credit rating scale not provided by the user.
 	Instrument_CREDIT_RATING_SCALE_UNSPECIFIED Instrument_CreditRatingScale = 0
-	Instrument_AAA                             Instrument_CreditRatingScale = 1
-	Instrument_AA1                             Instrument_CreditRatingScale = 2
-	Instrument_AA2                             Instrument_CreditRatingScale = 3
-	Instrument_AA3                             Instrument_CreditRatingScale = 4
-	Instrument_A1                              Instrument_CreditRatingScale = 5
-	Instrument_A2                              Instrument_CreditRatingScale = 6
-	Instrument_A3                              Instrument_CreditRatingScale = 7
-	Instrument_BAA1                            Instrument_CreditRatingScale = 8
-	Instrument_BAA2                            Instrument_CreditRatingScale = 9
-	Instrument_BAA3                            Instrument_CreditRatingScale = 10
-	Instrument_BA1                             Instrument_CreditRatingScale = 11
-	Instrument_BA2                             Instrument_CreditRatingScale = 12
-	Instrument_BA3                             Instrument_CreditRatingScale = 13
-	Instrument_B1                              Instrument_CreditRatingScale = 14
-	Instrument_B2                              Instrument_CreditRatingScale = 15
-	Instrument_B3                              Instrument_CreditRatingScale = 16
-	Instrument_CAA1                            Instrument_CreditRatingScale = 17
-	Instrument_CAA2                            Instrument_CreditRatingScale = 18
-	Instrument_CAA3                            Instrument_CreditRatingScale = 19
-	Instrument_CA                              Instrument_CreditRatingScale = 20
-	Instrument_C                               Instrument_CreditRatingScale = 21
-	Instrument_AA_PLUS                         Instrument_CreditRatingScale = 23
-	Instrument_AA                              Instrument_CreditRatingScale = 24
-	Instrument_AA_MINUS                        Instrument_CreditRatingScale = 25
-	Instrument_A_PLUS                          Instrument_CreditRatingScale = 26
-	Instrument_A                               Instrument_CreditRatingScale = 27
-	Instrument_A_MINUS                         Instrument_CreditRatingScale = 28
-	Instrument_BBB_PLUS                        Instrument_CreditRatingScale = 29
-	Instrument_BBB                             Instrument_CreditRatingScale = 30
-	Instrument_BBB_MINUS                       Instrument_CreditRatingScale = 31
-	Instrument_BB_PLUS                         Instrument_CreditRatingScale = 32
-	Instrument_BB                              Instrument_CreditRatingScale = 33
-	Instrument_BB_MINUS                        Instrument_CreditRatingScale = 34
-	Instrument_B_PLUS                          Instrument_CreditRatingScale = 35
-	Instrument_B                               Instrument_CreditRatingScale = 36
-	Instrument_B_MINUS                         Instrument_CreditRatingScale = 37
-	Instrument_CCC_PLUS                        Instrument_CreditRatingScale = 38
-	Instrument_CCC                             Instrument_CreditRatingScale = 39
-	Instrument_CCC_MINUS                       Instrument_CreditRatingScale = 40
-	Instrument_CC                              Instrument_CreditRatingScale = 41
-	Instrument_DDD                             Instrument_CreditRatingScale = 42
-	Instrument_DD                              Instrument_CreditRatingScale = 43
-	Instrument_D                               Instrument_CreditRatingScale = 44
+	// Prime
+	Instrument_AAA Instrument_CreditRatingScale = 1
+	// High grade
+	Instrument_AA1 Instrument_CreditRatingScale = 2
+	// High grade
+	Instrument_AA2 Instrument_CreditRatingScale = 3
+	// High grade
+	Instrument_AA3 Instrument_CreditRatingScale = 4
+	// Upper medium grade
+	Instrument_A1 Instrument_CreditRatingScale = 5
+	// Upper medium grade
+	Instrument_A2 Instrument_CreditRatingScale = 6
+	// Upper medium grade
+	Instrument_A3 Instrument_CreditRatingScale = 7
+	// Lower medium grade
+	Instrument_BAA1 Instrument_CreditRatingScale = 8
+	// Lower medium grade
+	Instrument_BAA2 Instrument_CreditRatingScale = 9
+	// Lower medium grade
+	Instrument_BAA3 Instrument_CreditRatingScale = 10
+	// Non-investment grade
+	Instrument_BA1 Instrument_CreditRatingScale = 11
+	// Non-investment grade
+	Instrument_BA2 Instrument_CreditRatingScale = 12
+	// Non-investment grade
+	Instrument_BA3 Instrument_CreditRatingScale = 13
+	// Highly speculative
+	Instrument_B1 Instrument_CreditRatingScale = 14
+	// Highly speculative
+	Instrument_B2 Instrument_CreditRatingScale = 15
+	// Highly speculative
+	Instrument_B3 Instrument_CreditRatingScale = 16
+	// Substantial risk
+	Instrument_CAA1 Instrument_CreditRatingScale = 17
+	// Extremely speculative
+	Instrument_CAA2 Instrument_CreditRatingScale = 18
+	// In default with little prospect of recovery
+	Instrument_CAA3 Instrument_CreditRatingScale = 19
+	// In default with little prospect of recovery
+	Instrument_CA Instrument_CreditRatingScale = 20
+	// In default with little prospect of recovery
+	Instrument_C Instrument_CreditRatingScale = 21
+	// High grade
+	Instrument_AA_PLUS Instrument_CreditRatingScale = 23
+	// High grade
+	Instrument_AA Instrument_CreditRatingScale = 24
+	// High grade
+	Instrument_AA_MINUS Instrument_CreditRatingScale = 25
+	// Upper medium grade
+	Instrument_A_PLUS Instrument_CreditRatingScale = 26
+	// Upper medium grade
+	Instrument_A Instrument_CreditRatingScale = 27
+	// Upper medium grade
+	Instrument_A_MINUS Instrument_CreditRatingScale = 28
+	// Lower medium grade
+	Instrument_BBB_PLUS Instrument_CreditRatingScale = 29
+	// Lower medium grade
+	Instrument_BBB Instrument_CreditRatingScale = 30
+	// Lower medium grade
+	Instrument_BBB_MINUS Instrument_CreditRatingScale = 31
+	// Non-investment grade
+	Instrument_BB_PLUS Instrument_CreditRatingScale = 32
+	// Non-investment grade
+	Instrument_BB Instrument_CreditRatingScale = 33
+	// Non-investment grade
+	Instrument_BB_MINUS Instrument_CreditRatingScale = 34
+	// Highly speculative
+	Instrument_B_PLUS Instrument_CreditRatingScale = 35
+	// Highly speculative
+	Instrument_B Instrument_CreditRatingScale = 36
+	// Highly speculative
+	Instrument_B_MINUS Instrument_CreditRatingScale = 37
+	// Substantial risk
+	Instrument_CCC_PLUS Instrument_CreditRatingScale = 38
+	// Extremely speculative
+	Instrument_CCC Instrument_CreditRatingScale = 39
+	// In default with little prospect of recovery
+	Instrument_CCC_MINUS Instrument_CreditRatingScale = 40
+	// In default with little prospect of recovery
+	Instrument_CC Instrument_CreditRatingScale = 41
+	// In default
+	Instrument_DDD Instrument_CreditRatingScale = 42
+	// In default
+	Instrument_DD Instrument_CreditRatingScale = 43
+	// In default
+	Instrument_D Instrument_CreditRatingScale = 44
 )
 
 // Enum value maps for Instrument_CreditRatingScale.
@@ -268,13 +346,18 @@ func (Instrument_CreditRatingScale) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 1}
 }
 
+// Rating agency
 type Instrument_RatingAgency int32
 
 const (
+	// Rating agency not provided by the user.
 	Instrument_RATING_AGENCY_UNSPECIFIED Instrument_RatingAgency = 0
-	Instrument_S_AND_P                   Instrument_RatingAgency = 1
-	Instrument_FITCH                     Instrument_RatingAgency = 2
-	Instrument_MOODYS                    Instrument_RatingAgency = 3
+	// S&P
+	Instrument_S_AND_P Instrument_RatingAgency = 1
+	// Fitch
+	Instrument_FITCH Instrument_RatingAgency = 2
+	// Moody's
+	Instrument_MOODYS Instrument_RatingAgency = 3
 )
 
 // Enum value maps for Instrument_RatingAgency.
@@ -320,12 +403,16 @@ func (Instrument_RatingAgency) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 2}
 }
 
+// The FIGI type.
 type Instrument_FigiType int32
 
 const (
+	// Figi Type is not provided
 	Instrument_FIGI_TYPE_UNSPECIFIED Instrument_FigiType = 0
-	Instrument_GLOBAL                Instrument_FigiType = 1
-	Instrument_CUSTOM                Instrument_FigiType = 2
+	// Global FIGI
+	Instrument_GLOBAL Instrument_FigiType = 1
+	// Custom generated figi, not available on www.openfigi.com, yet...
+	Instrument_CUSTOM Instrument_FigiType = 2
 )
 
 // Enum value maps for Instrument_FigiType.
@@ -369,39 +456,70 @@ func (Instrument_FigiType) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 3}
 }
 
+// List of available Asisa asset classes
 type Instrument_Asisa_AssetClass int32
 
 const (
+	// Category not provided by the user.
 	Instrument_Asisa_ASSET_CLASS_UNSPECIFIED Instrument_Asisa_AssetClass = 0
-	Instrument_Asisa_DB                      Instrument_Asisa_AssetClass = 1
-	Instrument_Asisa_DBU                     Instrument_Asisa_AssetClass = 2
-	Instrument_Asisa_DC                      Instrument_Asisa_AssetClass = 3
-	Instrument_Asisa_DCO                     Instrument_Asisa_AssetClass = 4
-	Instrument_Asisa_DD                      Instrument_Asisa_AssetClass = 5
-	Instrument_Asisa_DEP                     Instrument_Asisa_AssetClass = 6
-	Instrument_Asisa_DES                     Instrument_Asisa_AssetClass = 7
-	Instrument_Asisa_DEU                     Instrument_Asisa_AssetClass = 8
-	Instrument_Asisa_DFI                     Instrument_Asisa_AssetClass = 9
-	Instrument_Asisa_DFO                     Instrument_Asisa_AssetClass = 10
-	Instrument_Asisa_DFT                     Instrument_Asisa_AssetClass = 11
-	Instrument_Asisa_DLN                     Instrument_Asisa_AssetClass = 12
-	Instrument_Asisa_DM                      Instrument_Asisa_AssetClass = 13
-	Instrument_Asisa_DO                      Instrument_Asisa_AssetClass = 14
-	Instrument_Asisa_DS                      Instrument_Asisa_AssetClass = 15
-	Instrument_Asisa_DT                      Instrument_Asisa_AssetClass = 16
-	Instrument_Asisa_FB                      Instrument_Asisa_AssetClass = 17
-	Instrument_Asisa_FBU                     Instrument_Asisa_AssetClass = 18
-	Instrument_Asisa_FC                      Instrument_Asisa_AssetClass = 19
-	Instrument_Asisa_FCO                     Instrument_Asisa_AssetClass = 20
-	Instrument_Asisa_FE                      Instrument_Asisa_AssetClass = 21
-	Instrument_Asisa_FEU                     Instrument_Asisa_AssetClass = 22
-	Instrument_Asisa_FLN                     Instrument_Asisa_AssetClass = 23
-	Instrument_Asisa_FM                      Instrument_Asisa_AssetClass = 24
-	Instrument_Asisa_FO                      Instrument_Asisa_AssetClass = 25
-	Instrument_Asisa_FS                      Instrument_Asisa_AssetClass = 26
-	Instrument_Asisa_FUT                     Instrument_Asisa_AssetClass = 27
-	Instrument_Asisa_LUT                     Instrument_Asisa_AssetClass = 28
-	Instrument_Asisa_DFF                     Instrument_Asisa_AssetClass = 29
+	// Domestic bonds and debentures (listed)
+	Instrument_Asisa_DB Instrument_Asisa_AssetClass = 1
+	// Domestic bonds and debentures (unlisted)
+	Instrument_Asisa_DBU Instrument_Asisa_AssetClass = 2
+	// Domestic deposits with banks
+	Instrument_Asisa_DC Instrument_Asisa_AssetClass = 3
+	// Domestic other liquid assets
+	Instrument_Asisa_DCO Instrument_Asisa_AssetClass = 4
+	// Other derivatives
+	Instrument_Asisa_DD Instrument_Asisa_AssetClass = 5
+	// JSE listed equity (primary listing)
+	Instrument_Asisa_DEP Instrument_Asisa_AssetClass = 6
+	// JSE listed equity (secondary listing)
+	Instrument_Asisa_DES Instrument_Asisa_AssetClass = 7
+	// Local unlisted equity
+	Instrument_Asisa_DEU Instrument_Asisa_AssetClass = 8
+	// Instruments based on underlying asset
+	Instrument_Asisa_DFI Instrument_Asisa_AssetClass = 9
+	// Options
+	Instrument_Asisa_DFO Instrument_Asisa_AssetClass = 10
+	// Index Tracking Certificates
+	Instrument_Asisa_DFT Instrument_Asisa_AssetClass = 11
+	// Domestic Loans
+	Instrument_Asisa_DLN Instrument_Asisa_AssetClass = 12
+	// Domestic money market
+	Instrument_Asisa_DM Instrument_Asisa_AssetClass = 13
+	// Domestic other
+	Instrument_Asisa_DO Instrument_Asisa_AssetClass = 14
+	// Domestic settlement accounts
+	Instrument_Asisa_DS Instrument_Asisa_AssetClass = 15
+	// Trust account
+	Instrument_Asisa_DT Instrument_Asisa_AssetClass = 16
+	// Foreign bonds and debentures (listed)
+	Instrument_Asisa_FB Instrument_Asisa_AssetClass = 17
+	// Foreign bonds and debentures (unlisted)
+	Instrument_Asisa_FBU Instrument_Asisa_AssetClass = 18
+	// Foreign deposits with banks
+	Instrument_Asisa_FC Instrument_Asisa_AssetClass = 19
+	// Foreign other liquid assets
+	Instrument_Asisa_FCO Instrument_Asisa_AssetClass = 20
+	// Foreign listed equity
+	Instrument_Asisa_FE Instrument_Asisa_AssetClass = 21
+	// Foreign unlisted equity
+	Instrument_Asisa_FEU Instrument_Asisa_AssetClass = 22
+	// Foreign Loans
+	Instrument_Asisa_FLN Instrument_Asisa_AssetClass = 23
+	// Foreign money market
+	Instrument_Asisa_FM Instrument_Asisa_AssetClass = 24
+	// Foreign other
+	Instrument_Asisa_FO Instrument_Asisa_AssetClass = 25
+	// Foreign settlement accounts
+	Instrument_Asisa_FS Instrument_Asisa_AssetClass = 26
+	// Foreign unit trust
+	Instrument_Asisa_FUT Instrument_Asisa_AssetClass = 27
+	// Local unit trust
+	Instrument_Asisa_LUT Instrument_Asisa_AssetClass = 28
+	// Futures
+	Instrument_Asisa_DFF Instrument_Asisa_AssetClass = 29
 )
 
 // Enum value maps for Instrument_Asisa_AssetClass.
@@ -499,30 +617,81 @@ func (Instrument_Asisa_AssetClass) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
+// List of available ASISA Categories
 type Instrument_Asisa_Category int32
 
 const (
-	Instrument_Asisa_CATEGORY_UNSPECIFIED                                     Instrument_Asisa_Category = 0
-	Instrument_Asisa_CASH_INSIDE_THE_REPUBLIC                                 Instrument_Asisa_Category = 1
-	Instrument_Asisa_CASH_FOREIGN_ASSETS                                      Instrument_Asisa_Category = 2
-	Instrument_Asisa_DEBT_GUARANTEED_BY_THE_REPUBLIC                          Instrument_Asisa_Category = 3
-	Instrument_Asisa_DEBT_GUARANTEED_BY_FOREIGN_COUNTRY                       Instrument_Asisa_Category = 4
-	Instrument_Asisa_DEBT_GUARANTEED_BY_SOUTH_AFRICAN_BANK                    Instrument_Asisa_Category = 5
-	Instrument_Asisa_DEBT_GUARANTEED_BY_LISTED_OR_PFMA_ENTITY                 Instrument_Asisa_Category = 6
-	Instrument_Asisa_DEBT_OTHER                                               Instrument_Asisa_Category = 7
-	Instrument_Asisa_EQUITIES                                                 Instrument_Asisa_Category = 8
-	Instrument_Asisa_IMMOVABLE_PROPERTY                                       Instrument_Asisa_Category = 10
-	Instrument_Asisa_COMMODITIES_GOLD                                         Instrument_Asisa_Category = 12
-	Instrument_Asisa_COMMODITIES_OTHER                                        Instrument_Asisa_Category = 13
-	Instrument_Asisa_PARTICIPATING_EMPLOYER_BUSINESS_PFA_SECTION_19_4         Instrument_Asisa_Category = 14
+	// Category not provided by the user.
+	Instrument_Asisa_CATEGORY_UNSPECIFIED Instrument_Asisa_Category = 0
+	// Notes and coins; any balance or deposit in an account
+	// held with a South African bank;
+	// A money market instrument issued by a South African
+	// bank including an Islamic liquidity management financial
+	// instrument;
+	// Any positive net balance in a margin account with an
+	// exchange; and
+	// Any positive net balance in a settlement account with an
+	// exchange, operated for the buying and selling of assets.
+	Instrument_Asisa_CASH_INSIDE_THE_REPUBLIC Instrument_Asisa_Category = 1
+	// Any balance or deposit held with a foreign bank;
+	// A money market instrument issued by a foreign bank
+	// including an Islamic liquidity management financial
+	// instrument;
+	Instrument_Asisa_CASH_FOREIGN_ASSETS Instrument_Asisa_Category = 2
+	// Debt instruments issued by, and loans to, the
+	// government of the Republic, and any debt or loan
+	// guaranteed by the Republic
+	Instrument_Asisa_DEBT_GUARANTEED_BY_THE_REPUBLIC Instrument_Asisa_Category = 3
+	// Debt instruments issued or guaranteed by the
+	// government of a foreign country
+	Instrument_Asisa_DEBT_GUARANTEED_BY_FOREIGN_COUNTRY Instrument_Asisa_Category = 4
+	// Debt instruments issued or guaranteed by a South
+	// African bank against its balance sheet subject to issuer listing status
+	// and prevailing market capitalisation
+	Instrument_Asisa_DEBT_GUARANTEED_BY_SOUTH_AFRICAN_BANK Instrument_Asisa_Category = 5
+	// Debt instruments issued or guaranteed by an entity
+	// that has equity listed on an exchange, or debt
+	// instruments issued or guaranteed by a public entity
+	// under the Public Finance Management Act, 1999
+	// (Act No. 1 of 1999)
+	Instrument_Asisa_DEBT_GUARANTEED_BY_LISTED_OR_PFMA_ENTITY Instrument_Asisa_Category = 6
+	// Other debt instruments
+	Instrument_Asisa_DEBT_OTHER Instrument_Asisa_Category = 7
+	// Preference and ordinary shares in companies,
+	// excluding shares in property companies
+	Instrument_Asisa_EQUITIES Instrument_Asisa_Category = 8
+	// Preference shares, ordinary shares and linked units
+	// comprising shares linked to debentures in property
+	// companies, or units in a Collective Investment
+	// Scheme in Property
+	Instrument_Asisa_IMMOVABLE_PROPERTY Instrument_Asisa_Category = 10
+	// Kruger Rands and other commodities listed on an
+	// exchange, including exchange traded commodities.
+	Instrument_Asisa_COMMODITIES_GOLD Instrument_Asisa_Category = 12
+	// All other non-gold commodities
+	Instrument_Asisa_COMMODITIES_OTHER Instrument_Asisa_Category = 13
+	// Investments in the business of a participating employer
+	// inside the republic in terms of Section 19(4) of the Pension Funds Act (PFA)
+	Instrument_Asisa_PARTICIPATING_EMPLOYER_BUSINESS_PFA_SECTION_19_4 Instrument_Asisa_Category = 14
+	// Investments in the business of a participating employer
+	// inside the republic in terms of the extent it has been allowed by an exemption in terms of
+	// section 19(4A) of the Pension Funds Act
 	Instrument_Asisa_PARTICIPATING_EMPLOYER_BUSINESS_PFA_SECTION_19_4A_EXEMPT Instrument_Asisa_Category = 15
-	Instrument_Asisa_HOUSING_LOANS                                            Instrument_Asisa_Category = 16
-	Instrument_Asisa_OTHER_ASSETS_FUNDS_OF_HEDGE_FUNDS                        Instrument_Asisa_Category = 17
-	Instrument_Asisa_OTHER_ASSETS_HEDGE_FUNDS                                 Instrument_Asisa_Category = 18
-	Instrument_Asisa_OTHER_ASSETS_FUNDS_OF_PRIVATE_EQUITY_FUNDS               Instrument_Asisa_Category = 19
-	Instrument_Asisa_OTHER_ASSETS_PRIVATE_EQUITY_FUNDS                        Instrument_Asisa_Category = 20
-	Instrument_Asisa_OTHER_ASSETS_NOT_REFERRED_TO_IN_SCHEDULE                 Instrument_Asisa_Category = 21
-	Instrument_Asisa_EXCLUDED_ASSETS                                          Instrument_Asisa_Category = 22
+	// Housing loans granted to members in accordance with the provisions of Section 19(5)
+	Instrument_Asisa_HOUSING_LOANS Instrument_Asisa_Category = 16
+	// Funds of hedge funds
+	Instrument_Asisa_OTHER_ASSETS_FUNDS_OF_HEDGE_FUNDS Instrument_Asisa_Category = 17
+	// Hedge funds
+	Instrument_Asisa_OTHER_ASSETS_HEDGE_FUNDS Instrument_Asisa_Category = 18
+	// Funds of private equity funds
+	Instrument_Asisa_OTHER_ASSETS_FUNDS_OF_PRIVATE_EQUITY_FUNDS Instrument_Asisa_Category = 19
+	// Private equity funds
+	Instrument_Asisa_OTHER_ASSETS_PRIVATE_EQUITY_FUNDS Instrument_Asisa_Category = 20
+	// Other assets not referred to in this schedule and
+	// excluding a hedge fund or private equity fund
+	Instrument_Asisa_OTHER_ASSETS_NOT_REFERRED_TO_IN_SCHEDULE Instrument_Asisa_Category = 21
+	// Assets excluding from all other categorisations
+	Instrument_Asisa_EXCLUDED_ASSETS Instrument_Asisa_Category = 22
 )
 
 // Enum value maps for Instrument_Asisa_Category.
@@ -602,23 +771,38 @@ func (Instrument_Asisa_Category) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 0, 1}
 }
 
+// List of available MiFID asset classes
 type Instrument_Mifid_AssetClass int32
 
 const (
+	// Category not provided by the user.
 	Instrument_Mifid_ASSET_CLASS_UNSPECIFIED Instrument_Mifid_AssetClass = 0
-	Instrument_Mifid_CTDV                    Instrument_Mifid_AssetClass = 1
-	Instrument_Mifid_EALL                    Instrument_Mifid_AssetClass = 2
-	Instrument_Mifid_IRDV                    Instrument_Mifid_AssetClass = 3
-	Instrument_Mifid_SFPS                    Instrument_Mifid_AssetClass = 4
-	Instrument_Mifid_CDRV                    Instrument_Mifid_AssetClass = 5
-	Instrument_Mifid_EDRV                    Instrument_Mifid_AssetClass = 6
-	Instrument_Mifid_SDRV                    Instrument_Mifid_AssetClass = 7
-	Instrument_Mifid_CRDV                    Instrument_Mifid_AssetClass = 8
-	Instrument_Mifid_FXDV                    Instrument_Mifid_AssetClass = 9
-	Instrument_Mifid_EQUI                    Instrument_Mifid_AssetClass = 10
-	Instrument_Mifid_EADV                    Instrument_Mifid_AssetClass = 11
-	Instrument_Mifid_FCFD                    Instrument_Mifid_AssetClass = 12
-	Instrument_Mifid_BOND                    Instrument_Mifid_AssetClass = 13
+	// C10 Derivatives
+	Instrument_Mifid_CTDV Instrument_Mifid_AssetClass = 1
+	// Emission Allowances
+	Instrument_Mifid_EALL Instrument_Mifid_AssetClass = 2
+	// Interest Rate Derivatives
+	Instrument_Mifid_IRDV Instrument_Mifid_AssetClass = 3
+	// Structured Financial Products
+	Instrument_Mifid_SFPS Instrument_Mifid_AssetClass = 4
+	// Commodity Derivatives
+	Instrument_Mifid_CDRV Instrument_Mifid_AssetClass = 5
+	// Equity Derivatives
+	Instrument_Mifid_EDRV Instrument_Mifid_AssetClass = 6
+	// Securitised Derivatives
+	Instrument_Mifid_SDRV Instrument_Mifid_AssetClass = 7
+	// Credit Derivatives
+	Instrument_Mifid_CRDV Instrument_Mifid_AssetClass = 8
+	// Foreign Exchange Derivatives
+	Instrument_Mifid_FXDV Instrument_Mifid_AssetClass = 9
+	// Equity Financial Derivatives
+	Instrument_Mifid_EQUI Instrument_Mifid_AssetClass = 10
+	// Emission Allowance Derivatives
+	Instrument_Mifid_EADV Instrument_Mifid_AssetClass = 11
+	// Financial Contracts for Difference
+	Instrument_Mifid_FCFD Instrument_Mifid_AssetClass = 12
+	// Bonds
+	Instrument_Mifid_BOND Instrument_Mifid_AssetClass = 13
 )
 
 // Enum value maps for Instrument_Mifid_AssetClass.
@@ -684,20 +868,32 @@ func (Instrument_Mifid_AssetClass) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 1, 0}
 }
 
+// The instrument market sector
 type Instrument_Ucits_MarketSector int32
 
 const (
+	// Market Sector not specified
 	Instrument_Ucits_MARKET_SECTOR_UNSPECIFIED Instrument_Ucits_MarketSector = 0
-	Instrument_Ucits_COMMODITY                 Instrument_Ucits_MarketSector = 1
-	Instrument_Ucits_CORPORATE                 Instrument_Ucits_MarketSector = 2
-	Instrument_Ucits_CURRENCY                  Instrument_Ucits_MarketSector = 3
-	Instrument_Ucits_EQUITY                    Instrument_Ucits_MarketSector = 4
-	Instrument_Ucits_INDEX                     Instrument_Ucits_MarketSector = 5
-	Instrument_Ucits_MONEY_MARKET              Instrument_Ucits_MarketSector = 6
-	Instrument_Ucits_GOVERNMENT                Instrument_Ucits_MarketSector = 7
-	Instrument_Ucits_MTGE                      Instrument_Ucits_MarketSector = 8
-	Instrument_Ucits_MUNI                      Instrument_Ucits_MarketSector = 9
-	Instrument_Ucits_PFD                       Instrument_Ucits_MarketSector = 10
+	// Commodities
+	Instrument_Ucits_COMMODITY Instrument_Ucits_MarketSector = 1
+	// Corporate Bonds
+	Instrument_Ucits_CORPORATE Instrument_Ucits_MarketSector = 2
+	// Currency
+	Instrument_Ucits_CURRENCY Instrument_Ucits_MarketSector = 3
+	// Equity
+	Instrument_Ucits_EQUITY Instrument_Ucits_MarketSector = 4
+	// Market index
+	Instrument_Ucits_INDEX Instrument_Ucits_MarketSector = 5
+	// Money Market
+	Instrument_Ucits_MONEY_MARKET Instrument_Ucits_MarketSector = 6
+	// Government Bonds
+	Instrument_Ucits_GOVERNMENT Instrument_Ucits_MarketSector = 7
+	// Mortgage Backed
+	Instrument_Ucits_MTGE Instrument_Ucits_MarketSector = 8
+	// Municipal Bonds
+	Instrument_Ucits_MUNI Instrument_Ucits_MarketSector = 9
+	// Preferred Stock
+	Instrument_Ucits_PFD Instrument_Ucits_MarketSector = 10
 )
 
 // Enum value maps for Instrument_Ucits_MarketSector.
@@ -757,30 +953,81 @@ func (Instrument_Ucits_MarketSector) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 2, 0}
 }
 
+// List of available Reg 28 Categories
 type Instrument_Reg28_Category int32
 
 const (
-	Instrument_Reg28_CATEGORY_UNSPECIFIED                                     Instrument_Reg28_Category = 0
-	Instrument_Reg28_CASH_INSIDE_THE_REPUBLIC                                 Instrument_Reg28_Category = 1
-	Instrument_Reg28_CASH_FOREIGN_ASSETS                                      Instrument_Reg28_Category = 2
-	Instrument_Reg28_DEBT_GUARANTEED_BY_THE_REPUBLIC                          Instrument_Reg28_Category = 3
-	Instrument_Reg28_DEBT_GUARANTEED_BY_FOREIGN_COUNTRY                       Instrument_Reg28_Category = 4
-	Instrument_Reg28_DEBT_GUARANTEED_BY_SOUTH_AFRICAN_BANK                    Instrument_Reg28_Category = 5
-	Instrument_Reg28_DEBT_GUARANTEED_BY_LISTED_OR_PFMA_ENTITY                 Instrument_Reg28_Category = 6
-	Instrument_Reg28_DEBT_OTHER                                               Instrument_Reg28_Category = 7
-	Instrument_Reg28_EQUITIES                                                 Instrument_Reg28_Category = 8
-	Instrument_Reg28_IMMOVABLE_PROPERTY                                       Instrument_Reg28_Category = 10
-	Instrument_Reg28_COMMODITIES_GOLD                                         Instrument_Reg28_Category = 12
-	Instrument_Reg28_COMMODITIES_OTHER                                        Instrument_Reg28_Category = 13
-	Instrument_Reg28_PARTICIPATING_EMPLOYER_BUSINESS_PFA_SECTION_19_4         Instrument_Reg28_Category = 14
+	// Category not provided by the user.
+	Instrument_Reg28_CATEGORY_UNSPECIFIED Instrument_Reg28_Category = 0
+	// Notes and coins; any balance or deposit in an account
+	// held with a South African bank;
+	// A money market instrument issued by a South African
+	// bank including an Islamic liquidity management financial
+	// instrument;
+	// Any positive net balance in a margin account with an
+	// exchange; and
+	// Any positive net balance in a settlement account with an
+	// exchange, operated for the buying and selling of assets.
+	Instrument_Reg28_CASH_INSIDE_THE_REPUBLIC Instrument_Reg28_Category = 1
+	// Any balance or deposit held with a foreign bank;
+	// A money market instrument issued by a foreign bank
+	// including an Islamic liquidity management financial
+	// instrument;
+	Instrument_Reg28_CASH_FOREIGN_ASSETS Instrument_Reg28_Category = 2
+	// Debt instruments issued by, and loans to, the
+	// government of the Republic, and any debt or loan
+	// guaranteed by the Republic
+	Instrument_Reg28_DEBT_GUARANTEED_BY_THE_REPUBLIC Instrument_Reg28_Category = 3
+	// Debt instruments issued or guaranteed by the
+	// government of a foreign country
+	Instrument_Reg28_DEBT_GUARANTEED_BY_FOREIGN_COUNTRY Instrument_Reg28_Category = 4
+	// Debt instruments issued or guaranteed by a South
+	// African bank against its balance sheet subject to issuer listing status
+	// and prevailing market capitalisation
+	Instrument_Reg28_DEBT_GUARANTEED_BY_SOUTH_AFRICAN_BANK Instrument_Reg28_Category = 5
+	// Debt instruments issued or guaranteed by an entity
+	// that has equity listed on an exchange, or debt
+	// instruments issued or guaranteed by a public entity
+	// under the Public Finance Management Act, 1999
+	// (Act No. 1 of 1999)
+	Instrument_Reg28_DEBT_GUARANTEED_BY_LISTED_OR_PFMA_ENTITY Instrument_Reg28_Category = 6
+	// Other debt instruments
+	Instrument_Reg28_DEBT_OTHER Instrument_Reg28_Category = 7
+	// Preference and ordinary shares in companies,
+	// excluding shares in property companies
+	Instrument_Reg28_EQUITIES Instrument_Reg28_Category = 8
+	// Preference shares, ordinary shares and linked units
+	// comprising shares linked to debentures in property
+	// companies, or units in a Collective Investment
+	// Scheme in Property
+	Instrument_Reg28_IMMOVABLE_PROPERTY Instrument_Reg28_Category = 10
+	// Kruger Rands and other commodities listed on an
+	// exchange, including exchange traded commodities.
+	Instrument_Reg28_COMMODITIES_GOLD Instrument_Reg28_Category = 12
+	// All other non-gold commodities
+	Instrument_Reg28_COMMODITIES_OTHER Instrument_Reg28_Category = 13
+	// Investments in the business of a participating employer
+	// inside the republic in terms of Section 19(4) of the Pension Funds Act (PFA)
+	Instrument_Reg28_PARTICIPATING_EMPLOYER_BUSINESS_PFA_SECTION_19_4 Instrument_Reg28_Category = 14
+	// Investments in the business of a participating employer
+	// inside the republic in terms of the extent it has been allowed by an exemption in terms of
+	// section 19(4A) of the Pension Funds Act
 	Instrument_Reg28_PARTICIPATING_EMPLOYER_BUSINESS_PFA_SECTION_19_4A_EXEMPT Instrument_Reg28_Category = 15
-	Instrument_Reg28_HOUSING_LOANS                                            Instrument_Reg28_Category = 16
-	Instrument_Reg28_OTHER_ASSETS_FUNDS_OF_HEDGE_FUNDS                        Instrument_Reg28_Category = 17
-	Instrument_Reg28_OTHER_ASSETS_HEDGE_FUNDS                                 Instrument_Reg28_Category = 18
-	Instrument_Reg28_OTHER_ASSETS_FUNDS_OF_PRIVATE_EQUITY_FUNDS               Instrument_Reg28_Category = 19
-	Instrument_Reg28_OTHER_ASSETS_PRIVATE_EQUITY_FUNDS                        Instrument_Reg28_Category = 20
-	Instrument_Reg28_OTHER_ASSETS_NOT_REFERRED_TO_IN_SCHEDULE                 Instrument_Reg28_Category = 21
-	Instrument_Reg28_EXCLUDED_ASSETS                                          Instrument_Reg28_Category = 22
+	// Housing loans granted to members in accordance with the provisions of Section 19(5)
+	Instrument_Reg28_HOUSING_LOANS Instrument_Reg28_Category = 16
+	// Funds of hedge funds
+	Instrument_Reg28_OTHER_ASSETS_FUNDS_OF_HEDGE_FUNDS Instrument_Reg28_Category = 17
+	// Hedge funds
+	Instrument_Reg28_OTHER_ASSETS_HEDGE_FUNDS Instrument_Reg28_Category = 18
+	// Funds of private equity funds
+	Instrument_Reg28_OTHER_ASSETS_FUNDS_OF_PRIVATE_EQUITY_FUNDS Instrument_Reg28_Category = 19
+	// Private equity funds
+	Instrument_Reg28_OTHER_ASSETS_PRIVATE_EQUITY_FUNDS Instrument_Reg28_Category = 20
+	// Other assets not referred to in this schedule and
+	// excluding a hedge fund or private equity fund
+	Instrument_Reg28_OTHER_ASSETS_NOT_REFERRED_TO_IN_SCHEDULE Instrument_Reg28_Category = 21
+	// Assets excluding from all other categorisations
+	Instrument_Reg28_EXCLUDED_ASSETS Instrument_Reg28_Category = 22
 )
 
 // Enum value maps for Instrument_Reg28_Category.
@@ -860,39 +1107,72 @@ func (Instrument_Reg28_Category) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 3, 0}
 }
 
+// List of available CISCA categories
 type Instrument_Cisca_Category int32
 
 const (
-	Instrument_Cisca_CATEGORY_UNSPECIFIED                                                                                          Instrument_Cisca_Category = 0
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_REPUBLIC_OF_SOUTH_AFRICA                                                   Instrument_Cisca_Category = 1
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_FOREIGN_GOVERNMENT_WITH_SOVEREIGN_CURRENCY_RATING_NOT_LOWER_SOUTH_AFRICA   Instrument_Cisca_Category = 2
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_FOREIGN_GOVERNMENT_WITH_SOVEREIGN_CURRENCY_RATING_LOWER_THAN_SOUTH_AFRICA  Instrument_Cisca_Category = 3
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_SARB                                                                       Instrument_Cisca_Category = 4
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_AFRICAN_DEVELOPMENT_BANK                                                   Instrument_Cisca_Category = 5
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_BANK_WITH_LISTED_HOLDING_COMPANY                                           Instrument_Cisca_Category = 6
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_PUBLIC_ENTITY_UNDER_PFMA                                                   Instrument_Cisca_Category = 9
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_MUNICIPALITY_UNDER_LGMFMA                                                  Instrument_Cisca_Category = 10
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_LOCAL_OR_FOREIGN_LISTED_ENTITY                                             Instrument_Cisca_Category = 11
-	Instrument_Cisca_NON_EQUITY_PREFERENCE_SHARES_NOT_PART_OF_ISSUER_SHARE_CAPITAL                                                 Instrument_Cisca_Category = 12
-	Instrument_Cisca_NON_EQUITY_EXCHANGE_TRADED_NON_DELIVERABLE_PRECIOUS_METAL_DEBENTURE                                           Instrument_Cisca_Category = 13
-	Instrument_Cisca_NON_EQUITY_CISCA_COMPLIANT_ETN                                                                                Instrument_Cisca_Category = 14
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_LISTED_AND_EXCHANGE_TRADED_ENTITY_NOT_DESCRIBED_OTHERWISE                  Instrument_Cisca_Category = 15
-	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_UNLISTED_ENTITY_NOT_DESCRIBED_OTHERWISE_INCLUDING_PARTICIPATION_BONDS      Instrument_Cisca_Category = 16
-	Instrument_Cisca_EQUITY_LISTED                                                                                                 Instrument_Cisca_Category = 17
-	Instrument_Cisca_EQUITY_UNLISTED                                                                                               Instrument_Cisca_Category = 18
-	Instrument_Cisca_EQUITY_INVESTMENT_COMPANY                                                                                     Instrument_Cisca_Category = 19
-	Instrument_Cisca_EQUITY_PREFERENCE_SHARES_PART_OF_ISSUER_SHARE_CAPITAL                                                         Instrument_Cisca_Category = 20
-	Instrument_Cisca_EQUITY_EXCHANGE_TRADED_NON_DELIVERABLE_PRECIOUS_METAL_ETF                                                     Instrument_Cisca_Category = 21
-	Instrument_Cisca_EQUITY_CISCA_COMPLIANT_ETF                                                                                    Instrument_Cisca_Category = 22
-	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_REPUBLIC_OF_SOUTH_AFRICA                                                 Instrument_Cisca_Category = 23
+	// Category not provided by the user.
+	Instrument_Cisca_CATEGORY_UNSPECIFIED Instrument_Cisca_Category = 0
+	// Non-Equity security issued/guaranteed by Republic of South Africa
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_REPUBLIC_OF_SOUTH_AFRICA Instrument_Cisca_Category = 1
+	// Non-Equity security issued/guaranteed by a foreign government whose sovereign currency rating is the same or higher than Republic of South Africa
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_FOREIGN_GOVERNMENT_WITH_SOVEREIGN_CURRENCY_RATING_NOT_LOWER_SOUTH_AFRICA Instrument_Cisca_Category = 2
+	// Non-Equity security issued/guaranteed by a foreign government whose sovereign currency rating is the lower than Republic of South Africa
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_FOREIGN_GOVERNMENT_WITH_SOVEREIGN_CURRENCY_RATING_LOWER_THAN_SOUTH_AFRICA Instrument_Cisca_Category = 3
+	// Non-Equity security issued/guaranteed by the South African Reserve Bank (SARB)
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_SARB Instrument_Cisca_Category = 4
+	// Non-Equity security issued/guaranteed by the African Development Bank
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_AFRICAN_DEVELOPMENT_BANK Instrument_Cisca_Category = 5
+	// Non-Equity security issued/guaranteed by a bank which is part of a listed holding company
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_BANK_WITH_LISTED_HOLDING_COMPANY Instrument_Cisca_Category = 6
+	// Non-Equity security issued/guaranteed by a public entity that is subject to the Public Finance Management Act 1999 (PFMA)
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_PUBLIC_ENTITY_UNDER_PFMA Instrument_Cisca_Category = 9
+	// Non-Equity security issued/guaranteed by a municipality that is subject to Local Government Municipal Finance Management Act 2003
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_MUNICIPALITY_UNDER_LGMFMA Instrument_Cisca_Category = 10
+	// Non-Equity security issued/guaranteed by a local or foreign entity that is listed on an exchange
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_LOCAL_OR_FOREIGN_LISTED_ENTITY Instrument_Cisca_Category = 11
+	// Non-Equity security which are preference shares not part of the issuers share capital
+	Instrument_Cisca_NON_EQUITY_PREFERENCE_SHARES_NOT_PART_OF_ISSUER_SHARE_CAPITAL Instrument_Cisca_Category = 12
+	// Non-Equity security that exchange traded debentures/notes that have exposure to physical precious metal/s
+	Instrument_Cisca_NON_EQUITY_EXCHANGE_TRADED_NON_DELIVERABLE_PRECIOUS_METAL_DEBENTURE Instrument_Cisca_Category = 13
+	// Non-Equity security that is an exchange traded note (ETN) where the portfolio note represents is itself CISCA compliant
+	Instrument_Cisca_NON_EQUITY_CISCA_COMPLIANT_ETN Instrument_Cisca_Category = 14
+	// Non-Equity security issued/guaranteed by listed entity not described by any non-equity category
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_LISTED_AND_EXCHANGE_TRADED_ENTITY_NOT_DESCRIBED_OTHERWISE Instrument_Cisca_Category = 15
+	// Non-Equity security issued/guaranteed by by unlisted entity not described by any non-equity category and may include participatory interests in participation bonds
+	Instrument_Cisca_NON_EQUITY_ISSUED_OR_GUARANTEED_BY_UNLISTED_ENTITY_NOT_DESCRIBED_OTHERWISE_INCLUDING_PARTICIPATION_BONDS Instrument_Cisca_Category = 16
+	// Equity security issued by any one concern that is listed
+	Instrument_Cisca_EQUITY_LISTED Instrument_Cisca_Category = 17
+	// Equity security issued by any one concern that is unlisted
+	Instrument_Cisca_EQUITY_UNLISTED Instrument_Cisca_Category = 18
+	// Equity security issued by any one concern which is an investment company (meaning a company that is engaged primarily in the
+	// business of investment in the securities of companies for the purpose of revenue and
+	// profit and not for the purpose of exercising control)
+	Instrument_Cisca_EQUITY_INVESTMENT_COMPANY Instrument_Cisca_Category = 19
+	// Equity security which are preference shares which are part of the issuers share capital
+	Instrument_Cisca_EQUITY_PREFERENCE_SHARES_PART_OF_ISSUER_SHARE_CAPITAL Instrument_Cisca_Category = 20
+	// Equity security that exchange traded fund (ETF) that have exposure to physical precious metal/s of which there is no obligation for physical delivery
+	Instrument_Cisca_EQUITY_EXCHANGE_TRADED_NON_DELIVERABLE_PRECIOUS_METAL_ETF Instrument_Cisca_Category = 21
+	// Equity security that is an exchange traded fund (ETF) where the portfolio note represents is itself CISCA compliant
+	Instrument_Cisca_EQUITY_CISCA_COMPLIANT_ETF Instrument_Cisca_Category = 22
+	// Money market security issued/guaranteed by Republic of South Africa
+	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_REPUBLIC_OF_SOUTH_AFRICA Instrument_Cisca_Category = 23
+	// Money market security issued/guaranteed by a foreign government whose sovereign currency rating is the same or higher than Republic of South Africa
 	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_FOREIGN_GOVERNMENT_WITH_SOVEREIGN_CURRENCY_RATING_NOT_LOWER_SOUTH_AFRICA Instrument_Cisca_Category = 24
-	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_SARB                                                                     Instrument_Cisca_Category = 25
-	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_BANK_WITH_LISTED_HOLDING_COMPANY                                         Instrument_Cisca_Category = 26
-	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_PUBLIC_ENTITY_UNDER_PFMA                                                 Instrument_Cisca_Category = 28
-	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_LOCAL_OR_FOREIGN_LISTED_ENTITY                                           Instrument_Cisca_Category = 29
-	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_LISTED_AND_EXCHANGE_TRADED_ENTITY_NOT_DESCRIBED_OTHERWISE                Instrument_Cisca_Category = 30
-	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_UNLISTED_ENTITY                                                          Instrument_Cisca_Category = 31
-	Instrument_Cisca_ASSETS_IN_LIQUID_FORM                                                                                         Instrument_Cisca_Category = 32
+	// Money market security issued/guaranteed by the South African Reserve Bank (SARB)
+	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_SARB Instrument_Cisca_Category = 25
+	// Money market security issued/guaranteed by a bank which is part of a listed holding company
+	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_BANK_WITH_LISTED_HOLDING_COMPANY Instrument_Cisca_Category = 26
+	// Money market security issued/guaranteed by a public entity that is subject to the Public Finance Management Act 1999 (PFMA)
+	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_PUBLIC_ENTITY_UNDER_PFMA Instrument_Cisca_Category = 28
+	// Money market security issued/guaranteed by a local or foreign entity that is listed on an exchange
+	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_LOCAL_OR_FOREIGN_LISTED_ENTITY Instrument_Cisca_Category = 29
+	// Money market security issued/guaranteed by by listed entity not described by any money market category
+	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_LISTED_AND_EXCHANGE_TRADED_ENTITY_NOT_DESCRIBED_OTHERWISE Instrument_Cisca_Category = 30
+	// Money market security issued/guaranteed by an unlisted entity not described by any money market category
+	Instrument_Cisca_MONEY_MARKET_ISSUED_OR_GUARANTEED_BY_UNLISTED_ENTITY Instrument_Cisca_Category = 31
+	// Assets held in liquid form
+	Instrument_Cisca_ASSETS_IN_LIQUID_FORM Instrument_Cisca_Category = 32
 )
 
 // Enum value maps for Instrument_Cisca_Category.
@@ -990,25 +1270,59 @@ func (Instrument_Cisca_Category) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_cx_v1_cx_proto_rawDescGZIP(), []int{0, 4, 0}
 }
 
+// Instrument is a resource within the Compliance Exchange product.
 type Instrument struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	Name          string                  `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	FigiType      Instrument_FigiType     `protobuf:"varint,2,opt,name=figi_type,json=figiType,proto3,enum=alis.open.cx.v1.Instrument_FigiType" json:"figi_type,omitempty"`
-	DisplayName   string                  `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Description   string                  `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	MarketSector  Instrument_MarketSector `protobuf:"varint,5,opt,name=market_sector,json=marketSector,proto3,enum=alis.open.cx.v1.Instrument_MarketSector" json:"market_sector,omitempty"`
-	ExchCode      string                  `protobuf:"bytes,6,opt,name=exch_code,json=exchCode,proto3" json:"exch_code,omitempty"`
-	CurrencyCode  string                  `protobuf:"bytes,7,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
-	CountryCode   string                  `protobuf:"bytes,8,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
-	Issuer        string                  `protobuf:"bytes,9,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	UpdateTime    *timestamppb.Timestamp  `protobuf:"bytes,10,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	Asisa         *Instrument_Asisa       `protobuf:"bytes,100,opt,name=asisa,proto3" json:"asisa,omitempty"`
-	Mifid         *Instrument_Mifid       `protobuf:"bytes,101,opt,name=mifid,proto3" json:"mifid,omitempty"`
-	Ucits         *Instrument_Ucits       `protobuf:"bytes,102,opt,name=ucits,proto3" json:"ucits,omitempty"`
-	Reg28         *Instrument_Reg28       `protobuf:"bytes,103,opt,name=reg28,proto3" json:"reg28,omitempty"`
-	Cisca         *Instrument_Cisca       `protobuf:"bytes,104,opt,name=cisca,proto3" json:"cisca,omitempty"`
-	Reg30         *Instrument_Reg30       `protobuf:"bytes,105,opt,name=reg30,proto3" json:"reg30,omitempty"`
-	SarbC23       *Instrument_SarbC23     `protobuf:"bytes,106,opt,name=sarbC23,proto3" json:"sarbC23,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The instrument name is the unique identifier across organisations.
+	//
+	// Format: instruments/{instrument}. {instrument} must be a valid Bloomberg or custom FIGI as defined by www.openfigi.com..
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Figi Type. Either a global or custom FIGI, else set to unspecified
+	FigiType Instrument_FigiType `protobuf:"varint,2,opt,name=figi_type,json=figiType,proto3,enum=alis.open.cx.v1.Instrument_FigiType" json:"figi_type,omitempty"`
+	// Human readable display name
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// Security Description
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// Market Sector
+	// The asset class/category of the particular instrument
+	//
+	// Format: EQUITY, MONEY_MARKET, etc.
+	MarketSector Instrument_MarketSector `protobuf:"varint,5,opt,name=market_sector,json=marketSector,proto3,enum=alis.open.cx.v1.Instrument_MarketSector" json:"market_sector,omitempty"`
+	// Exchange Code
+	// Code for the trading venue or environment on which the instrument trades. If an exchange is specified,
+	// the code will be for the specified exchange.
+	//
+	// Format: US, UN, SJ etc.
+	ExchCode string `protobuf:"bytes,6,opt,name=exch_code,json=exchCode,proto3" json:"exch_code,omitempty"`
+	// Currency
+	// The 3-letter currency code defined in ISO 4217.
+	// Currency in which the security was issued. Equities: Trading currency for the security.
+	// Fixed Income: Provides the currency in which the bond was issued, not necessarily the currency in which
+	// the bond trades or pays its coupons.
+	CurrencyCode string `protobuf:"bytes,7,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
+	// The ISO country code
+	// (-- api-linter: core::0143::standardized-codes=disabled
+	//
+	//	aip.dev/not-precedent: 'Country' is a well defined attributes within Finance. --)
+	CountryCode string `protobuf:"bytes,8,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
+	// Name of the issuing entity of the security.
+	Issuer string `protobuf:"bytes,9,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	// Instrument Update time
+	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	// ASISA attributes.
+	Asisa *Instrument_Asisa `protobuf:"bytes,100,opt,name=asisa,proto3" json:"asisa,omitempty"`
+	// MiFID attributes
+	Mifid *Instrument_Mifid `protobuf:"bytes,101,opt,name=mifid,proto3" json:"mifid,omitempty"`
+	// UCITS attributes
+	Ucits *Instrument_Ucits `protobuf:"bytes,102,opt,name=ucits,proto3" json:"ucits,omitempty"`
+	// Reg28 attributes
+	Reg28 *Instrument_Reg28 `protobuf:"bytes,103,opt,name=reg28,proto3" json:"reg28,omitempty"`
+	// CISCA attributes
+	Cisca *Instrument_Cisca `protobuf:"bytes,104,opt,name=cisca,proto3" json:"cisca,omitempty"`
+	// Regulation 30 from Annexure B of the Medical Schemes Act.
+	Reg30 *Instrument_Reg30 `protobuf:"bytes,105,opt,name=reg30,proto3" json:"reg30,omitempty"`
+	// SARB C23
+	SarbC23       *Instrument_SarbC23 `protobuf:"bytes,106,opt,name=sarbC23,proto3" json:"sarbC23,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1162,23 +1476,45 @@ func (x *Instrument) GetSarbC23() *Instrument_SarbC23 {
 	return nil
 }
 
+// The ASISA set
 type Instrument_Asisa struct {
-	state                         protoimpl.MessageState      `protogen:"open.v1"`
-	AssetClass                    Instrument_Asisa_AssetClass `protobuf:"varint,1,opt,name=asset_class,json=assetClass,proto3,enum=alis.open.cx.v1.Instrument_Asisa_AssetClass" json:"asset_class,omitempty"`
-	SecurityType                  string                      `protobuf:"bytes,2,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
-	Issuer                        string                      `protobuf:"bytes,3,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	IssuerZarMarketCapitalisation float64                     `protobuf:"fixed64,4,opt,name=issuer_zar_market_capitalisation,json=issuerZarMarketCapitalisation,proto3" json:"issuer_zar_market_capitalisation,omitempty"`
-	ShortTermCreditRating         *Instrument_CreditRating    `protobuf:"bytes,5,opt,name=short_term_credit_rating,json=shortTermCreditRating,proto3" json:"short_term_credit_rating,omitempty"`
-	LongTermCreditRating          *Instrument_CreditRating    `protobuf:"bytes,6,opt,name=long_term_credit_rating,json=longTermCreditRating,proto3" json:"long_term_credit_rating,omitempty"`
-	ShortTermCreditRatingIssuer   *Instrument_CreditRating    `protobuf:"bytes,7,opt,name=short_term_credit_rating_issuer,json=shortTermCreditRatingIssuer,proto3" json:"short_term_credit_rating_issuer,omitempty"`
-	LongTermCreditRatingIssuer    *Instrument_CreditRating    `protobuf:"bytes,8,opt,name=long_term_credit_rating_issuer,json=longTermCreditRatingIssuer,proto3" json:"long_term_credit_rating_issuer,omitempty"`
-	AfricaAllowance               *wrapperspb.BoolValue       `protobuf:"bytes,10,opt,name=africa_allowance,json=africaAllowance,proto3" json:"africa_allowance,omitempty"`
-	CcdClassified                 *wrapperspb.BoolValue       `protobuf:"bytes,11,opt,name=ccd_classified,json=ccdClassified,proto3" json:"ccd_classified,omitempty"`
-	CurrencyCode                  string                      `protobuf:"bytes,12,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
-	Category                      Instrument_Asisa_Category   `protobuf:"varint,13,opt,name=category,proto3,enum=alis.open.cx.v1.Instrument_Asisa_Category" json:"category,omitempty"`
-	Validation                    *Instrument_Validation      `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
-	unknownFields                 protoimpl.UnknownFields
-	sizeCache                     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Asset Classes
+	AssetClass Instrument_Asisa_AssetClass `protobuf:"varint,1,opt,name=asset_class,json=assetClass,proto3,enum=alis.open.cx.v1.Instrument_Asisa_AssetClass" json:"asset_class,omitempty"`
+	// Description of the specific instrument type within its market sector.
+	// This typically depends on the market sector and is fairly flexible
+	SecurityType string `protobuf:"bytes,2,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
+	// Name of the issuing entity of the security.
+	Issuer string `protobuf:"bytes,3,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	// market capitalisation in ZAR
+	IssuerZarMarketCapitalisation float64 `protobuf:"fixed64,4,opt,name=issuer_zar_market_capitalisation,json=issuerZarMarketCapitalisation,proto3" json:"issuer_zar_market_capitalisation,omitempty"`
+	// short term credit rating
+	ShortTermCreditRating *Instrument_CreditRating `protobuf:"bytes,5,opt,name=short_term_credit_rating,json=shortTermCreditRating,proto3" json:"short_term_credit_rating,omitempty"`
+	// long term credit rating
+	LongTermCreditRating *Instrument_CreditRating `protobuf:"bytes,6,opt,name=long_term_credit_rating,json=longTermCreditRating,proto3" json:"long_term_credit_rating,omitempty"`
+	// issuer short term credit rating
+	ShortTermCreditRatingIssuer *Instrument_CreditRating `protobuf:"bytes,7,opt,name=short_term_credit_rating_issuer,json=shortTermCreditRatingIssuer,proto3" json:"short_term_credit_rating_issuer,omitempty"`
+	// issuer long term credit rating
+	LongTermCreditRatingIssuer *Instrument_CreditRating `protobuf:"bytes,8,opt,name=long_term_credit_rating_issuer,json=longTermCreditRatingIssuer,proto3" json:"long_term_credit_rating_issuer,omitempty"`
+	//	// Indicates if the security is linked to an as an equity index linked instrument
+	//	google.protobuf.BoolValue equities_index_linked = 9;
+	//
+	// Indicates if the security forms part of the 5% Africa allowance.
+	AfricaAllowance *wrapperspb.BoolValue `protobuf:"bytes,10,opt,name=africa_allowance,json=africaAllowance,proto3" json:"africa_allowance,omitempty"`
+	// If the security is classified as a compulsory convertible debenture (CCD)
+	CcdClassified *wrapperspb.BoolValue `protobuf:"bytes,11,opt,name=ccd_classified,json=ccdClassified,proto3" json:"ccd_classified,omitempty"`
+	// Currency
+	// The 3-letter currency code defined in ISO 4217.
+	// Currency in which the security was issued. Equities: Trading currency for the security.
+	// Fixed Income: Provides the currency in which the bond was issued, not necessarily the currency in which
+	// the bond trades or pays its coupons.
+	CurrencyCode string `protobuf:"bytes,12,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
+	// The different categories of securities
+	Category Instrument_Asisa_Category `protobuf:"varint,13,opt,name=category,proto3,enum=alis.open.cx.v1.Instrument_Asisa_Category" json:"category,omitempty"`
+	// Details on whether the instrument attributes meet the requirements for the Set
+	Validation    *Instrument_Validation `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument_Asisa) Reset() {
@@ -1302,10 +1638,13 @@ func (x *Instrument_Asisa) GetValidation() *Instrument_Validation {
 	return nil
 }
 
+// The MiFID set
 type Instrument_Mifid struct {
-	state         protoimpl.MessageState      `protogen:"open.v1"`
-	AssetClass    Instrument_Mifid_AssetClass `protobuf:"varint,1,opt,name=asset_class,json=assetClass,proto3,enum=alis.open.cx.v1.Instrument_Mifid_AssetClass" json:"asset_class,omitempty"`
-	Validation    *Instrument_Validation      `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Asset classes
+	AssetClass Instrument_Mifid_AssetClass `protobuf:"varint,1,opt,name=asset_class,json=assetClass,proto3,enum=alis.open.cx.v1.Instrument_Mifid_AssetClass" json:"asset_class,omitempty"`
+	// Details on whether the instrument attributes meet the requirements for the Set
+	Validation    *Instrument_Validation `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1354,19 +1693,33 @@ func (x *Instrument_Mifid) GetValidation() *Instrument_Validation {
 	return nil
 }
 
+// The Ucits set
 type Instrument_Ucits struct {
-	state                     protoimpl.MessageState        `protogen:"open.v1"`
-	MarketSector              Instrument_Ucits_MarketSector `protobuf:"varint,1,opt,name=market_sector,json=marketSector,proto3,enum=alis.open.cx.v1.Instrument_Ucits_MarketSector" json:"market_sector,omitempty"`
-	SecurityType              string                        `protobuf:"bytes,2,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
-	Issuer                    string                        `protobuf:"bytes,3,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	EuBankIssuer              *wrapperspb.BoolValue         `protobuf:"bytes,4,opt,name=eu_bank_issuer,json=euBankIssuer,proto3" json:"eu_bank_issuer,omitempty"`
-	EuCreditInstitutionIssuer *wrapperspb.BoolValue         `protobuf:"bytes,5,opt,name=eu_credit_institution_issuer,json=euCreditInstitutionIssuer,proto3" json:"eu_credit_institution_issuer,omitempty"`
-	UcitsCompatible           *wrapperspb.BoolValue         `protobuf:"bytes,6,opt,name=ucits_compatible,json=ucitsCompatible,proto3" json:"ucits_compatible,omitempty"`
-	TradedOnExchange          *wrapperspb.BoolValue         `protobuf:"bytes,7,opt,name=traded_on_exchange,json=tradedOnExchange,proto3" json:"traded_on_exchange,omitempty"`
-	UcitsUciFund              *wrapperspb.BoolValue         `protobuf:"bytes,8,opt,name=ucits_uci_fund,json=ucitsUciFund,proto3" json:"ucits_uci_fund,omitempty"`
-	Validation                *Instrument_Validation        `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Market Sector
+	// The asset class/category of the particular instrument
+	//
+	// Format: EQUITY, MONEY_MARKET, etc.
+	MarketSector Instrument_Ucits_MarketSector `protobuf:"varint,1,opt,name=market_sector,json=marketSector,proto3,enum=alis.open.cx.v1.Instrument_Ucits_MarketSector" json:"market_sector,omitempty"`
+	// Description of the specific instrument type within its market sector.
+	// This typically depends on the market sector and is fairly flexible
+	SecurityType string `protobuf:"bytes,2,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
+	// Name of the issuing entity of the security.
+	Issuer string `protobuf:"bytes,3,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	// Instrument issued by Banks in EU or in non-member states with equivalent supervision
+	EuBankIssuer *wrapperspb.BoolValue `protobuf:"bytes,4,opt,name=eu_bank_issuer,json=euBankIssuer,proto3" json:"eu_bank_issuer,omitempty"`
+	// Instrument issued by EU credit institutions with special public supervision
+	EuCreditInstitutionIssuer *wrapperspb.BoolValue `protobuf:"bytes,5,opt,name=eu_credit_institution_issuer,json=euCreditInstitutionIssuer,proto3" json:"eu_credit_institution_issuer,omitempty"`
+	// Permissible for inclusion in a portfolio governed by UCITS
+	UcitsCompatible *wrapperspb.BoolValue `protobuf:"bytes,6,opt,name=ucits_compatible,json=ucitsCompatible,proto3" json:"ucits_compatible,omitempty"`
+	// Instrument is traded on a regulated exchange
+	TradedOnExchange *wrapperspb.BoolValue `protobuf:"bytes,7,opt,name=traded_on_exchange,json=tradedOnExchange,proto3" json:"traded_on_exchange,omitempty"`
+	// Instrument itself is UCITS fund or equivalent funds (UCI)
+	UcitsUciFund *wrapperspb.BoolValue `protobuf:"bytes,8,opt,name=ucits_uci_fund,json=ucitsUciFund,proto3" json:"ucits_uci_fund,omitempty"`
+	// Details on whether the instrument attributes meet the requirements for the Set
+	Validation    *Instrument_Validation `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument_Ucits) Reset() {
@@ -1462,17 +1815,26 @@ func (x *Instrument_Ucits) GetValidation() *Instrument_Validation {
 	return nil
 }
 
+// The Reg28 set
 type Instrument_Reg28 struct {
-	state                         protoimpl.MessageState    `protogen:"open.v1"`
-	Category                      Instrument_Reg28_Category `protobuf:"varint,1,opt,name=category,proto3,enum=alis.open.cx.v1.Instrument_Reg28_Category" json:"category,omitempty"`
-	ExchangeListedIssuer          *wrapperspb.BoolValue     `protobuf:"bytes,2,opt,name=exchange_listed_issuer,json=exchangeListedIssuer,proto3" json:"exchange_listed_issuer,omitempty"`
-	SecurityType                  string                    `protobuf:"bytes,3,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
-	Issuer                        string                    `protobuf:"bytes,4,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	IssuerZarMarketCapitalisation float64                   `protobuf:"fixed64,5,opt,name=issuer_zar_market_capitalisation,json=issuerZarMarketCapitalisation,proto3" json:"issuer_zar_market_capitalisation,omitempty"`
-	CurrencyCode                  string                    `protobuf:"bytes,6,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
-	Validation                    *Instrument_Validation    `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
-	unknownFields                 protoimpl.UnknownFields
-	sizeCache                     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The different categories of securities
+	Category Instrument_Reg28_Category `protobuf:"varint,1,opt,name=category,proto3,enum=alis.open.cx.v1.Instrument_Reg28_Category" json:"category,omitempty"`
+	// Issuer of instrument is listed on an exchange
+	ExchangeListedIssuer *wrapperspb.BoolValue `protobuf:"bytes,2,opt,name=exchange_listed_issuer,json=exchangeListedIssuer,proto3" json:"exchange_listed_issuer,omitempty"`
+	// Description of the specific instrument type within its market sector.
+	// This typically depends on the market sector and is fairly flexible
+	SecurityType string `protobuf:"bytes,3,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
+	// Name of the issuing entity of the security.
+	Issuer string `protobuf:"bytes,4,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	// market capitalisation in ZAR
+	IssuerZarMarketCapitalisation float64 `protobuf:"fixed64,5,opt,name=issuer_zar_market_capitalisation,json=issuerZarMarketCapitalisation,proto3" json:"issuer_zar_market_capitalisation,omitempty"`
+	// currency code for the reg28 field
+	CurrencyCode string `protobuf:"bytes,6,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
+	// Details on whether the instrument attributes meet the requirements for the Set
+	Validation    *Instrument_Validation `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument_Reg28) Reset() {
@@ -1554,17 +1916,27 @@ func (x *Instrument_Reg28) GetValidation() *Instrument_Validation {
 	return nil
 }
 
+// The CISCA set
 type Instrument_Cisca struct {
-	state                      protoimpl.MessageState    `protogen:"open.v1"`
-	Category                   Instrument_Cisca_Category `protobuf:"varint,1,opt,name=category,proto3,enum=alis.open.cx.v1.Instrument_Cisca_Category" json:"category,omitempty"`
-	SecurityType               string                    `protobuf:"bytes,3,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
-	Issuer                     string                    `protobuf:"bytes,4,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	HasEmbeddedLeverage        *wrapperspb.BoolValue     `protobuf:"bytes,5,opt,name=has_embedded_leverage,json=hasEmbeddedLeverage,proto3" json:"has_embedded_leverage,omitempty"`
-	IndexWeight                float64                   `protobuf:"fixed64,6,opt,name=index_weight,json=indexWeight,proto3" json:"index_weight,omitempty"`
-	IssuerMarketCapitalisation float64                   `protobuf:"fixed64,7,opt,name=issuer_market_capitalisation,json=issuerMarketCapitalisation,proto3" json:"issuer_market_capitalisation,omitempty"`
-	Validation                 *Instrument_Validation    `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The different categories of securities
+	Category Instrument_Cisca_Category `protobuf:"varint,1,opt,name=category,proto3,enum=alis.open.cx.v1.Instrument_Cisca_Category" json:"category,omitempty"`
+	// Description of the specific instrument type within its market sector.
+	// This typically depends on the market sector and is fairly flexible
+	SecurityType string `protobuf:"bytes,3,opt,name=security_type,json=securityType,proto3" json:"security_type,omitempty"`
+	// Name of the issuing entity of the security.
+	Issuer string `protobuf:"bytes,4,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	// indication if security has embedded leveraged
+	HasEmbeddedLeverage *wrapperspb.BoolValue `protobuf:"bytes,5,opt,name=has_embedded_leverage,json=hasEmbeddedLeverage,proto3" json:"has_embedded_leverage,omitempty"`
+	// equity security's weighting in its relevant index
+	// e.g. 0.5 = 50%
+	IndexWeight float64 `protobuf:"fixed64,6,opt,name=index_weight,json=indexWeight,proto3" json:"index_weight,omitempty"`
+	// market capitalisation in ZAR
+	IssuerMarketCapitalisation float64 `protobuf:"fixed64,7,opt,name=issuer_market_capitalisation,json=issuerMarketCapitalisation,proto3" json:"issuer_market_capitalisation,omitempty"`
+	// Details on whether the instrument attributes meet the requirements for the Set
+	Validation    *Instrument_Validation `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Instrument_Cisca) Reset() {
@@ -1646,10 +2018,17 @@ func (x *Instrument_Cisca) GetValidation() *Instrument_Validation {
 	return nil
 }
 
+// Regulation 30 from Annexure B of the Medical Schemes Act.
 type Instrument_Reg30 struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Category      string                 `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
-	Institution   string                 `protobuf:"bytes,2,opt,name=institution,proto3" json:"institution,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The category of the Instrument relates to the Annexure B categorisation
+	// Refer to Page 48 of the Medical Schemes Act 131 of 1998
+	// available at https://www.medicalschemes.com/files/Acts%20and%20Regulations/MSREGS19July2004.pdf
+	// Example: 1.a.ii
+	Category string `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
+	// Name of the issuing entity of the security.
+	Institution string `protobuf:"bytes,2,opt,name=institution,proto3" json:"institution,omitempty"`
+	// Details on whether the instrument attributes meet the requirements for the Set
 	Validation    *Instrument_Validation `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1706,9 +2085,14 @@ func (x *Instrument_Reg30) GetValidation() *Instrument_Validation {
 	return nil
 }
 
+// The SARB C23 set
 type Instrument_SarbC23 struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CategoryIds   []int32                `protobuf:"varint,1,rep,packed,name=category_ids,json=categoryIds,proto3" json:"category_ids,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The different categories of securities
+	// These are defined by the C23 form, essentially each row in the table has a unique row number / id.
+	CategoryIds []int32 `protobuf:"varint,1,rep,packed,name=category_ids,json=categoryIds,proto3" json:"category_ids,omitempty"`
+	// Details on whether the instrument attributes meet the requirements for the Set
+	// Not yet implemented
 	Validation    *Instrument_Validation `protobuf:"bytes,99,opt,name=validation,proto3" json:"validation,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1758,9 +2142,12 @@ func (x *Instrument_SarbC23) GetValidation() *Instrument_Validation {
 	return nil
 }
 
+// credit rating
 type Instrument_CreditRating struct {
-	state             protoimpl.MessageState       `protogen:"open.v1"`
-	RatingAgency      Instrument_RatingAgency      `protobuf:"varint,1,opt,name=rating_agency,json=ratingAgency,proto3,enum=alis.open.cx.v1.Instrument_RatingAgency" json:"rating_agency,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Agency that has assigned rating to instrument or entity
+	RatingAgency Instrument_RatingAgency `protobuf:"varint,1,opt,name=rating_agency,json=ratingAgency,proto3,enum=alis.open.cx.v1.Instrument_RatingAgency" json:"rating_agency,omitempty"`
+	// Rating assigned to instrument or entity
 	CreditRatingScale Instrument_CreditRatingScale `protobuf:"varint,2,opt,name=credit_rating_scale,json=creditRatingScale,proto3,enum=alis.open.cx.v1.Instrument_CreditRatingScale" json:"credit_rating_scale,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
@@ -1810,9 +2197,13 @@ func (x *Instrument_CreditRating) GetCreditRatingScale() Instrument_CreditRating
 	return Instrument_CREDIT_RATING_SCALE_UNSPECIFIED
 }
 
+// Whether an instrument's attributes meet the requirements for a set, and
+// which fields need attention.
 type Instrument_Validation struct {
-	state         protoimpl.MessageState         `protogen:"open.v1"`
-	IsValid       bool                           `protobuf:"varint,1,opt,name=is_valid,json=isValid,proto3" json:"is_valid,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Whether the instrument's attributes meet the requirements for the set.
+	IsValid bool `protobuf:"varint,1,opt,name=is_valid,json=isValid,proto3" json:"is_valid,omitempty"`
+	// Fields which require attention
 	InvalidFields []*Instrument_Validation_Field `protobuf:"bytes,2,rep,name=invalid_fields,json=invalidFields,proto3" json:"invalid_fields,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1862,10 +2253,14 @@ func (x *Instrument_Validation) GetInvalidFields() []*Instrument_Validation_Fiel
 	return nil
 }
 
+// A single Field
 type Instrument_Validation_Field struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Notes         string                 `protobuf:"bytes,2,opt,name=notes,proto3" json:"notes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name of the field
+	// Examples: reg28.category, cisca.issuer, etc.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Validation notes for the field.
+	Notes         string `protobuf:"bytes,2,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
