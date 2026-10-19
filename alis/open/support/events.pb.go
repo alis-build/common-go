@@ -23,9 +23,12 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Event published when a new issue is created.
 type IssueCreatedEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue.
+	// Format: issues/*
+	Issue         string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -67,10 +70,15 @@ func (x *IssueCreatedEvent) GetIssue() string {
 	return ""
 }
 
+// Event published when the requesters of an issue are changed.
 type IssueRequestersChangedEvent struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	Issue              string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
-	PreviousRequesters []string               `protobuf:"bytes,2,rep,name=previous_requesters,json=previousRequesters,proto3" json:"previous_requesters,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue.
+	// Format: issues/*
+	Issue string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	// The fully qualified names of the previous requesters.
+	// Format: [users/*]
+	PreviousRequesters []string `protobuf:"bytes,2,rep,name=previous_requesters,json=previousRequesters,proto3" json:"previous_requesters,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -119,10 +127,15 @@ func (x *IssueRequestersChangedEvent) GetPreviousRequesters() []string {
 	return nil
 }
 
+// Event published when the assignees of an issue are changed.
 type IssueAssigneesChangedEvent struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	Issue             string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
-	PreviousAssignees []string               `protobuf:"bytes,2,rep,name=previous_assignees,json=previousAssignees,proto3" json:"previous_assignees,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue.
+	// Format: issues/*
+	Issue string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	// The fully qualified names of the previous assignees.
+	// Format: [users/*]
+	PreviousAssignees []string `protobuf:"bytes,2,rep,name=previous_assignees,json=previousAssignees,proto3" json:"previous_assignees,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -171,9 +184,12 @@ func (x *IssueAssigneesChangedEvent) GetPreviousAssignees() []string {
 	return nil
 }
 
+// Event published when the type of an issue is changed.
 type IssueTypeChangedEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue.
+	// Format: issues/*
+	Issue         string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -215,9 +231,12 @@ func (x *IssueTypeChangedEvent) GetIssue() string {
 	return ""
 }
 
+// Event published when an issue is closed.
 type IssueClosedEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue.
+	// Format: issues/*
+	Issue         string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -259,9 +278,12 @@ func (x *IssueClosedEvent) GetIssue() string {
 	return ""
 }
 
+// Event published when an issue is reopened.
 type IssueReopenedEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue.
+	// Format: issues/*
+	Issue         string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -303,9 +325,12 @@ func (x *IssueReopenedEvent) GetIssue() string {
 	return ""
 }
 
+// Event published when an issue is put on hold.
 type IssueOnHoldEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue.
+	// Format: issues/*
+	Issue         string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -347,9 +372,12 @@ func (x *IssueOnHoldEvent) GetIssue() string {
 	return ""
 }
 
+// Event published when an issue is resumed.
 type IssueResumedEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue.
+	// Format: issues/*
+	Issue         string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -391,9 +419,12 @@ func (x *IssueResumedEvent) GetIssue() string {
 	return ""
 }
 
+// Event published when a requester comment is added to an issue.
 type IssueCommentAddedEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	IssueActivity string                 `protobuf:"bytes,1,opt,name=issue_activity,json=issueActivity,proto3" json:"issue_activity,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The fully qualified name of the issue activity.
+	// Format: "issues/*/activities/*".
+	IssueActivity string `protobuf:"bytes,1,opt,name=issue_activity,json=issueActivity,proto3" json:"issue_activity,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

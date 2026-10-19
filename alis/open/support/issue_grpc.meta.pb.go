@@ -3,43 +3,43 @@
 // Source: alis/open/support/v1/issue.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:41:00 UTC
+// Generated on: 2026-10-19 08:24:37 UTC
 
 package support
 
 const (
 	// IssuesService_ValidateMessage_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.ValidateMessage method.
-	IssuesService_ValidateMessage_FullMethodDescription = ""
+	IssuesService_ValidateMessage_FullMethodDescription = "Validates any proto message that is used directly or indirectly by this service.\n Most common use case is to validate request messages from a client-side application."
 	// IssuesService_RetrieveRules_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.RetrieveRules method.
-	IssuesService_RetrieveRules_FullMethodDescription = ""
+	IssuesService_RetrieveRules_FullMethodDescription = "Retrieves the validation rules for any proto message that is used directly or indirectly by this service.\n Serves as live auto-documentation of the validation rules in this service."
 	// IssuesService_GetIamPolicy_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.GetIamPolicy method.
-	IssuesService_GetIamPolicy_FullMethodDescription = ""
+	IssuesService_GetIamPolicy_FullMethodDescription = "Gets the IAM policy for a resource implemented in this service."
 	// IssuesService_SetIamPolicy_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.SetIamPolicy method.
-	IssuesService_SetIamPolicy_FullMethodDescription = ""
+	IssuesService_SetIamPolicy_FullMethodDescription = "Sets the IAM policy for a resource implemented in this service."
 	// IssuesService_TestIamPermissions_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.TestIamPermissions method.
-	IssuesService_TestIamPermissions_FullMethodDescription = ""
+	IssuesService_TestIamPermissions_FullMethodDescription = "Returns permissions that a caller has on the specified resource."
 	// IssuesService_AddIamBindings_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.AddIamBindings method.
-	IssuesService_AddIamBindings_FullMethodDescription = ""
+	IssuesService_AddIamBindings_FullMethodDescription = "Adds principals or updates the roles existing principals have on an IAM Policy protected resource."
 	// IssuesService_RemoveIamBindings_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.RemoveIamBindings method.
-	IssuesService_RemoveIamBindings_FullMethodDescription = ""
+	IssuesService_RemoveIamBindings_FullMethodDescription = "Removes principals or some of the roles they have on an IAM Policy protected resource."
 	// IssuesService_CreateIssue_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.CreateIssue method.
-	IssuesService_CreateIssue_FullMethodDescription = ""
+	IssuesService_CreateIssue_FullMethodDescription = "Creates a new Issue."
 	// IssuesService_UpdateIssue_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.UpdateIssue method.
-	IssuesService_UpdateIssue_FullMethodDescription = ""
+	IssuesService_UpdateIssue_FullMethodDescription = "Updates a Issue.\n Only called from alis-build."
 	// IssuesService_GetIssue_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.GetIssue method.
-	IssuesService_GetIssue_FullMethodDescription = ""
+	IssuesService_GetIssue_FullMethodDescription = "Gets information about a Issue."
 	// IssuesService_ListIssues_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.ListIssues method.
-	IssuesService_ListIssues_FullMethodDescription = ""
+	IssuesService_ListIssues_FullMethodDescription = "Lists Issues. Results are sorted by name, ascending."
 	// IssuesService_DeleteIssue_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.DeleteIssue method.
-	IssuesService_DeleteIssue_FullMethodDescription = ""
+	IssuesService_DeleteIssue_FullMethodDescription = "Deletes a Issue.\n Only called from alis-build."
 	// IssuesService_EditNewIssue_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.EditNewIssue method.
-	IssuesService_EditNewIssue_FullMethodDescription = ""
+	IssuesService_EditNewIssue_FullMethodDescription = "Edit all the details of a newly created issue\n Used by requesters to update the issue while no activities have been created under the issue"
 	// IssuesService_CancelNewIssue_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.CancelNewIssue method.
-	IssuesService_CancelNewIssue_FullMethodDescription = ""
+	IssuesService_CancelNewIssue_FullMethodDescription = "Cancel a new issue. This will delete the issue, so support will not even see it in closed issues."
 	// IssuesService_SetIssueAssignee_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.SetIssueAssignee method.
-	IssuesService_SetIssueAssignee_FullMethodDescription = ""
+	IssuesService_SetIssueAssignee_FullMethodDescription = "Set the assignee of an issue"
 	// IssuesService_AddIssueViewers_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.AddIssueViewers method.
-	IssuesService_AddIssueViewers_FullMethodDescription = ""
+	IssuesService_AddIssueViewers_FullMethodDescription = "Set issue viewers. This will allow the specified users to view the issue in the case of a private issue.\n The method appends the viewers to the existing list of viewers."
 	// IssuesService_RemoveIssueViewers_FullMethodDescription returns the description of the alis.open.support.v1.IssuesService.RemoveIssueViewers method.
-	IssuesService_RemoveIssueViewers_FullMethodDescription = ""
+	IssuesService_RemoveIssueViewers_FullMethodDescription = "Remove issue viewers. This will remove the specified users from the list of users who can view the issue."
 )

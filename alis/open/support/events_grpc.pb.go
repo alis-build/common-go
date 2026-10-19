@@ -27,7 +27,10 @@ const (
 // EventsServiceClient is the client API for EventsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Service for handling events.
 type EventsServiceClient interface {
+	// Handles an event from pubsub.
 	HandleEvent(ctx context.Context, in *pubsub.PubSubMessage, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -52,7 +55,10 @@ func (c *eventsServiceClient) HandleEvent(ctx context.Context, in *pubsub.PubSub
 // EventsServiceServer is the server API for EventsService service.
 // All implementations must embed UnimplementedEventsServiceServer
 // for forward compatibility.
+//
+// Service for handling events.
 type EventsServiceServer interface {
+	// Handles an event from pubsub.
 	HandleEvent(context.Context, *pubsub.PubSubMessage) (*emptypb.Empty, error)
 	mustEmbedUnimplementedEventsServiceServer()
 }

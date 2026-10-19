@@ -30,11 +30,20 @@ const (
 // GuidesServiceClient is the client API for GuidesService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// GuidesService provides RPCs for managing Guide resources.
 type GuidesServiceClient interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	// Gets information about a Guide.
 	GetGuide(ctx context.Context, in *GetGuideRequest, opts ...grpc.CallOption) (*Guide, error)
+	// Lists Guides. Results are sorted by name, ascending.
 	ListGuides(ctx context.Context, in *ListGuidesRequest, opts ...grpc.CallOption) (*ListGuidesResponse, error)
+	// SyncGuide synchronizes the published guide from alis-build so its available in this deployment.
 	SyncGuide(ctx context.Context, in *SyncGuideRequest, opts ...grpc.CallOption) (*Guide, error)
 }
 
@@ -99,11 +108,20 @@ func (c *guidesServiceClient) SyncGuide(ctx context.Context, in *SyncGuideReques
 // GuidesServiceServer is the server API for GuidesService service.
 // All implementations must embed UnimplementedGuidesServiceServer
 // for forward compatibility.
+//
+// GuidesService provides RPCs for managing Guide resources.
 type GuidesServiceServer interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	// Gets information about a Guide.
 	GetGuide(context.Context, *GetGuideRequest) (*Guide, error)
+	// Lists Guides. Results are sorted by name, ascending.
 	ListGuides(context.Context, *ListGuidesRequest) (*ListGuidesResponse, error)
+	// SyncGuide synchronizes the published guide from alis-build so its available in this deployment.
 	SyncGuide(context.Context, *SyncGuideRequest) (*Guide, error)
 	mustEmbedUnimplementedGuidesServiceServer()
 }

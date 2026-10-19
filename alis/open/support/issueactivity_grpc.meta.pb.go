@@ -3,29 +3,29 @@
 // Source: alis/open/support/v1/issueactivity.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:41:00 UTC
+// Generated on: 2026-10-19 08:24:37 UTC
 
 package support
 
 const (
 	// IssueActivitiesService_ValidateMessage_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.ValidateMessage method.
-	IssueActivitiesService_ValidateMessage_FullMethodDescription = ""
+	IssueActivitiesService_ValidateMessage_FullMethodDescription = "Validates any proto message that is used directly or indirectly by this service.\n Most common use case is to validate request messages from a client-side application."
 	// IssueActivitiesService_RetrieveRules_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.RetrieveRules method.
-	IssueActivitiesService_RetrieveRules_FullMethodDescription = ""
+	IssueActivitiesService_RetrieveRules_FullMethodDescription = "Retrieves the validation rules for any proto message that is used directly or indirectly by this service.\n Serves as live auto-documentation of the validation rules in this service."
 	// IssueActivitiesService_CreateIssueActivity_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.CreateIssueActivity method.
-	IssueActivitiesService_CreateIssueActivity_FullMethodDescription = ""
+	IssueActivitiesService_CreateIssueActivity_FullMethodDescription = "Creates a IssueActivity.\n Only called from alis-build"
 	// IssueActivitiesService_GetIssueActivity_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.GetIssueActivity method.
-	IssueActivitiesService_GetIssueActivity_FullMethodDescription = ""
+	IssueActivitiesService_GetIssueActivity_FullMethodDescription = "Gets information about a IssueActivity."
 	// IssueActivitiesService_UpdateIssueActivity_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.UpdateIssueActivity method.
-	IssueActivitiesService_UpdateIssueActivity_FullMethodDescription = ""
+	IssueActivitiesService_UpdateIssueActivity_FullMethodDescription = "Updates a issue activity.\n Only called from alis-build."
 	// IssueActivitiesService_DeleteIssueActivity_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.DeleteIssueActivity method.
-	IssueActivitiesService_DeleteIssueActivity_FullMethodDescription = ""
+	IssueActivitiesService_DeleteIssueActivity_FullMethodDescription = "Deletes a IssueActivity.\n Only called from alis-build."
 	// IssueActivitiesService_ListIssueActivities_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.ListIssueActivities method.
-	IssueActivitiesService_ListIssueActivities_FullMethodDescription = ""
+	IssueActivitiesService_ListIssueActivities_FullMethodDescription = "Lists IssueActivities. Results are sorted by name, ascending."
 	// IssueActivitiesService_CreateComment_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.CreateComment method.
-	IssueActivitiesService_CreateComment_FullMethodDescription = ""
+	IssueActivitiesService_CreateComment_FullMethodDescription = "Adds a comment to the issue.\n If the Issue is private, only the reporter and assignees can comment.\n If the Issue is public, other users in the deployment can comment."
 	// IssueActivitiesService_UpdateComment_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.UpdateComment method.
-	IssueActivitiesService_UpdateComment_FullMethodDescription = ""
+	IssueActivitiesService_UpdateComment_FullMethodDescription = "Update an existing comment.\n Only the creator of the comment can update it."
 	// IssueActivitiesService_DeleteComment_FullMethodDescription returns the description of the alis.open.support.v1.IssueActivitiesService.DeleteComment method.
-	IssueActivitiesService_DeleteComment_FullMethodDescription = ""
+	IssueActivitiesService_DeleteComment_FullMethodDescription = "Deletes an existing comment.\n Only the creator of the comment can delete it."
 )

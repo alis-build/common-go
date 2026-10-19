@@ -3,19 +3,19 @@
 // Source: alis/open/support/v1/guide.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:41:00 UTC
+// Generated on: 2026-10-19 08:24:37 UTC
 
 package support
 
 const (
 	// GuidesService_ValidateMessage_FullMethodDescription returns the description of the alis.open.support.v1.GuidesService.ValidateMessage method.
-	GuidesService_ValidateMessage_FullMethodDescription = ""
+	GuidesService_ValidateMessage_FullMethodDescription = "Validates any proto message that is used directly or indirectly by this service.\n Most common use case is to validate request messages from a client-side application."
 	// GuidesService_RetrieveRules_FullMethodDescription returns the description of the alis.open.support.v1.GuidesService.RetrieveRules method.
-	GuidesService_RetrieveRules_FullMethodDescription = ""
+	GuidesService_RetrieveRules_FullMethodDescription = "Retrieves the validation rules for any proto message that is used directly or indirectly by this service.\n Serves as live auto-documentation of the validation rules in this service."
 	// GuidesService_GetGuide_FullMethodDescription returns the description of the alis.open.support.v1.GuidesService.GetGuide method.
-	GuidesService_GetGuide_FullMethodDescription = ""
+	GuidesService_GetGuide_FullMethodDescription = "Gets information about a Guide."
 	// GuidesService_ListGuides_FullMethodDescription returns the description of the alis.open.support.v1.GuidesService.ListGuides method.
-	GuidesService_ListGuides_FullMethodDescription = ""
+	GuidesService_ListGuides_FullMethodDescription = "Lists Guides. Results are sorted by name, ascending."
 	// GuidesService_SyncGuide_FullMethodDescription returns the description of the alis.open.support.v1.GuidesService.SyncGuide method.
-	GuidesService_SyncGuide_FullMethodDescription = ""
+	GuidesService_SyncGuide_FullMethodDescription = "SyncGuide synchronizes the published guide from alis-build so its available in this deployment."
 )

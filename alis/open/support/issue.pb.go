@@ -27,13 +27,18 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Available Issue categories.
 type Issue_Category int32
 
 const (
+	// Not specified
 	Issue_CATEGORY_UNSPECIFIED Issue_Category = 0
-	Issue_BUG                  Issue_Category = 1
-	Issue_QUESTION             Issue_Category = 2
-	Issue_REQUEST              Issue_Category = 3
+	// The user is experiencing a bug in the product functionality
+	Issue_BUG Issue_Category = 1
+	// A question from the user
+	Issue_QUESTION Issue_Category = 2
+	// User has a request, e.g. a feature request or request for training.
+	Issue_REQUEST Issue_Category = 3
 )
 
 // Enum value maps for Issue_Category.
@@ -79,20 +84,35 @@ func (Issue_Category) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_issue_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// Available types.
 type Issue_Type int32
 
 const (
-	Issue_TYPE_UNSPECIFIED           Issue_Type = 0
-	Issue_UNREACHABLE_SERVICE        Issue_Type = 2
-	Issue_GA_BUG                     Issue_Type = 4
-	Issue_URGENT_SUPPORT             Issue_Type = 6
-	Issue_WORKAROUNDABLE_GA_BUG      Issue_Type = 8
-	Issue_PREVIEW_BUG                Issue_Type = 10
+	// Not specified
+	Issue_TYPE_UNSPECIFIED Issue_Type = 0
+	// Console/service is unreachable.
+	Issue_UNREACHABLE_SERVICE Issue_Type = 2
+	// One/more GA features are unusable and an acceptable workaround is not possible.
+	// The acceptability of a workaround is determined by the type of bug and the willingness of the user to use the workaround.
+	Issue_GA_BUG Issue_Type = 4
+	// Nothing is necessarily wrong in the service, but the user needs urgent assistence. E.g. accidental deletion of resources.
+	// Too many of these issues from one user could result in the user being "blacklisted" and not being allowed to request support for some time period.
+	Issue_URGENT_SUPPORT Issue_Type = 6
+	// One/more GA features are unusable, and an acceptable workaround is possible.
+	// The acceptability of a workaround is determined by the type of bug and the willingness of the user to use the workaround.
+	Issue_WORKAROUNDABLE_GA_BUG Issue_Type = 8
+	// One/more preview features are unusable and an acceptable workaround is not possible.
+	Issue_PREVIEW_BUG Issue_Type = 10
+	// One/more preview features are unusable, and an acceptable workaround is possible.
 	Issue_WORKAROUNDABLE_PREVIEW_BUG Issue_Type = 12
-	Issue_SUPPORT                    Issue_Type = 14
-	Issue_TRAINING                   Issue_Type = 16
-	Issue_GENERAL                    Issue_Type = 18
-	Issue_FEATURE_REQUEST            Issue_Type = 20
+	// User has difficulty in using/understanding the service, but can wait an hour/more if there are other more urgent issues.
+	Issue_SUPPORT Issue_Type = 14
+	// The user is formally requesting training on using the entire or a part of the service.
+	Issue_TRAINING Issue_Type = 16
+	// User has general questions.
+	Issue_GENERAL Issue_Type = 18
+	// User has a feature request.
+	Issue_FEATURE_REQUEST Issue_Type = 20
 )
 
 // Enum value maps for Issue_Type.
@@ -152,13 +172,20 @@ func (Issue_Type) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_issue_proto_rawDescGZIP(), []int{0, 1}
 }
 
+// The available Issue states
 type Issue_State int32
 
 const (
+	// Issue is in an unknown state. Not allowed
 	Issue_STATE_UNSPECIFIED Issue_State = 0
-	Issue_OPEN              Issue_State = 1
-	Issue_ON_HOLD           Issue_State = 2
-	Issue_CLOSED            Issue_State = 3
+	// The Issue is open (can be a new unassigned Issue or a Issue being worked on)
+	Issue_OPEN Issue_State = 1
+	// The Issue has been put on hold by support, meaning it won't be looked at for a day or more
+	Issue_ON_HOLD Issue_State = 2
+	// The Issue has been resolved.
+	// Closed does not imply that a successful solution was provided.
+	// The Issue may be closed if changing requirements render the Issue irrelevant.
+	Issue_CLOSED Issue_State = 3
 )
 
 // Enum value maps for Issue_State.
@@ -204,12 +231,18 @@ func (Issue_State) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_issue_proto_rawDescGZIP(), []int{0, 2}
 }
 
+// Visibility of the issue
 type Issue_IssueVisibility int32
 
 const (
+	// Issue visibility is not specified; the issue is treated as
+	// `ISSUE_VISIBILITY_PRIVATE`.
 	Issue_ISSUE_VISIBILITY_UNSPECIFIED Issue_IssueVisibility = 0
-	Issue_ISSUE_VISIBILITY_PRIVATE     Issue_IssueVisibility = 1
-	Issue_ISSUE_VISIBILITY_PUBLIC      Issue_IssueVisibility = 2
+	// The issue is visible only to the reporter, assignee and allowed users.
+	Issue_ISSUE_VISIBILITY_PRIVATE Issue_IssueVisibility = 1
+	// The issue is visible to all users.
+	// This also allows other users to comment on the issue.
+	Issue_ISSUE_VISIBILITY_PUBLIC Issue_IssueVisibility = 2
 )
 
 // Enum value maps for Issue_IssueVisibility.
@@ -253,13 +286,18 @@ func (Issue_IssueVisibility) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_issue_proto_rawDescGZIP(), []int{0, 3}
 }
 
+// The potential types of content blocks
 type Issue_ContentBlock_Type int32
 
 const (
+	// The content block type is not specified.
 	Issue_ContentBlock_TYPE_UNSPECIFIED Issue_ContentBlock_Type = 0
-	Issue_ContentBlock_TEXT_BODY        Issue_ContentBlock_Type = 1
-	Issue_ContentBlock_IMAGE            Issue_ContentBlock_Type = 2
-	Issue_ContentBlock_VIDEO            Issue_ContentBlock_Type = 3
+	// Body text
+	Issue_ContentBlock_TEXT_BODY Issue_ContentBlock_Type = 1
+	// A standalone image
+	Issue_ContentBlock_IMAGE Issue_ContentBlock_Type = 2
+	// A standalone video
+	Issue_ContentBlock_VIDEO Issue_ContentBlock_Type = 3
 )
 
 // Enum value maps for Issue_ContentBlock_Type.
@@ -305,18 +343,34 @@ func (Issue_ContentBlock_Type) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_issue_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
+// An Issue represents support that is requested by a user of a Product.
 type Issue struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Description   []*Issue_ContentBlock  `protobuf:"bytes,3,rep,name=description,proto3" json:"description,omitempty"`
-	Category      Issue_Category         `protobuf:"varint,4,opt,name=category,proto3,enum=alis.open.support.v1.Issue_Category" json:"category,omitempty"`
-	Type          Issue_Type             `protobuf:"varint,5,opt,name=type,proto3,enum=alis.open.support.v1.Issue_Type" json:"type,omitempty"`
-	State         Issue_State            `protobuf:"varint,6,opt,name=state,proto3,enum=alis.open.support.v1.Issue_State" json:"state,omitempty"`
-	Reporter      *Issue_User            `protobuf:"bytes,7,opt,name=reporter,proto3" json:"reporter,omitempty"`
-	Assignee      *Issue_User            `protobuf:"bytes,8,opt,name=assignee,proto3" json:"assignee,omitempty"`
-	Visibility    Issue_IssueVisibility  `protobuf:"varint,9,opt,name=visibility,proto3,enum=alis.open.support.v1.Issue_IssueVisibility" json:"visibility,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name for the Issue.
+	// Format: issues/*
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The short description of the Issue. 63 characters or less
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// A detailed description of the Issue.
+	Description []*Issue_ContentBlock `protobuf:"bytes,3,rep,name=description,proto3" json:"description,omitempty"`
+	// The user specified Issue category,
+	// kept simple for user to have broad categories.
+	Category Issue_Category `protobuf:"varint,4,opt,name=category,proto3,enum=alis.open.support.v1.Issue_Category" json:"category,omitempty"`
+	// The internal type categorisation of the Issue, which is set by the team
+	// based on the content of the Issue.
+	Type Issue_Type `protobuf:"varint,5,opt,name=type,proto3,enum=alis.open.support.v1.Issue_Type" json:"type,omitempty"`
+	// The current state of the Issue.
+	State Issue_State `protobuf:"varint,6,opt,name=state,proto3,enum=alis.open.support.v1.Issue_State" json:"state,omitempty"`
+	// The user that reported the issue.
+	Reporter *Issue_User `protobuf:"bytes,7,opt,name=reporter,proto3" json:"reporter,omitempty"`
+	// The builder or support agent assigned to manage this issue.
+	Assignee *Issue_User `protobuf:"bytes,8,opt,name=assignee,proto3" json:"assignee,omitempty"`
+	// Visibility of the issue.
+	// If not specified, the default is ISSUE_VISIBILITY_PRIVATE
+	Visibility Issue_IssueVisibility `protobuf:"varint,9,opt,name=visibility,proto3,enum=alis.open.support.v1.Issue_IssueVisibility" json:"visibility,omitempty"`
+	// Output only. The time this Issue was created.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// Output only. The time this Issue was last updated.
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,100,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -429,9 +483,11 @@ func (x *Issue) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// The request message for the CreateIssue method.
 type CreateIssueRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         *Issue                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Issue to create.
+	Issue         *Issue `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -473,9 +529,14 @@ func (x *CreateIssueRequest) GetIssue() *Issue {
 	return nil
 }
 
+// The request message for the UpdateIssue method.
 type UpdateIssueRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         *Issue                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Issue to update with all of its fields.
+	// The Issue's `name` field is used to identify the Issue to update.
+	Issue *Issue `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	// The fields to update in snake_case.
+	// All fields are updated if not set.
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -525,9 +586,14 @@ func (x *UpdateIssueRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the GetIssue method.
 type GetIssueRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the Issue.
+	// Format: issues/*
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -577,13 +643,25 @@ func (x *GetIssueRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the ListIssues method.
 type ListIssuesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
-	OrderBy       string                 `protobuf:"bytes,5,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of Issues to return.
+	PageSize int32 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous ListIssues call.
+	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// A filter to apply to the list of Issues.
+	Filter string `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
+	// The order to sort the results by
+	// Default is descending
+	//
+	// Format: "field_name {asc|desc}"
+	//
+	// Only update_time is supported at the moment.
+	OrderBy       string `protobuf:"bytes,5,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -653,10 +731,13 @@ func (x *ListIssuesRequest) GetOrderBy() string {
 	return ""
 }
 
+// The response message for the ListIssues method.
 type ListIssuesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issues        []*Issue               `protobuf:"bytes,1,rep,name=issues,proto3" json:"issues,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Issues.
+	Issues []*Issue `protobuf:"bytes,1,rep,name=issues,proto3" json:"issues,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -705,9 +786,12 @@ func (x *ListIssuesResponse) GetNextPageToken() string {
 	return ""
 }
 
+// The request message for the DeleteIssue method
 type DeleteIssueRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the Issue.
+	// Format: issues/*
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -749,9 +833,12 @@ func (x *DeleteIssueRequest) GetName() string {
 	return ""
 }
 
+// The request message for the EditNewIssue method
 type EditNewIssueRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         *Issue                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Issue to update with all of its fields, similar to a create method
+	// The Issue's `name` field is used to identify the Issue to update.
+	Issue         *Issue `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -793,9 +880,11 @@ func (x *EditNewIssueRequest) GetIssue() *Issue {
 	return nil
 }
 
+// The request message for the CancelNewIssue method
 type CancelNewIssueRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The issue to cancel
+	Issue         string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -837,10 +926,14 @@ func (x *CancelNewIssueRequest) GetIssue() string {
 	return ""
 }
 
+// The request message for the SetIssueAssignee method
 type SetIssueAssigneeRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
-	Assignee      *Issue_User            `protobuf:"bytes,2,opt,name=assignee,proto3" json:"assignee,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Issue to set the assignee on
+	// Format: issues/*
+	Issue string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	// The new assignee for the issue
+	Assignee      *Issue_User `protobuf:"bytes,2,opt,name=assignee,proto3" json:"assignee,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -889,10 +982,15 @@ func (x *SetIssueAssigneeRequest) GetAssignee() *Issue_User {
 	return nil
 }
 
+// The request message for the AddIssueViewers method
 type AddIssueViewersRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
-	Viewers       []string               `protobuf:"bytes,2,rep,name=viewers,proto3" json:"viewers,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Issue to add the viewers to
+	// Format: issues/*
+	Issue string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	// The viewers for the issue.
+	// Format: users/([a-z0-9-]{2,50})
+	Viewers       []string `protobuf:"bytes,2,rep,name=viewers,proto3" json:"viewers,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -941,10 +1039,15 @@ func (x *AddIssueViewersRequest) GetViewers() []string {
 	return nil
 }
 
+// The request message for the RemoveIssueViewers method
 type RemoveIssueViewersRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issue         string                 `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
-	Viewers       []string               `protobuf:"bytes,2,rep,name=viewers,proto3" json:"viewers,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Issue to remove the viewers from
+	// Format: issues/*
+	Issue string `protobuf:"bytes,1,opt,name=issue,proto3" json:"issue,omitempty"`
+	// The viewers for the issue.
+	// Format: users/([a-z0-9-]{2,50})
+	Viewers       []string `protobuf:"bytes,2,rep,name=viewers,proto3" json:"viewers,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -993,9 +1096,13 @@ func (x *RemoveIssueViewersRequest) GetViewers() []string {
 	return nil
 }
 
+// ContentBlock in the context of a Issue or Issue Activity
 type Issue_ContentBlock struct {
-	state protoimpl.MessageState  `protogen:"open.v1"`
-	Type  Issue_ContentBlock_Type `protobuf:"varint,1,opt,name=type,proto3,enum=alis.open.support.v1.Issue_ContentBlock_Type" json:"type,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The type of the content block
+	Type Issue_ContentBlock_Type `protobuf:"varint,1,opt,name=type,proto3,enum=alis.open.support.v1.Issue_ContentBlock_Type" json:"type,omitempty"`
+	// The block containing the content
+	//
 	// Types that are valid to be assigned to Block:
 	//
 	//	*Issue_ContentBlock_TextBody_
@@ -1082,14 +1189,17 @@ type isIssue_ContentBlock_Block interface {
 }
 
 type Issue_ContentBlock_TextBody_ struct {
+	// Body text
 	TextBody *Issue_ContentBlock_TextBody `protobuf:"bytes,2,opt,name=text_body,json=textBody,proto3,oneof"`
 }
 
 type Issue_ContentBlock_Image_ struct {
+	// A standalone image
 	Image *Issue_ContentBlock_Image `protobuf:"bytes,3,opt,name=image,proto3,oneof"`
 }
 
 type Issue_ContentBlock_Video_ struct {
+	// A standalone video
 	Video *Issue_ContentBlock_Video `protobuf:"bytes,4,opt,name=video,proto3,oneof"`
 }
 
@@ -1099,13 +1209,21 @@ func (*Issue_ContentBlock_Image_) isIssue_ContentBlock_Block() {}
 
 func (*Issue_ContentBlock_Video_) isIssue_ContentBlock_Block() {}
 
+// A user referenced by an Issue, such as its reporter or assignee.
 type Issue_User struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	GivenName     string                 `protobuf:"bytes,3,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
-	FamilyName    string                 `protobuf:"bytes,4,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
-	Picture       string                 `protobuf:"bytes,5,opt,name=picture,proto3" json:"picture,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the User which cannot be changed.
+	// Format: users/([a-z0-9-]{2,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The email of the User. Alis will never overwrite this field.
+	Email string `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	// The given name of the User.
+	GivenName string `protobuf:"bytes,3,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
+	// The family name of the User.
+	FamilyName string `protobuf:"bytes,4,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
+	// The picture of the User.
+	// Format: https://...
+	Picture       string `protobuf:"bytes,5,opt,name=picture,proto3" json:"picture,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1175,9 +1293,12 @@ func (x *Issue_User) GetPicture() string {
 	return ""
 }
 
+// Body text
 type Issue_ContentBlock_TextBody struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The text body content
+	// Supports standard markdown format.
+	Text          string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1219,10 +1340,13 @@ func (x *Issue_ContentBlock_TextBody) GetText() string {
 	return ""
 }
 
+// A standalone image
 type Issue_ContentBlock_Image struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SourceUri     string                 `protobuf:"bytes,1,opt,name=source_uri,json=sourceUri,proto3" json:"source_uri,omitempty"`
-	Caption       string                 `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The image source url
+	SourceUri string `protobuf:"bytes,1,opt,name=source_uri,json=sourceUri,proto3" json:"source_uri,omitempty"`
+	// An optional caption to the image
+	Caption       string `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1271,10 +1395,13 @@ func (x *Issue_ContentBlock_Image) GetCaption() string {
 	return ""
 }
 
+// A standalone video
 type Issue_ContentBlock_Video struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SourceUri     string                 `protobuf:"bytes,1,opt,name=source_uri,json=sourceUri,proto3" json:"source_uri,omitempty"`
-	Caption       string                 `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The video source url.
+	SourceUri string `protobuf:"bytes,1,opt,name=source_uri,json=sourceUri,proto3" json:"source_uri,omitempty"`
+	// An optional caption to the video
+	Caption       string `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

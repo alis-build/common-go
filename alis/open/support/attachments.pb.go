@@ -4,6 +4,34 @@
 // 	protoc        v3.21.12
 // source: alis/open/support/v1/attachments.proto
 
+// Lets users of an Alis product request support, and publishes the guides the
+// product team provides to help them use the product.
+//
+// Resources:
+//
+// - `Issue` (`issues/{issue}`), managed by `IssuesService`: a support request
+//   raised by a user, with a user-chosen category, an internal type set by the
+//   team, a state (`OPEN`, `ON_HOLD`, `CLOSED`), a reporter, an assignee, and
+//   private or public visibility.
+// - `IssueActivity` (`issues/{issue}/activities/{activity}`), managed by
+//   `IssueActivitiesService`: a change made to an issue, or a requester,
+//   support or internal comment on it.
+// - `IssueSubscriber` (`issues/{issue}/subscribers/{subscriber}`), managed by
+//   `IssueSubscribersService`: a user subscribed to an issue.
+// - `Guide` (`guides/{guide}`), managed by `GuidesService`: help content made
+//   of content blocks, synced from Alis Build with `SyncGuide`.
+//
+// Several write RPCs, such as `UpdateIssue`, `DeleteIssue` and
+// `CreateIssueActivity`, are only called from Alis Build. Users edit or cancel
+// a new issue with `EditNewIssue` and `CancelNewIssue`, and comment with
+// `CreateComment`, `UpdateComment` and `DeleteComment`.
+//
+// `PublicAttachmentsService` uploads images for use in support content and
+// returns a public URI. `EventsService` handles Pub/Sub events. The
+// `Issue*Event` messages are published when an issue is created, closed,
+// reopened, put on hold or resumed, when its type, requesters or assignees
+// change, and when a comment is added to it.
+
 package support
 
 import (
@@ -21,10 +49,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The request message for the `UploadImage` method.
 type UploadImageRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	MimeType      string                 `protobuf:"bytes,2,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The image data as bytes.
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	// The image mime type.
+	//
+	// The current types supported are:
+	// - image/jpeg,
+	// - image/jpg
+	// - image/x-png,
+	// - image/png,
+	// - image/gif
+	MimeType      string `protobuf:"bytes,2,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,9 +111,11 @@ func (x *UploadImageRequest) GetMimeType() string {
 	return ""
 }
 
+// The response message for the `UploadImage` method.
 type UploadImageResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PublicUri     string                 `protobuf:"bytes,1,opt,name=public_uri,json=publicUri,proto3" json:"public_uri,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The uri link to the original image.
+	PublicUri     string `protobuf:"bytes,1,opt,name=public_uri,json=publicUri,proto3" json:"public_uri,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

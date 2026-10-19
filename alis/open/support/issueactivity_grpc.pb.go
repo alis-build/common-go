@@ -36,16 +36,37 @@ const (
 // IssueActivitiesServiceClient is the client API for IssueActivitiesService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// IssueActivitiesService provides RPCs for managing IssueActivity resources.
 type IssueActivitiesServiceClient interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	// Creates a IssueActivity.
+	// Only called from alis-build
 	CreateIssueActivity(ctx context.Context, in *CreateIssueActivityRequest, opts ...grpc.CallOption) (*IssueActivity, error)
+	// Gets information about a IssueActivity.
 	GetIssueActivity(ctx context.Context, in *GetIssueActivityRequest, opts ...grpc.CallOption) (*IssueActivity, error)
+	// Updates a issue activity.
+	// Only called from alis-build.
 	UpdateIssueActivity(ctx context.Context, in *UpdateIssueActivityRequest, opts ...grpc.CallOption) (*IssueActivity, error)
+	// Deletes a IssueActivity.
+	// Only called from alis-build.
 	DeleteIssueActivity(ctx context.Context, in *DeleteIssueActivityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Lists IssueActivities. Results are sorted by name, ascending.
 	ListIssueActivities(ctx context.Context, in *ListIssueActivitiesRequest, opts ...grpc.CallOption) (*ListIssueActivitiesResponse, error)
+	// Adds a comment to the issue.
+	// If the Issue is private, only the reporter and assignees can comment.
+	// If the Issue is public, other users in the deployment can comment.
 	CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*IssueActivity, error)
+	// Update an existing comment.
+	// Only the creator of the comment can update it.
 	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*IssueActivity, error)
+	// Deletes an existing comment.
+	// Only the creator of the comment can delete it.
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -160,16 +181,37 @@ func (c *issueActivitiesServiceClient) DeleteComment(ctx context.Context, in *De
 // IssueActivitiesServiceServer is the server API for IssueActivitiesService service.
 // All implementations must embed UnimplementedIssueActivitiesServiceServer
 // for forward compatibility.
+//
+// IssueActivitiesService provides RPCs for managing IssueActivity resources.
 type IssueActivitiesServiceServer interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	// Creates a IssueActivity.
+	// Only called from alis-build
 	CreateIssueActivity(context.Context, *CreateIssueActivityRequest) (*IssueActivity, error)
+	// Gets information about a IssueActivity.
 	GetIssueActivity(context.Context, *GetIssueActivityRequest) (*IssueActivity, error)
+	// Updates a issue activity.
+	// Only called from alis-build.
 	UpdateIssueActivity(context.Context, *UpdateIssueActivityRequest) (*IssueActivity, error)
+	// Deletes a IssueActivity.
+	// Only called from alis-build.
 	DeleteIssueActivity(context.Context, *DeleteIssueActivityRequest) (*emptypb.Empty, error)
+	// Lists IssueActivities. Results are sorted by name, ascending.
 	ListIssueActivities(context.Context, *ListIssueActivitiesRequest) (*ListIssueActivitiesResponse, error)
+	// Adds a comment to the issue.
+	// If the Issue is private, only the reporter and assignees can comment.
+	// If the Issue is public, other users in the deployment can comment.
 	CreateComment(context.Context, *CreateCommentRequest) (*IssueActivity, error)
+	// Update an existing comment.
+	// Only the creator of the comment can update it.
 	UpdateComment(context.Context, *UpdateCommentRequest) (*IssueActivity, error)
+	// Deletes an existing comment.
+	// Only the creator of the comment can delete it.
 	DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedIssueActivitiesServiceServer()
 }

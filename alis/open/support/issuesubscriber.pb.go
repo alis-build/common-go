@@ -27,10 +27,15 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// An IssueSubscriber represents a user who is subscribed to an issue.
 type IssueSubscriber struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the IssueSubscription which cannot be changed.
+	// Format: issues/([a-z0-9-]{2,50})/subscribers/([a-z0-9-]{2,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Output only. The time when this IssueSubscription was created.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// Output only . The time when this IssueSubscription was last updated.
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -87,13 +92,20 @@ func (x *IssueSubscriber) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// The request message for the CreateIssueSubscriber method.
 type CreateIssueSubscriberRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Parent          string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	IssueSubscriber *IssueSubscriber       `protobuf:"bytes,2,opt,name=issue_subscriber,json=issueSubscriber,proto3" json:"issue_subscriber,omitempty"`
-	SubscriberId    string                 `protobuf:"bytes,3,opt,name=subscriber_id,json=subscriberId,proto3" json:"subscriber_id,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name of the issue to subscribe to.
+	// Format: issues/([a-z0-9-]{2,50})
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The IssueSubscriber to create.
+	IssueSubscriber *IssueSubscriber `protobuf:"bytes,2,opt,name=issue_subscriber,json=issueSubscriber,proto3" json:"issue_subscriber,omitempty"`
+	// Subscriber id.
+	// Typically a user id.
+	// Format: ([a-z0-9-]{2,50})
+	SubscriberId  string `protobuf:"bytes,3,opt,name=subscriber_id,json=subscriberId,proto3" json:"subscriber_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateIssueSubscriberRequest) Reset() {
@@ -147,9 +159,12 @@ func (x *CreateIssueSubscriberRequest) GetSubscriberId() string {
 	return ""
 }
 
+// The request message for the DeleteIssueSubscriber method.
 type DeleteIssueSubscriberRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name of the issue subscription to delete.
+	// Format: issues/([a-z0-9-]{2,50})/subscribers/([a-z0-9-]{2,50})
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -191,9 +206,12 @@ func (x *DeleteIssueSubscriberRequest) GetName() string {
 	return ""
 }
 
+// The request message for the GetIssueSubscriber method.
 type GetIssueSubscriberRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name of the issue subscription to get.
+	// Format: issues/([a-z0-9-]{2,50})/subscribers/([a-z0-9-]{2,50})
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -235,14 +253,28 @@ func (x *GetIssueSubscriberRequest) GetName() string {
 	return ""
 }
 
+// The request message for the ListIssueSubscribers method.
 type ListIssueSubscribersRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
-	OrderBy       string                 `protobuf:"bytes,6,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name of the issue to list subscribers for.
+	// Format: issues/([a-z0-9-]{2,50})
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The maximum number of IssueSubscribers to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous ListIssueSubscribers call.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// The filter to apply
+	Filter string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	// The order to sort the results by
+	// Default is descending
+	//
+	// Format: "field_name {asc|desc}"
+	//
+	// Only update_time is supported at the moment.
+	OrderBy       string `protobuf:"bytes,6,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -319,10 +351,13 @@ func (x *ListIssueSubscribersRequest) GetOrderBy() string {
 	return ""
 }
 
+// The response message for the ListIssueSubscribers method.
 type ListIssueSubscribersResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Subscribers   []*IssueSubscriber     `protobuf:"bytes,1,rep,name=subscribers,proto3" json:"subscribers,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of subscribers for the issue.
+	Subscribers []*IssueSubscriber `protobuf:"bytes,1,rep,name=subscribers,proto3" json:"subscribers,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

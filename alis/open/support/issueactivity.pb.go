@@ -25,20 +25,32 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Available Activity types
 type IssueActivity_Type int32
 
 const (
-	IssueActivity_TYPE_UNSPECIFIED  IssueActivity_Type = 0
+	// Not specified
+	IssueActivity_TYPE_UNSPECIFIED IssueActivity_Type = 0
+	// The requesters on the issue were changed
 	IssueActivity_REQUESTERS_CHANGE IssueActivity_Type = 1
-	IssueActivity_ASSIGNEES_CHANGE  IssueActivity_Type = 2
-	IssueActivity_TYPE_CHANGE       IssueActivity_Type = 3
-	IssueActivity_CLOSED            IssueActivity_Type = 7
-	IssueActivity_REOPENED          IssueActivity_Type = 8
-	IssueActivity_ON_HOLD           IssueActivity_Type = 9
-	IssueActivity_RESUMED           IssueActivity_Type = 10
+	// The issue assignees were changed
+	IssueActivity_ASSIGNEES_CHANGE IssueActivity_Type = 2
+	// The issue type was changed
+	IssueActivity_TYPE_CHANGE IssueActivity_Type = 3 // reserve 4, 5 and 6 for other field changes
+	// The issue was closed
+	IssueActivity_CLOSED IssueActivity_Type = 7
+	// The closed issue was reopened
+	IssueActivity_REOPENED IssueActivity_Type = 8
+	// The issue was put on hold
+	IssueActivity_ON_HOLD IssueActivity_Type = 9
+	// The on hold issue was resumed
+	IssueActivity_RESUMED IssueActivity_Type = 10
+	// A requester comment
 	IssueActivity_REQUESTER_COMMENT IssueActivity_Type = 13
-	IssueActivity_SUPPORT_COMMENT   IssueActivity_Type = 14
-	IssueActivity_INTERNAL_COMMENT  IssueActivity_Type = 15
+	// A support comment
+	IssueActivity_SUPPORT_COMMENT IssueActivity_Type = 14
+	// An internal note
+	IssueActivity_INTERNAL_COMMENT IssueActivity_Type = 15
 )
 
 // Enum value maps for IssueActivity_Type.
@@ -98,13 +110,21 @@ func (IssueActivity_Type) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_issueactivity_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// An Activity represent any changes made within, or comments added to, a Issue over its lifetime.
 type IssueActivity struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Creator       *Issue_User            `protobuf:"bytes,2,opt,name=creator,proto3" json:"creator,omitempty"`
-	Body          []*Issue_ContentBlock  `protobuf:"bytes,3,rep,name=body,proto3" json:"body,omitempty"`
-	Type          IssueActivity_Type     `protobuf:"varint,5,opt,name=type,proto3,enum=alis.open.support.v1.IssueActivity_Type" json:"type,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the Activity.
+	// Format: "issues/*/activities/*".
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Output only. The User who created this Activity or caused the Activity to be created by updating a Issue.
+	Creator *Issue_User `protobuf:"bytes,2,opt,name=creator,proto3" json:"creator,omitempty"`
+	// The full body of the activity
+	Body []*Issue_ContentBlock `protobuf:"bytes,3,rep,name=body,proto3" json:"body,omitempty"`
+	// The type of Activity
+	Type IssueActivity_Type `protobuf:"varint,5,opt,name=type,proto3,enum=alis.open.support.v1.IssueActivity_Type" json:"type,omitempty"`
+	// Output only. The time when this Activity was created.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// Output only . The time when this Activity was last updated.
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -182,10 +202,14 @@ func (x *IssueActivity) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// The request message for the CreateIssueActivity method.
 type CreateIssueActivityRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	IssueActivity *IssueActivity         `protobuf:"bytes,2,opt,name=issue_activity,json=issueActivity,proto3" json:"issue_activity,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The parent resource of the IssueActivity.
+	// Format: "issues/*".
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The IssueActivity to create.
+	IssueActivity *IssueActivity `protobuf:"bytes,2,opt,name=issue_activity,json=issueActivity,proto3" json:"issue_activity,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -234,9 +258,14 @@ func (x *CreateIssueActivityRequest) GetIssueActivity() *IssueActivity {
 	return nil
 }
 
+// The request message for the GetIssueActivity method.
 type GetIssueActivityRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the IssueActivity.
+	// Format: "issues/*/activities/*".
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -286,9 +315,13 @@ func (x *GetIssueActivityRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the UpdateIssueActivity method.
 type UpdateIssueActivityRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	IssueActivity *IssueActivity         `protobuf:"bytes,1,opt,name=issue_activity,json=issueActivity,proto3" json:"issue_activity,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The IssueActivity to update.
+	IssueActivity *IssueActivity `protobuf:"bytes,1,opt,name=issue_activity,json=issueActivity,proto3" json:"issue_activity,omitempty"`
+	// The fields to update in snake_case.
+	// All fields are updated if not set.
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -338,9 +371,12 @@ func (x *UpdateIssueActivityRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the DeleteIssueActivity method.
 type DeleteIssueActivityRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the IssueActivity.
+	// Format: "issues/*/activities/*".
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -382,14 +418,28 @@ func (x *DeleteIssueActivityRequest) GetName() string {
 	return ""
 }
 
+// The request message for the ListIssueActivities method.
 type ListIssueActivitiesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
-	OrderBy       string                 `protobuf:"bytes,6,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The parent resource of the IssueActivity.
+	// Format: "issues/*".
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The maximum number of IssueActivities to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous ListIssueActivities call.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// The filter to apply
+	Filter string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	// The order to sort the results by
+	// Default is descending
+	//
+	// Format: "field_name {asc|desc}"
+	//
+	// Only update_time is supported at the moment.
+	OrderBy       string `protobuf:"bytes,6,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -466,12 +516,15 @@ func (x *ListIssueActivitiesRequest) GetOrderBy() string {
 	return ""
 }
 
+// The response message for the ListIssueActivities method.
 type ListIssueActivitiesResponse struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	IssueActivities []*IssueActivity       `protobuf:"bytes,1,rep,name=issue_activities,json=issueActivities,proto3" json:"issue_activities,omitempty"`
-	NextPageToken   string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The IssueActivities.
+	IssueActivities []*IssueActivity `protobuf:"bytes,1,rep,name=issue_activities,json=issueActivities,proto3" json:"issue_activities,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListIssueActivitiesResponse) Reset() {
@@ -518,10 +571,14 @@ func (x *ListIssueActivitiesResponse) GetNextPageToken() string {
 	return ""
 }
 
+// The request message for the CreateComment method.
 type CreateCommentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	Body          []*Issue_ContentBlock  `protobuf:"bytes,2,rep,name=body,proto3" json:"body,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The parent resource of the IssueActivity.
+	// Format: "issues/*".
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The full body of the activity
+	Body          []*Issue_ContentBlock `protobuf:"bytes,2,rep,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -570,10 +627,14 @@ func (x *CreateCommentRequest) GetBody() []*Issue_ContentBlock {
 	return nil
 }
 
+// The request message for the UpdateComment method.
 type UpdateCommentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Body          []*Issue_ContentBlock  `protobuf:"bytes,2,rep,name=body,proto3" json:"body,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the IssueActivity.
+	// Format: "issues/*/activities/*".
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The full body of the activity
+	Body          []*Issue_ContentBlock `protobuf:"bytes,2,rep,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -622,9 +683,12 @@ func (x *UpdateCommentRequest) GetBody() []*Issue_ContentBlock {
 	return nil
 }
 
+// The request message for the DeleteComment method.
 type DeleteCommentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the IssueActivity.
+	// Format: "issues/*/activities/*".
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

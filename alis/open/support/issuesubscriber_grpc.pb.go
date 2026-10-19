@@ -39,17 +39,32 @@ const (
 // IssueSubscribersServiceClient is the client API for IssueSubscribersService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// IssueSubscribersService provides RPCs for managing IssueSubscriber resources.
 type IssueSubscribersServiceClient interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Subscribes a user to an issue.
 	CreateIssueSubscriber(ctx context.Context, in *CreateIssueSubscriberRequest, opts ...grpc.CallOption) (*IssueSubscriber, error)
+	// Gets a user's subscription to an issue.
 	GetIssueSubscriber(ctx context.Context, in *GetIssueSubscriberRequest, opts ...grpc.CallOption) (*IssueSubscriber, error)
+	// Gets a list of subscribers for an issue.
 	ListIssueSubscribers(ctx context.Context, in *ListIssueSubscribersRequest, opts ...grpc.CallOption) (*ListIssueSubscribersResponse, error)
+	// Deletes an issue subscription.
 	DeleteIssueSubscriber(ctx context.Context, in *DeleteIssueSubscriberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -174,17 +189,32 @@ func (c *issueSubscribersServiceClient) DeleteIssueSubscriber(ctx context.Contex
 // IssueSubscribersServiceServer is the server API for IssueSubscribersService service.
 // All implementations must embed UnimplementedIssueSubscribersServiceServer
 // for forward compatibility.
+//
+// IssueSubscribersService provides RPCs for managing IssueSubscriber resources.
 type IssueSubscribersServiceServer interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
+	// Subscribes a user to an issue.
 	CreateIssueSubscriber(context.Context, *CreateIssueSubscriberRequest) (*IssueSubscriber, error)
+	// Gets a user's subscription to an issue.
 	GetIssueSubscriber(context.Context, *GetIssueSubscriberRequest) (*IssueSubscriber, error)
+	// Gets a list of subscribers for an issue.
 	ListIssueSubscribers(context.Context, *ListIssueSubscribersRequest) (*ListIssueSubscribersResponse, error)
+	// Deletes an issue subscription.
 	DeleteIssueSubscriber(context.Context, *DeleteIssueSubscriberRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedIssueSubscribersServiceServer()
 }

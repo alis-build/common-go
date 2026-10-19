@@ -45,23 +45,48 @@ const (
 // IssuesServiceClient is the client API for IssuesService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// IssuesService provides RPCs for managing Issue resources.
 type IssuesServiceClient interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Creates a new Issue.
 	CreateIssue(ctx context.Context, in *CreateIssueRequest, opts ...grpc.CallOption) (*Issue, error)
+	// Updates a Issue.
+	// Only called from alis-build.
 	UpdateIssue(ctx context.Context, in *UpdateIssueRequest, opts ...grpc.CallOption) (*Issue, error)
+	// Gets information about a Issue.
 	GetIssue(ctx context.Context, in *GetIssueRequest, opts ...grpc.CallOption) (*Issue, error)
+	// Lists Issues. Results are sorted by name, ascending.
 	ListIssues(ctx context.Context, in *ListIssuesRequest, opts ...grpc.CallOption) (*ListIssuesResponse, error)
+	// Deletes a Issue.
+	// Only called from alis-build.
 	DeleteIssue(ctx context.Context, in *DeleteIssueRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Edit all the details of a newly created issue
+	// Used by requesters to update the issue while no activities have been created under the issue
 	EditNewIssue(ctx context.Context, in *EditNewIssueRequest, opts ...grpc.CallOption) (*Issue, error)
+	// Cancel a new issue. This will delete the issue, so support will not even see it in closed issues.
 	CancelNewIssue(ctx context.Context, in *CancelNewIssueRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Set the assignee of an issue
 	SetIssueAssignee(ctx context.Context, in *SetIssueAssigneeRequest, opts ...grpc.CallOption) (*Issue, error)
+	// Set issue viewers. This will allow the specified users to view the issue in the case of a private issue.
+	// The method appends the viewers to the existing list of viewers.
 	AddIssueViewers(ctx context.Context, in *AddIssueViewersRequest, opts ...grpc.CallOption) (*Issue, error)
+	// Remove issue viewers. This will remove the specified users from the list of users who can view the issue.
 	RemoveIssueViewers(ctx context.Context, in *RemoveIssueViewersRequest, opts ...grpc.CallOption) (*Issue, error)
 }
 
@@ -246,23 +271,48 @@ func (c *issuesServiceClient) RemoveIssueViewers(ctx context.Context, in *Remove
 // IssuesServiceServer is the server API for IssuesService service.
 // All implementations must embed UnimplementedIssuesServiceServer
 // for forward compatibility.
+//
+// IssuesService provides RPCs for managing Issue resources.
 type IssuesServiceServer interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	// Gets the IAM policy for a resource implemented in this service.
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
 	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
 	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
+	// Creates a new Issue.
 	CreateIssue(context.Context, *CreateIssueRequest) (*Issue, error)
+	// Updates a Issue.
+	// Only called from alis-build.
 	UpdateIssue(context.Context, *UpdateIssueRequest) (*Issue, error)
+	// Gets information about a Issue.
 	GetIssue(context.Context, *GetIssueRequest) (*Issue, error)
+	// Lists Issues. Results are sorted by name, ascending.
 	ListIssues(context.Context, *ListIssuesRequest) (*ListIssuesResponse, error)
+	// Deletes a Issue.
+	// Only called from alis-build.
 	DeleteIssue(context.Context, *DeleteIssueRequest) (*emptypb.Empty, error)
+	// Edit all the details of a newly created issue
+	// Used by requesters to update the issue while no activities have been created under the issue
 	EditNewIssue(context.Context, *EditNewIssueRequest) (*Issue, error)
+	// Cancel a new issue. This will delete the issue, so support will not even see it in closed issues.
 	CancelNewIssue(context.Context, *CancelNewIssueRequest) (*emptypb.Empty, error)
+	// Set the assignee of an issue
 	SetIssueAssignee(context.Context, *SetIssueAssigneeRequest) (*Issue, error)
+	// Set issue viewers. This will allow the specified users to view the issue in the case of a private issue.
+	// The method appends the viewers to the existing list of viewers.
 	AddIssueViewers(context.Context, *AddIssueViewersRequest) (*Issue, error)
+	// Remove issue viewers. This will remove the specified users from the list of users who can view the issue.
 	RemoveIssueViewers(context.Context, *RemoveIssueViewersRequest) (*Issue, error)
 	mustEmbedUnimplementedIssuesServiceServer()
 }

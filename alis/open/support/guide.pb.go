@@ -24,21 +24,34 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The potential types of content blocks
 type Guide_ContentBlock_Type int32
 
 const (
+	// The content block type is not specified.
 	Guide_ContentBlock_TYPE_UNSPECIFIED Guide_ContentBlock_Type = 0
-	Guide_ContentBlock_TITLE            Guide_ContentBlock_Type = 1
-	Guide_ContentBlock_SUBTITLE         Guide_ContentBlock_Type = 2
-	Guide_ContentBlock_HEADING          Guide_ContentBlock_Type = 3
-	Guide_ContentBlock_TEXT_BODY        Guide_ContentBlock_Type = 4
-	Guide_ContentBlock_IMAGE            Guide_ContentBlock_Type = 5
-	Guide_ContentBlock_VIDEO            Guide_ContentBlock_Type = 6
-	Guide_ContentBlock_DIVIDER          Guide_ContentBlock_Type = 7
-	Guide_ContentBlock_LINK_PREVIEW     Guide_ContentBlock_Type = 8
-	Guide_ContentBlock_FOOTNOTE         Guide_ContentBlock_Type = 9
-	Guide_ContentBlock_DIAGRAM          Guide_ContentBlock_Type = 10
-	Guide_ContentBlock_CODE_BLOCK       Guide_ContentBlock_Type = 11
+	// A title
+	Guide_ContentBlock_TITLE Guide_ContentBlock_Type = 1
+	// A subtitle
+	Guide_ContentBlock_SUBTITLE Guide_ContentBlock_Type = 2
+	// A heading
+	Guide_ContentBlock_HEADING Guide_ContentBlock_Type = 3
+	// Body text
+	Guide_ContentBlock_TEXT_BODY Guide_ContentBlock_Type = 4
+	// A standalone image
+	Guide_ContentBlock_IMAGE Guide_ContentBlock_Type = 5
+	// A standalone video
+	Guide_ContentBlock_VIDEO Guide_ContentBlock_Type = 6
+	// A divider which can be used to seperate elements of the page.
+	Guide_ContentBlock_DIVIDER Guide_ContentBlock_Type = 7
+	// Provides a user-specified preview of a URL
+	Guide_ContentBlock_LINK_PREVIEW Guide_ContentBlock_Type = 8
+	// Footnote that can be placed at the end of a section
+	Guide_ContentBlock_FOOTNOTE Guide_ContentBlock_Type = 9
+	// A diagram, specified using valid syntax
+	Guide_ContentBlock_DIAGRAM Guide_ContentBlock_Type = 10
+	// A syntax-highlighted code block for the set of supported languages
+	Guide_ContentBlock_CODE_BLOCK Guide_ContentBlock_Type = 11
 )
 
 // Enum value maps for Guide_ContentBlock_Type.
@@ -100,20 +113,32 @@ func (Guide_ContentBlock_Type) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_guide_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
+// The set of available languages
 type Guide_ContentBlock_CodeBlock_Language int32
 
 const (
+	// The code language is not specified.
 	Guide_ContentBlock_CodeBlock_LANGUAGE_UNSPECIFIED Guide_ContentBlock_CodeBlock_Language = 0
-	Guide_ContentBlock_CodeBlock_GO                   Guide_ContentBlock_CodeBlock_Language = 1
-	Guide_ContentBlock_CodeBlock_PROTO                Guide_ContentBlock_CodeBlock_Language = 2
-	Guide_ContentBlock_CodeBlock_PYTHON               Guide_ContentBlock_CodeBlock_Language = 3
-	Guide_ContentBlock_CodeBlock_VUE                  Guide_ContentBlock_CodeBlock_Language = 4
-	Guide_ContentBlock_CodeBlock_TYPESCRIPT           Guide_ContentBlock_CodeBlock_Language = 5
-	Guide_ContentBlock_CodeBlock_LATEX                Guide_ContentBlock_CodeBlock_Language = 6
-	Guide_ContentBlock_CodeBlock_HCL                  Guide_ContentBlock_CodeBlock_Language = 7
-	Guide_ContentBlock_CodeBlock_JSON                 Guide_ContentBlock_CodeBlock_Language = 8
-	Guide_ContentBlock_CodeBlock_YAML                 Guide_ContentBlock_CodeBlock_Language = 9
-	Guide_ContentBlock_CodeBlock_TEXT                 Guide_ContentBlock_CodeBlock_Language = 10
+	// Go
+	Guide_ContentBlock_CodeBlock_GO Guide_ContentBlock_CodeBlock_Language = 1
+	// Protocol buffer 3
+	Guide_ContentBlock_CodeBlock_PROTO Guide_ContentBlock_CodeBlock_Language = 2
+	// Python
+	Guide_ContentBlock_CodeBlock_PYTHON Guide_ContentBlock_CodeBlock_Language = 3
+	// Vue
+	Guide_ContentBlock_CodeBlock_VUE Guide_ContentBlock_CodeBlock_Language = 4
+	// Typescript
+	Guide_ContentBlock_CodeBlock_TYPESCRIPT Guide_ContentBlock_CodeBlock_Language = 5
+	// LATEX
+	Guide_ContentBlock_CodeBlock_LATEX Guide_ContentBlock_CodeBlock_Language = 6
+	// Hashicorp HCL
+	Guide_ContentBlock_CodeBlock_HCL Guide_ContentBlock_CodeBlock_Language = 7
+	// JSON
+	Guide_ContentBlock_CodeBlock_JSON Guide_ContentBlock_CodeBlock_Language = 8
+	// YAML
+	Guide_ContentBlock_CodeBlock_YAML Guide_ContentBlock_CodeBlock_Language = 9
+	// Plain text
+	Guide_ContentBlock_CodeBlock_TEXT Guide_ContentBlock_CodeBlock_Language = 10
 )
 
 // Enum value maps for Guide_ContentBlock_CodeBlock_Language.
@@ -173,13 +198,22 @@ func (Guide_ContentBlock_CodeBlock_Language) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_guide_proto_rawDescGZIP(), []int{0, 0, 10, 0}
 }
 
+// A Guide represents preemptive support that is provided
+// by the Product team to aid users in their usage of the Product.
 type Guide struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Subtitle      string                 `protobuf:"bytes,3,opt,name=subtitle,proto3" json:"subtitle,omitempty"`
-	Contents      []*Guide_ContentBlock  `protobuf:"bytes,5,rep,name=contents,proto3" json:"contents,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the guide
+	// Format: guides/*
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Title of the Guide
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	// The subtitle of the Guide
+	Subtitle string `protobuf:"bytes,3,opt,name=subtitle,proto3" json:"subtitle,omitempty"`
+	// The Guide contents
+	Contents []*Guide_ContentBlock `protobuf:"bytes,5,rep,name=contents,proto3" json:"contents,omitempty"`
+	// Time the page was created
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// Time the page was updated
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -257,9 +291,14 @@ func (x *Guide) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// The request message for the GetGuide method.
 type GetGuideRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The unique name of the Guide.
+	// Format: guides/*
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -309,13 +348,25 @@ func (x *GetGuideRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the ListGuides method.
 type ListGuidesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
-	OrderBy       string                 `protobuf:"bytes,6,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of Guides to return.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous ListGuides call.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case.
+	// All fields are returned if not set.
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// The filter to apply
+	Filter string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	// The order to sort the results by
+	// Default is descending
+	//
+	// Format: "field_name {asc|desc}"
+	//
+	// Only update_time is supported at the moment.
+	OrderBy       string `protobuf:"bytes,6,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -385,10 +436,13 @@ func (x *ListGuidesRequest) GetOrderBy() string {
 	return ""
 }
 
+// The response message for the ListGuides method.
 type ListGuidesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Guides        []*Guide               `protobuf:"bytes,1,rep,name=guides,proto3" json:"guides,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Guides.
+	Guides []*Guide `protobuf:"bytes,1,rep,name=guides,proto3" json:"guides,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -437,10 +491,14 @@ func (x *ListGuidesResponse) GetNextPageToken() string {
 	return ""
 }
 
+// The request message for the SyncGuide method.
 type SyncGuideRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Guide         *Guide                 `protobuf:"bytes,2,opt,name=guide,proto3" json:"guide,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the guide to sync
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The new values of the guide.
+	// If empty, the guide is removed.
+	Guide         *Guide `protobuf:"bytes,2,opt,name=guide,proto3" json:"guide,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -489,9 +547,14 @@ func (x *SyncGuideRequest) GetGuide() *Guide {
 	return nil
 }
 
+// A ContentBlock defines various content types
+// that may be used as part of the Guides.
 type Guide_ContentBlock struct {
-	state protoimpl.MessageState  `protogen:"open.v1"`
-	Type  Guide_ContentBlock_Type `protobuf:"varint,1,opt,name=type,proto3,enum=alis.open.support.v1.Guide_ContentBlock_Type" json:"type,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The type of the content block
+	Type Guide_ContentBlock_Type `protobuf:"varint,1,opt,name=type,proto3,enum=alis.open.support.v1.Guide_ContentBlock_Type" json:"type,omitempty"`
+	// The block containing the content
+	//
 	// Types that are valid to be assigned to Block:
 	//
 	//	*Guide_ContentBlock_Title_
@@ -658,46 +721,57 @@ type isGuide_ContentBlock_Block interface {
 }
 
 type Guide_ContentBlock_Title_ struct {
+	// A title
 	Title *Guide_ContentBlock_Title `protobuf:"bytes,2,opt,name=title,proto3,oneof"`
 }
 
 type Guide_ContentBlock_Subtitle_ struct {
+	// A Subtitle
 	Subtitle *Guide_ContentBlock_Subtitle `protobuf:"bytes,3,opt,name=subtitle,proto3,oneof"`
 }
 
 type Guide_ContentBlock_Heading_ struct {
+	// A heading
 	Heading *Guide_ContentBlock_Heading `protobuf:"bytes,4,opt,name=heading,proto3,oneof"`
 }
 
 type Guide_ContentBlock_TextBody_ struct {
+	// Body text
 	TextBody *Guide_ContentBlock_TextBody `protobuf:"bytes,5,opt,name=text_body,json=textBody,proto3,oneof"`
 }
 
 type Guide_ContentBlock_Image_ struct {
+	// A standalone image
 	Image *Guide_ContentBlock_Image `protobuf:"bytes,6,opt,name=image,proto3,oneof"`
 }
 
 type Guide_ContentBlock_Video_ struct {
+	// A standalone video
 	Video *Guide_ContentBlock_Video `protobuf:"bytes,7,opt,name=video,proto3,oneof"`
 }
 
 type Guide_ContentBlock_Divider_ struct {
+	// A divider which can be used to seperate elements of the page.
 	Divider *Guide_ContentBlock_Divider `protobuf:"bytes,8,opt,name=divider,proto3,oneof"`
 }
 
 type Guide_ContentBlock_LinkPreview_ struct {
+	// Provides a user-specified preview of a URL
 	LinkPreview *Guide_ContentBlock_LinkPreview `protobuf:"bytes,9,opt,name=link_preview,json=linkPreview,proto3,oneof"`
 }
 
 type Guide_ContentBlock_Footnote_ struct {
+	// Footnote that can be placed at the end of a section
 	Footnote *Guide_ContentBlock_Footnote `protobuf:"bytes,10,opt,name=footnote,proto3,oneof"`
 }
 
 type Guide_ContentBlock_Diagram_ struct {
+	// A diagram, specified using valid syntax
 	Diagram *Guide_ContentBlock_Diagram `protobuf:"bytes,11,opt,name=diagram,proto3,oneof"`
 }
 
 type Guide_ContentBlock_CodeBlock_ struct {
+	// A syntax-highlighted code block for the set of supported languages
 	CodeBlock *Guide_ContentBlock_CodeBlock `protobuf:"bytes,12,opt,name=code_block,json=codeBlock,proto3,oneof"`
 }
 
@@ -723,9 +797,11 @@ func (*Guide_ContentBlock_Diagram_) isGuide_ContentBlock_Block() {}
 
 func (*Guide_ContentBlock_CodeBlock_) isGuide_ContentBlock_Block() {}
 
+// A title
 type Guide_ContentBlock_Title struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The title text content
+	Text          string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -767,9 +843,11 @@ func (x *Guide_ContentBlock_Title) GetText() string {
 	return ""
 }
 
+// A Subtitle
 type Guide_ContentBlock_Subtitle struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The subtitle text content
+	Text          string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -811,9 +889,11 @@ func (x *Guide_ContentBlock_Subtitle) GetText() string {
 	return ""
 }
 
+// A Heading
 type Guide_ContentBlock_Heading struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The heading text content
+	Text          string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -855,9 +935,12 @@ func (x *Guide_ContentBlock_Heading) GetText() string {
 	return ""
 }
 
+// Body text
 type Guide_ContentBlock_TextBody struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The text body content
+	// Supports standard markdown format.
+	Text          string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -899,10 +982,13 @@ func (x *Guide_ContentBlock_TextBody) GetText() string {
 	return ""
 }
 
+// A standalone image
 type Guide_ContentBlock_Image struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SourceUri     string                 `protobuf:"bytes,1,opt,name=source_uri,json=sourceUri,proto3" json:"source_uri,omitempty"`
-	Caption       string                 `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The image source url
+	SourceUri string `protobuf:"bytes,1,opt,name=source_uri,json=sourceUri,proto3" json:"source_uri,omitempty"`
+	// An optional caption to the image
+	Caption       string `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -951,10 +1037,15 @@ func (x *Guide_ContentBlock_Image) GetCaption() string {
 	return ""
 }
 
+// A standalone video
 type Guide_ContentBlock_Video struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SourceUri     string                 `protobuf:"bytes,1,opt,name=source_uri,json=sourceUri,proto3" json:"source_uri,omitempty"`
-	Caption       string                 `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The video source url.
+	//
+	// Currently only support Youtube links
+	SourceUri string `protobuf:"bytes,1,opt,name=source_uri,json=sourceUri,proto3" json:"source_uri,omitempty"`
+	// An optional caption to the video
+	Caption       string `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1003,6 +1094,7 @@ func (x *Guide_ContentBlock_Video) GetCaption() string {
 	return ""
 }
 
+// A divider which can be used to seperate elements of the page.
 type Guide_ContentBlock_Divider struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1039,12 +1131,17 @@ func (*Guide_ContentBlock_Divider) Descriptor() ([]byte, []int) {
 	return file_alis_open_support_v1_guide_proto_rawDescGZIP(), []int{0, 0, 6}
 }
 
+// Provides a user-specified preview of a URL
 type Guide_ContentBlock_LinkPreview struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uri           string                 `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
-	AvatarUri     string                 `protobuf:"bytes,2,opt,name=avatar_uri,json=avatarUri,proto3" json:"avatar_uri,omitempty"`
-	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	Body          string                 `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The URI that will be directed to on open
+	Uri string `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
+	// An avatar to use, if not specified, will default to the Alis dots
+	AvatarUri string `protobuf:"bytes,2,opt,name=avatar_uri,json=avatarUri,proto3" json:"avatar_uri,omitempty"`
+	// A title to use
+	Title string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	// A blurb of body text that can be used to give a description to the link.
+	Body          string `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1107,9 +1204,12 @@ func (x *Guide_ContentBlock_LinkPreview) GetBody() string {
 	return ""
 }
 
+// Footnote that can be placed at the end of a section
 type Guide_ContentBlock_Footnote struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The footnote content
+	// Supports standard markdown format.
+	Text          string `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1151,10 +1251,17 @@ func (x *Guide_ContentBlock_Footnote) GetText() string {
 	return ""
 }
 
+// A diagram, specified using valid syntax
 type Guide_ContentBlock_Diagram struct {
-	state                  protoimpl.MessageState `protogen:"open.v1"`
-	MermaidDiagramCode     string                 `protobuf:"bytes,1,opt,name=mermaid_diagram_code,json=mermaidDiagramCode,proto3" json:"mermaid_diagram_code,omitempty"`
-	MermaidRenderedDiagram string                 `protobuf:"bytes,2,opt,name=mermaid_rendered_diagram,json=mermaidRenderedDiagram,proto3" json:"mermaid_rendered_diagram,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Valid Mermaid Syntax (https://mermaid.js.org/intro/syntax-reference.html)
+	// that will be used to render the diagram.
+	MermaidDiagramCode string `protobuf:"bytes,1,opt,name=mermaid_diagram_code,json=mermaidDiagramCode,proto3" json:"mermaid_diagram_code,omitempty"`
+	// A string version of the rendered diagram as valid html or SVG.
+	//
+	// This is stored such that client-side usage does not need to
+	// install Mermaid and render the code themselves.
+	MermaidRenderedDiagram string `protobuf:"bytes,2,opt,name=mermaid_rendered_diagram,json=mermaidRenderedDiagram,proto3" json:"mermaid_rendered_diagram,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -1203,11 +1310,18 @@ func (x *Guide_ContentBlock_Diagram) GetMermaidRenderedDiagram() string {
 	return ""
 }
 
+// A syntax-highlighted code block for the set of supported languages
 type Guide_ContentBlock_CodeBlock struct {
-	state                 protoimpl.MessageState                `protogen:"open.v1"`
-	Language              Guide_ContentBlock_CodeBlock_Language `protobuf:"varint,1,opt,name=language,proto3,enum=alis.open.support.v1.Guide_ContentBlock_CodeBlock_Language" json:"language,omitempty"`
-	Code                  string                                `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
-	SyntaxHighlightedCode string                                `protobuf:"bytes,3,opt,name=syntax_highlighted_code,json=syntaxHighlightedCode,proto3" json:"syntax_highlighted_code,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The language of the code
+	Language Guide_ContentBlock_CodeBlock_Language `protobuf:"varint,1,opt,name=language,proto3,enum=alis.open.support.v1.Guide_ContentBlock_CodeBlock_Language" json:"language,omitempty"`
+	// The code to that will be displayed in the code block.
+	Code string `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	// A string version of the syntax-highlighted code rendered as valid html.
+	//
+	// This is stored such that client-side usage does not need to
+	// install a syntax highlighter and render the html themselves.
+	SyntaxHighlightedCode string `protobuf:"bytes,3,opt,name=syntax_highlighted_code,json=syntaxHighlightedCode,proto3" json:"syntax_highlighted_code,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }

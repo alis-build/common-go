@@ -4,6 +4,34 @@
 // - protoc             v3.21.12
 // source: alis/open/support/v1/attachments.proto
 
+// Lets users of an Alis product request support, and publishes the guides the
+// product team provides to help them use the product.
+//
+// Resources:
+//
+// - `Issue` (`issues/{issue}`), managed by `IssuesService`: a support request
+//   raised by a user, with a user-chosen category, an internal type set by the
+//   team, a state (`OPEN`, `ON_HOLD`, `CLOSED`), a reporter, an assignee, and
+//   private or public visibility.
+// - `IssueActivity` (`issues/{issue}/activities/{activity}`), managed by
+//   `IssueActivitiesService`: a change made to an issue, or a requester,
+//   support or internal comment on it.
+// - `IssueSubscriber` (`issues/{issue}/subscribers/{subscriber}`), managed by
+//   `IssueSubscribersService`: a user subscribed to an issue.
+// - `Guide` (`guides/{guide}`), managed by `GuidesService`: help content made
+//   of content blocks, synced from Alis Build with `SyncGuide`.
+//
+// Several write RPCs, such as `UpdateIssue`, `DeleteIssue` and
+// `CreateIssueActivity`, are only called from Alis Build. Users edit or cancel
+// a new issue with `EditNewIssue` and `CancelNewIssue`, and comment with
+// `CreateComment`, `UpdateComment` and `DeleteComment`.
+//
+// `PublicAttachmentsService` uploads images for use in support content and
+// returns a public URI. `EventsService` handles Pub/Sub events. The
+// `Issue*Event` messages are published when an issue is created, closed,
+// reopened, put on hold or resumed, when its type, requesters or assignees
+// change, and when a comment is added to it.
+
 package support
 
 import (
@@ -25,7 +53,11 @@ const (
 // PublicAttachmentsServiceClient is the client API for PublicAttachmentsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// The service that manages uploading public attachments for use
+// in the context of Support resources.
 type PublicAttachmentsServiceClient interface {
+	// Upload an image attachment of a maximum 4mb.
 	UploadImage(ctx context.Context, in *UploadImageRequest, opts ...grpc.CallOption) (*UploadImageResponse, error)
 }
 
@@ -50,7 +82,11 @@ func (c *publicAttachmentsServiceClient) UploadImage(ctx context.Context, in *Up
 // PublicAttachmentsServiceServer is the server API for PublicAttachmentsService service.
 // All implementations must embed UnimplementedPublicAttachmentsServiceServer
 // for forward compatibility.
+//
+// The service that manages uploading public attachments for use
+// in the context of Support resources.
 type PublicAttachmentsServiceServer interface {
+	// Upload an image attachment of a maximum 4mb.
 	UploadImage(context.Context, *UploadImageRequest) (*UploadImageResponse, error)
 	mustEmbedUnimplementedPublicAttachmentsServiceServer()
 }

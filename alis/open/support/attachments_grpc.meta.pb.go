@@ -3,11 +3,11 @@
 // Source: alis/open/support/v1/attachments.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:41:00 UTC
+// Generated on: 2026-10-19 08:24:37 UTC
 
 package support
 
 const (
 	// PublicAttachmentsService_UploadImage_FullMethodDescription returns the description of the alis.open.support.v1.PublicAttachmentsService.UploadImage method.
-	PublicAttachmentsService_UploadImage_FullMethodDescription = ""
+	PublicAttachmentsService_UploadImage_FullMethodDescription = "Upload an image attachment of a maximum 4mb."
 )

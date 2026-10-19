@@ -3,31 +3,31 @@
 // Source: alis/open/support/v1/issuesubscriber.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:41:00 UTC
+// Generated on: 2026-10-19 08:24:37 UTC
 
 package support
 
 const (
 	// IssueSubscribersService_ValidateMessage_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.ValidateMessage method.
-	IssueSubscribersService_ValidateMessage_FullMethodDescription = ""
+	IssueSubscribersService_ValidateMessage_FullMethodDescription = "Validates any proto message that is used directly or indirectly by this service.\n Most common use case is to validate request messages from a client-side application."
 	// IssueSubscribersService_RetrieveRules_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.RetrieveRules method.
-	IssueSubscribersService_RetrieveRules_FullMethodDescription = ""
+	IssueSubscribersService_RetrieveRules_FullMethodDescription = "Retrieves the validation rules for any proto message that is used directly or indirectly by this service.\n Serves as live auto-documentation of the validation rules in this service."
 	// IssueSubscribersService_GetIamPolicy_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.GetIamPolicy method.
-	IssueSubscribersService_GetIamPolicy_FullMethodDescription = ""
+	IssueSubscribersService_GetIamPolicy_FullMethodDescription = "Gets the IAM policy for a resource implemented in this service."
 	// IssueSubscribersService_SetIamPolicy_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.SetIamPolicy method.
-	IssueSubscribersService_SetIamPolicy_FullMethodDescription = ""
+	IssueSubscribersService_SetIamPolicy_FullMethodDescription = "Sets the IAM policy for a resource implemented in this service."
 	// IssueSubscribersService_TestIamPermissions_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.TestIamPermissions method.
-	IssueSubscribersService_TestIamPermissions_FullMethodDescription = ""
+	IssueSubscribersService_TestIamPermissions_FullMethodDescription = "Returns permissions that a caller has on the specified resource."
 	// IssueSubscribersService_AddIamBindings_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.AddIamBindings method.
-	IssueSubscribersService_AddIamBindings_FullMethodDescription = ""
+	IssueSubscribersService_AddIamBindings_FullMethodDescription = "Adds principals or updates the roles existing principals have on an IAM Policy protected resource."
 	// IssueSubscribersService_RemoveIamBindings_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.RemoveIamBindings method.
-	IssueSubscribersService_RemoveIamBindings_FullMethodDescription = ""
+	IssueSubscribersService_RemoveIamBindings_FullMethodDescription = "Removes principals or some of the roles they have on an IAM Policy protected resource."
 	// IssueSubscribersService_CreateIssueSubscriber_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.CreateIssueSubscriber method.
-	IssueSubscribersService_CreateIssueSubscriber_FullMethodDescription = ""
+	IssueSubscribersService_CreateIssueSubscriber_FullMethodDescription = "Subscribes a user to an issue."
 	// IssueSubscribersService_GetIssueSubscriber_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.GetIssueSubscriber method.
-	IssueSubscribersService_GetIssueSubscriber_FullMethodDescription = ""
+	IssueSubscribersService_GetIssueSubscriber_FullMethodDescription = "Gets a user's subscription to an issue."
 	// IssueSubscribersService_ListIssueSubscribers_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.ListIssueSubscribers method.
-	IssueSubscribersService_ListIssueSubscribers_FullMethodDescription = ""
+	IssueSubscribersService_ListIssueSubscribers_FullMethodDescription = "Gets a list of subscribers for an issue."
 	// IssueSubscribersService_DeleteIssueSubscriber_FullMethodDescription returns the description of the alis.open.support.v1.IssueSubscribersService.DeleteIssueSubscriber method.
-	IssueSubscribersService_DeleteIssueSubscriber_FullMethodDescription = ""
+	IssueSubscribersService_DeleteIssueSubscriber_FullMethodDescription = "Deletes an issue subscription."
 )
