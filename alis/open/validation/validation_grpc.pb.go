@@ -26,8 +26,14 @@ const (
 // ValidationServiceClient is the client API for ValidationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Validates protobuf messages against their validation rules and returns
+// those rules.
 type ValidationServiceClient interface {
+	// Retrieve the validation rules for a given message type.
 	RetrieveRules(ctx context.Context, in *RetrieveRulesRequest, opts ...grpc.CallOption) (*RetrieveRulesResponse, error)
+	// Validates if the given bytes are valid for the given message type.
+	// If the bytes cannot be marshalled into the message type, the rpc will return an error instead of the violations.
 	ValidateMessage(ctx context.Context, in *ValidateMessageRequest, opts ...grpc.CallOption) (*ValidateMessageResponse, error)
 }
 
@@ -62,8 +68,14 @@ func (c *validationServiceClient) ValidateMessage(ctx context.Context, in *Valid
 // ValidationServiceServer is the server API for ValidationService service.
 // All implementations must embed UnimplementedValidationServiceServer
 // for forward compatibility.
+//
+// Validates protobuf messages against their validation rules and returns
+// those rules.
 type ValidationServiceServer interface {
+	// Retrieve the validation rules for a given message type.
 	RetrieveRules(context.Context, *RetrieveRulesRequest) (*RetrieveRulesResponse, error)
+	// Validates if the given bytes are valid for the given message type.
+	// If the bytes cannot be marshalled into the message type, the rpc will return an error instead of the violations.
 	ValidateMessage(context.Context, *ValidateMessageRequest) (*ValidateMessageResponse, error)
 	mustEmbedUnimplementedValidationServiceServer()
 }

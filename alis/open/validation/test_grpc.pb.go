@@ -4,6 +4,29 @@
 // - protoc             v3.21.12
 // source: alis/open/validation/v1/test.proto
 
+// Checks protobuf messages against the validation rules of the service that
+// uses them, and lists those rules.
+//
+// `ValidationService` defines two RPCs:
+//
+// - `ValidateMessage` takes a message type name and the message as bytes, and
+//   returns the rules it violates (`Rule`) and the violations per field
+//   (`FieldViolation`). `field_paths` limits validation to some fields.
+// - `RetrieveRules` returns the rules that apply to a message type.
+//
+// Other services expose the same two RPCs with these request and response
+// messages, for example `alis.open.iam.v1.UsersService`, so that clients can
+// validate messages, most commonly requests built by a client-side
+// application, and read the service's validation rules as live
+// documentation.
+//
+// A `Rule` is identified by an expression-like `id`, such as
+// `length(F(name), I(1), I(64))`, and has a plain-language `description`, the
+// field paths it evaluates together, and any nested rules.
+//
+// `BookService` and `Book` in `test.proto` are a sample API for testing, not
+// part of the validation contract.
+
 package validation
 
 import (
@@ -30,11 +53,19 @@ const (
 // BookServiceClient is the client API for BookService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// A sample book API defined for testing. It is not part of the validation
+// contract.
 type BookServiceClient interface {
+	// Get a Book resource
 	GetBook(ctx context.Context, in *GetBookRequest, opts ...grpc.CallOption) (*Book, error)
+	// Create a new Book resource
 	CreateBook(ctx context.Context, in *CreateBookRequest, opts ...grpc.CallOption) (*Book, error)
+	// Update a Book resource
 	UpdateBook(ctx context.Context, in *UpdateBookRequest, opts ...grpc.CallOption) (*Book, error)
+	// Delete a Book
 	DeleteBook(ctx context.Context, in *DeleteBookRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Lists Book resources
 	ListBooks(ctx context.Context, in *ListBooksRequest, opts ...grpc.CallOption) (*ListBooksResponse, error)
 }
 
@@ -99,11 +130,19 @@ func (c *bookServiceClient) ListBooks(ctx context.Context, in *ListBooksRequest,
 // BookServiceServer is the server API for BookService service.
 // All implementations must embed UnimplementedBookServiceServer
 // for forward compatibility.
+//
+// A sample book API defined for testing. It is not part of the validation
+// contract.
 type BookServiceServer interface {
+	// Get a Book resource
 	GetBook(context.Context, *GetBookRequest) (*Book, error)
+	// Create a new Book resource
 	CreateBook(context.Context, *CreateBookRequest) (*Book, error)
+	// Update a Book resource
 	UpdateBook(context.Context, *UpdateBookRequest) (*Book, error)
+	// Delete a Book
 	DeleteBook(context.Context, *DeleteBookRequest) (*emptypb.Empty, error)
+	// Lists Book resources
 	ListBooks(context.Context, *ListBooksRequest) (*ListBooksResponse, error)
 	mustEmbedUnimplementedBookServiceServer()
 }

@@ -4,6 +4,29 @@
 // 	protoc        v3.21.12
 // source: alis/open/validation/v1/test.proto
 
+// Checks protobuf messages against the validation rules of the service that
+// uses them, and lists those rules.
+//
+// `ValidationService` defines two RPCs:
+//
+// - `ValidateMessage` takes a message type name and the message as bytes, and
+//   returns the rules it violates (`Rule`) and the violations per field
+//   (`FieldViolation`). `field_paths` limits validation to some fields.
+// - `RetrieveRules` returns the rules that apply to a message type.
+//
+// Other services expose the same two RPCs with these request and response
+// messages, for example `alis.open.iam.v1.UsersService`, so that clients can
+// validate messages, most commonly requests built by a client-side
+// application, and read the service's validation rules as live
+// documentation.
+//
+// A `Rule` is identified by an expression-like `id`, such as
+// `length(F(name), I(1), I(64))`, and has a plain-language `description`, the
+// field paths it evaluates together, and any nested rules.
+//
+// `BookService` and `Book` in `test.proto` are a sample API for testing, not
+// part of the validation contract.
+
 package validation
 
 import (
@@ -25,13 +48,18 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The type of a Book.
 type Type int32
 
 const (
+	// Not set. The default value; should not be used.
 	Type_TYPE_UNSPECIFIED Type = 0
-	Type_ANONYMOUS        Type = 1
-	Type_CHILDREN         Type = 2
-	Type_ADULT            Type = 3
+	// An anonymous book.
+	Type_ANONYMOUS Type = 1
+	// A children's book.
+	Type_CHILDREN Type = 2
+	// A book for adults.
+	Type_ADULT Type = 3
 )
 
 // Enum value maps for Type.
@@ -77,17 +105,26 @@ func (Type) EnumDescriptor() ([]byte, []int) {
 	return file_alis_open_validation_v1_test_proto_rawDescGZIP(), []int{0}
 }
 
+// Definition of a Book resource
 type Book struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName     string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Author          string                 `protobuf:"bytes,3,opt,name=author,proto3" json:"author,omitempty"`
-	PublicationDate *date.Date             `protobuf:"bytes,4,opt,name=publication_date,json=publicationDate,proto3" json:"publication_date,omitempty"`
-	UpdateTime      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	PageCount       int32                  `protobuf:"varint,6,opt,name=page_count,json=pageCount,proto3" json:"page_count,omitempty"`
-	Type            Type                   `protobuf:"varint,7,opt,name=type,proto3,enum=alis.open.validation.v1.Type" json:"type,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the Book.
+	// Format: "books/*".
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The display name of the Book.
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// The author of the Book.
+	Author string `protobuf:"bytes,3,opt,name=author,proto3" json:"author,omitempty"`
+	// The publication date of the Book.
+	PublicationDate *date.Date `protobuf:"bytes,4,opt,name=publication_date,json=publicationDate,proto3" json:"publication_date,omitempty"`
+	// The last time the Book was updated.
+	UpdateTime *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
+	// The page count of the Book.
+	PageCount int32 `protobuf:"varint,6,opt,name=page_count,json=pageCount,proto3" json:"page_count,omitempty"`
+	// The type of the Book.
+	Type          Type `protobuf:"varint,7,opt,name=type,proto3,enum=alis.open.validation.v1.Type" json:"type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Book) Reset() {
@@ -169,9 +206,15 @@ func (x *Book) GetType() Type {
 	return Type_TYPE_UNSPECIFIED
 }
 
+// The request message for the GetBook method
 type GetBookRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the Book to retrieve.
+	// Format: "books/*"
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The fields to return in snake_case, as defined in the proto
+	// e.g. &field_mask.FieldMask{Paths: []string{"name", "display_name"}} --> File{Name, DisplayName}
+	// All fields are returned if not provided
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -221,9 +264,11 @@ func (x *GetBookRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the CreateBook method
 type CreateBookRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Book          *Book                  `protobuf:"bytes,2,opt,name=book,proto3" json:"book,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Book to create.
+	Book          *Book `protobuf:"bytes,2,opt,name=book,proto3" json:"book,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -265,9 +310,13 @@ func (x *CreateBookRequest) GetBook() *Book {
 	return nil
 }
 
+// The request message for the UpdateBook method
 type UpdateBookRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Book          *Book                  `protobuf:"bytes,1,opt,name=book,proto3" json:"book,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The Book to update.
+	// The Book's `name` field is used to identify the Book to update.
+	Book *Book `protobuf:"bytes,1,opt,name=book,proto3" json:"book,omitempty"`
+	// The list of fields to update.
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -317,9 +366,12 @@ func (x *UpdateBookRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The request message for the DeleteBook method
 type DeleteBookRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the Book to delete.
+	// Format: "books/*"
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -361,10 +413,23 @@ func (x *DeleteBookRequest) GetName() string {
 	return ""
 }
 
+// The request message for the ListBooks method
 type ListBooksRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The maximum number of Books to return. The service may return fewer than
+	// this value.
+	// If unspecified, at most 50 Book will be returned.
+	// The maximum value is 1000; values above 1000 will be coerced to 1000.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous `ListBooks` call.
+	// Provide this to retrieve the subsequent page.
+	//
+	// When paginating, all other parameters provided to `ListBooks` must match
+	// the call that provided the page token.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case, as defined in the proto
+	// e.g. &field_mask.FieldMask{Paths: []string{"name", "display_name"}} --> File{Name, DisplayName}
+	// All fields are returned if not provided
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -421,10 +486,17 @@ func (x *ListBooksRequest) GetReadMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// The response message for the ListBooks method
 type ListBooksResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Books         []*Book                `protobuf:"bytes,1,rep,name=books,proto3" json:"books,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of Books returned
+	Books []*Book `protobuf:"bytes,1,rep,name=books,proto3" json:"books,omitempty"`
+	// A token, which can be sent as `page_token` to retrieve the next page.
+	// If this field is omitted, there are no subsequent pages.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	// The fields to return in snake_case, as defined in the proto
+	// e.g. &field_mask.FieldMask{Paths: []string{"name", "display_name"}} --> File{Name, DisplayName}
+	// All fields are returned if not provided
 	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

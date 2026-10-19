@@ -3,13 +3,13 @@
 // Source: alis/open/validation/v1/validation.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:33:16 UTC
+// Generated on: 2026-10-19 08:22:48 UTC
 
 package validation
 
 const (
 	// ValidationService_RetrieveRules_FullMethodDescription returns the description of the alis.open.validation.v1.ValidationService.RetrieveRules method.
-	ValidationService_RetrieveRules_FullMethodDescription = ""
+	ValidationService_RetrieveRules_FullMethodDescription = "Retrieve the validation rules for a given message type."
 	// ValidationService_ValidateMessage_FullMethodDescription returns the description of the alis.open.validation.v1.ValidationService.ValidateMessage method.
-	ValidationService_ValidateMessage_FullMethodDescription = ""
+	ValidationService_ValidateMessage_FullMethodDescription = "Validates if the given bytes are valid for the given message type.\n If the bytes cannot be marshalled into the message type, the rpc will return an error instead of the violations."
 )

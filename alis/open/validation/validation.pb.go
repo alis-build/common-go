@@ -21,9 +21,12 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Request message for `RetrieveRules`.
 type RetrieveRulesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MsgType       string                 `protobuf:"bytes,1,opt,name=msg_type,json=msgType,proto3" json:"msg_type,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED: The message type to retrieve rules for.
+	// E.g. "alis.os.processes.v1.CreateProcess"
+	MsgType       string `protobuf:"bytes,1,opt,name=msg_type,json=msgType,proto3" json:"msg_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -65,9 +68,11 @@ func (x *RetrieveRulesRequest) GetMsgType() string {
 	return ""
 }
 
+// Response message for `RetrieveRules`.
 type RetrieveRulesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Rules         []*Rule                `protobuf:"bytes,1,rep,name=rules,proto3" json:"rules,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The rules for the message type.
+	Rules         []*Rule `protobuf:"bytes,1,rep,name=rules,proto3" json:"rules,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -109,11 +114,17 @@ func (x *RetrieveRulesResponse) GetRules() []*Rule {
 	return nil
 }
 
+// Request message for `ValidateMessage`.
 type ValidateMessageRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MsgType       string                 `protobuf:"bytes,1,opt,name=msg_type,json=msgType,proto3" json:"msg_type,omitempty"`
-	Msg           []byte                 `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
-	FieldPaths    []string               `protobuf:"bytes,3,rep,name=field_paths,json=fieldPaths,proto3" json:"field_paths,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED: The message type to validate.
+	// E.g. "alis.os.processes.v1.CreateProcess"
+	MsgType string `protobuf:"bytes,1,opt,name=msg_type,json=msgType,proto3" json:"msg_type,omitempty"`
+	// REQUIRED: The msg to validate
+	Msg []byte `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+	// Optional list of fields to validate. If empty, all fields will be validated.
+	// If a rule contains more than one field_path, all field_paths must be in this list for the rule to be applied.
+	FieldPaths    []string `protobuf:"bytes,3,rep,name=field_paths,json=fieldPaths,proto3" json:"field_paths,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -169,10 +180,13 @@ func (x *ValidateMessageRequest) GetFieldPaths() []string {
 	return nil
 }
 
+// Response message for `ValidateMessage`.
 type ValidateMessageResponse struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	ViolatedRules  []*Rule                `protobuf:"bytes,1,rep,name=violated_rules,json=violatedRules,proto3" json:"violated_rules,omitempty"`
-	ViolatedFields []*FieldViolation      `protobuf:"bytes,2,rep,name=violated_fields,json=violatedFields,proto3" json:"violated_fields,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The list of rules violated
+	ViolatedRules []*Rule `protobuf:"bytes,1,rep,name=violated_rules,json=violatedRules,proto3" json:"violated_rules,omitempty"`
+	// The list of fields with violations
+	ViolatedFields []*FieldViolation `protobuf:"bytes,2,rep,name=violated_fields,json=violatedFields,proto3" json:"violated_fields,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -221,12 +235,27 @@ func (x *ValidateMessageResponse) GetViolatedFields() []*FieldViolation {
 	return nil
 }
 
+// A validation rule over one or more fields of a message, possibly composed of
+// nested rules.
 type Rule struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	FieldPaths    []string               `protobuf:"bytes,3,rep,name=field_paths,json=fieldPaths,proto3" json:"field_paths,omitempty"`
-	NestedRules   []*Rule                `protobuf:"bytes,4,rep,name=nested_rules,json=nestedRules,proto3" json:"nested_rules,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier for the rule which reads like code
+	// Examples:
+	// regex(F(name), S("^[a-z][a-z0-9_]*$"))
+	// length(F(name), I(1), I(64))
+	// or(regex(name, "^[a-z][a-z0-9_]*$"), regex(name, "^[A-Z][A-Z0-9_]*$"))
+	// not(regex(name, "^[a-z][a-z0-9_]*$")).if(e-eq(state,"ACTIVE"))
+	// and(regex(name, "^[a-z][a-z0-9_]*$"), length(name, 1, 64))
+	// nested(subm,update_mask)
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Clear description of the rule that can be understood by non-technical users.
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// The field_paths that are evaluated together to determine if the rule is met.
+	// For most cases, this will be a single field_path.
+	// An example of a rule with multiple field paths is a rule that requires that the sum of two fields is less than a third field.
+	FieldPaths []string `protobuf:"bytes,3,rep,name=field_paths,json=fieldPaths,proto3" json:"field_paths,omitempty"`
+	// A list of nested rules that this rule consists of.
+	NestedRules   []*Rule `protobuf:"bytes,4,rep,name=nested_rules,json=nestedRules,proto3" json:"nested_rules,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -289,10 +318,13 @@ func (x *Rule) GetNestedRules() []*Rule {
 	return nil
 }
 
+// The validation rules that a single field violates.
 type FieldViolation struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	FieldPath     string                 `protobuf:"bytes,1,opt,name=field_path,json=fieldPath,proto3" json:"field_path,omitempty"`
-	ViolatedRules []*Rule                `protobuf:"bytes,2,rep,name=violated_rules,json=violatedRules,proto3" json:"violated_rules,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The field path that has a violation
+	FieldPath string `protobuf:"bytes,1,opt,name=field_path,json=fieldPath,proto3" json:"field_path,omitempty"`
+	// The rules that were violated on this field
+	ViolatedRules []*Rule `protobuf:"bytes,2,rep,name=violated_rules,json=violatedRules,proto3" json:"violated_rules,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

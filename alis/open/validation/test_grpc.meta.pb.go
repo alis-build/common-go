@@ -3,19 +3,19 @@
 // Source: alis/open/validation/v1/test.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:33:16 UTC
+// Generated on: 2026-10-19 08:22:48 UTC
 
 package validation
 
 const (
 	// BookService_GetBook_FullMethodDescription returns the description of the alis.open.validation.v1.BookService.GetBook method.
-	BookService_GetBook_FullMethodDescription = ""
+	BookService_GetBook_FullMethodDescription = "Get a Book resource"
 	// BookService_CreateBook_FullMethodDescription returns the description of the alis.open.validation.v1.BookService.CreateBook method.
-	BookService_CreateBook_FullMethodDescription = ""
+	BookService_CreateBook_FullMethodDescription = "Create a new Book resource"
 	// BookService_UpdateBook_FullMethodDescription returns the description of the alis.open.validation.v1.BookService.UpdateBook method.
-	BookService_UpdateBook_FullMethodDescription = ""
+	BookService_UpdateBook_FullMethodDescription = "Update a Book resource"
 	// BookService_DeleteBook_FullMethodDescription returns the description of the alis.open.validation.v1.BookService.DeleteBook method.
-	BookService_DeleteBook_FullMethodDescription = ""
+	BookService_DeleteBook_FullMethodDescription = "Delete a Book"
 	// BookService_ListBooks_FullMethodDescription returns the description of the alis.open.validation.v1.BookService.ListBooks method.
-	BookService_ListBooks_FullMethodDescription = ""
+	BookService_ListBooks_FullMethodDescription = "Lists Book resources"
 )
