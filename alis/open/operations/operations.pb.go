@@ -4,6 +4,21 @@
 // 	protoc        v3.21.12
 // source: alis/open/operations/v1/operations.proto
 
+// A long-running operation resource that also carries the server-side state
+// needed to run and resume the work.
+//
+// `Operation` keeps the fields of `google.longrunning.Operation` (`name`,
+// `metadata`, `done`, and the `result` oneof of `error` or `response`) with
+// the same field numbers, and adds:
+//
+// - `method`: the RPC that started the operation, e.g.
+//   `/alis.open.iam.v1.UsersService/SyncUser`.
+// - `checkpoint` and `internal_state`: progress used to pause and resume the
+//   operation. `internal_state` is not returned to clients.
+// - `runner`: what runs the operation, currently a Google Cloud Tasks task
+//   (`CloudTask`).
+// - `create_time` and `update_time`.
+
 package operations
 
 import (
@@ -24,24 +39,52 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// This resource represents a long-running operation that is the result of a
+// network API call.
 type Operation struct {
-	state    protoimpl.MessageState `protogen:"open.v1"`
-	Name     string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Metadata *anypb.Any             `protobuf:"bytes,2,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Done     bool                   `protobuf:"varint,3,opt,name=done,proto3" json:"done,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The server-assigned name, which is only unique within the same service that
+	// originally returns it. If you use the default HTTP mapping, the
+	// `name` should be a resource name ending with `operations/{unique_id}`.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Service-specific metadata associated with the operation.  It typically
+	// contains progress information and common metadata such as create time.
+	// Some services might not provide such metadata.  Any method that returns a
+	// long-running operation should document the metadata type, if any.
+	Metadata *anypb.Any `protobuf:"bytes,2,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// If the value is `false`, it means the operation is still in progress.
+	// If `true`, the operation is completed, and either `error` or `response` is
+	// available.
+	Done bool `protobuf:"varint,3,opt,name=done,proto3" json:"done,omitempty"`
+	// The operation result, which can be either an `error` or a valid `response`.
+	// If `done` == `false`, neither `error` nor `response` is set.
+	// If `done` == `true`, exactly one of `error` or `response` is set.
+	//
 	// Types that are valid to be assigned to Result:
 	//
 	//	*Operation_Error
 	//	*Operation_Response
-	Result        isOperation_Result `protobuf_oneof:"result"`
-	Method        string             `protobuf:"bytes,6,opt,name=method,proto3" json:"method,omitempty"`
-	Checkpoint    string             `protobuf:"bytes,9,opt,name=checkpoint,proto3" json:"checkpoint,omitempty"`
-	InternalState []byte             `protobuf:"bytes,10,opt,name=internal_state,json=internalState,proto3" json:"internal_state,omitempty"`
+	Result isOperation_Result `protobuf_oneof:"result"`
+	// The method in which the operation was initiated.
+	// e.g. /alis.open.iam.v1.UsersService/SyncUser
+	// Useful for searching for operations related to a specific method.
+	Method string `protobuf:"bytes,6,opt,name=method,proto3" json:"method,omitempty"`
+	// The checkpoint of the operation.
+	// Useful for pausing and resuming the operation.
+	Checkpoint string `protobuf:"bytes,9,opt,name=checkpoint,proto3" json:"checkpoint,omitempty"`
+	// The internal state of the operation.
+	// Not returned to a client that requests the operation.
+	// Not limited to protocol buffer messages, e.g. could also use normal go structs via the encoding/gob package.
+	InternalState []byte `protobuf:"bytes,10,opt,name=internal_state,json=internalState,proto3" json:"internal_state,omitempty"`
+	// The runner of the operation
+	//
 	// Types that are valid to be assigned to Runner:
 	//
 	//	*Operation_CloudTask_
-	Runner        isOperation_Runner     `protobuf_oneof:"runner"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	Runner isOperation_Runner `protobuf_oneof:"runner"`
+	// The time the operation was created.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// The time the operation was last updated.
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -179,10 +222,19 @@ type isOperation_Result interface {
 }
 
 type Operation_Error struct {
+	// The error result of the operation in case of failure or cancellation.
 	Error *status.Status `protobuf:"bytes,4,opt,name=error,proto3,oneof"`
 }
 
 type Operation_Response struct {
+	// The normal response of the operation in case of success.  If the original
+	// method returns no data on success, such as `Delete`, the response is
+	// `google.protobuf.Empty`.  If the original method is standard
+	// `Get`/`Create`/`Update`, the response should be the resource.  For other
+	// methods, the response should have the type `XxxResponse`, where `Xxx`
+	// is the original method name.  For example, if the original method name
+	// is `TakeSnapshot()`, the inferred response type is
+	// `TakeSnapshotResponse`.
 	Response *anypb.Any `protobuf:"bytes,5,opt,name=response,proto3,oneof"`
 }
 
@@ -195,18 +247,28 @@ type isOperation_Runner interface {
 }
 
 type Operation_CloudTask_ struct {
+	// The Google Cloud Task running the operation.
+	// Useful for tracking/canceling the operation.
 	CloudTask *Operation_CloudTask `protobuf:"bytes,11,opt,name=cloud_task,json=cloudTask,proto3,oneof"`
 }
 
 func (*Operation_CloudTask_) isOperation_Runner() {}
 
+// A Google Cloud Task used to run an operation
 type Operation_CloudTask struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ScheduleTime  *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=schedule_time,json=scheduleTime,proto3" json:"schedule_time,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	Running       bool                   `protobuf:"varint,4,opt,name=running,proto3" json:"running,omitempty"`
-	TargetHost    string                 `protobuf:"bytes,5,opt,name=target_host,json=targetHost,proto3" json:"target_host,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The full name of the task
+	// Format: projects/{project}/locations/{location}/queues/{queue}/tasks/{task}
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The time the task is scheduled to run
+	ScheduleTime *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=schedule_time,json=scheduleTime,proto3" json:"schedule_time,omitempty"`
+	// The time the task was created
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// Whether the task is currently running
+	Running bool `protobuf:"varint,4,opt,name=running,proto3" json:"running,omitempty"`
+	// The target host setup for the task to make requests to.
+	// Normally https://internal-gateway-{projectNr}.{region}.run.app
+	TargetHost    string `protobuf:"bytes,5,opt,name=target_host,json=targetHost,proto3" json:"target_host,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
