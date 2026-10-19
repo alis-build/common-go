@@ -4,6 +4,30 @@
 // - protoc             v3.21.12
 // source: alis/evals/v1/evaluation.proto
 
+// Runs post-deploy tests and evaluations and records the outcome of each
+// finished suite as a `Run` (`runs/{run_id}`).
+//
+// `TestService` has one RPC per kind of run. Each starts a
+// `google.longrunning.Operation` whose response lists the names of the runs
+// it produced:
+//
+// - `RunIntegrationTest`: integration cases scored by deterministic checks.
+// - `RunLoadTest`: generated traffic at a `RunLoadTestRequest.Mode` preset,
+//   with Service Level Objective (SLO) checks on latency, errors, and
+//   throughput.
+// - `RunAgentEval`: agent evaluation cases scored by deterministic checks,
+//   LLM-as-judge scores, rubric dimensions, and ADK prebuilt metrics.
+// - `RunInfraObservation`: Cloud Monitoring snapshots of declared Cloud Run
+//   and Spanner targets, without generating load.
+//
+// Requests select cases by id: `suite.case` selects one case, `suite` selects
+// every case in that suite, and an empty list runs every registered case. An
+// operation completes successfully once execution finishes, even when cases
+// fail, so read `Run.status` for the outcome. Runs, cases, checks, and
+// metrics all report a `Status`. Each completed run is published as a
+// `RunPublishedEvent` for persistence and downstream consumers such as
+// BigQuery or Pub/Sub.
+
 package evals
 
 import (
@@ -29,10 +53,50 @@ const (
 // TestServiceClient is the client API for TestService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Executes post-deploy tests and evaluations. Each RPC starts a long-running
+// operation that runs bundled cases for one kind of test. One operation may
+// produce multiple Run resources (one per completed suite). When the operation
+// completes, the response returns the resource names of all resulting Runs
+// (`runs/{run_id}`). Each full Run payload is published for persistence and
+// event consumers (for example BigQuery or Pub/Sub).
 type TestServiceClient interface {
+	// Runs integration-scope cases: one or a few service boundaries, in-process
+	// or sibling gRPC calls, typically fast and suitable for post-deploy smoke.
+	//
+	// Returns a long-running operation. Poll GetOperation or wait on the operation
+	// name until done. The operation completes successfully when execution finishes,
+	// even if individual cases fail; inspect each Run status in the published
+	// payload to determine pass or fail.
 	RunIntegrationTest(ctx context.Context, in *RunIntegrationTestRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
+	// Runs a load test: generates traffic at the requested intensity against
+	// each selected load case, records per-case performance in
+	// LoadTestResults.cases, and evaluates configured Service Level Objectives
+	// (SLOs). An SLO is a pass/fail bound on a metric such as latency, error
+	// rate, or throughput; every evaluated check appears in the case's checks
+	// with its observed value, limit, and status.
+	//
+	// Returns a long-running operation. Poll GetOperation or wait on the operation
+	// name until done. The operation completes successfully when execution finishes,
+	// even if thresholds are breached; inspect each Run status in the published
+	// payload to determine pass or fail.
 	RunLoadTest(ctx context.Context, in *RunLoadTestRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
+	// Runs behavioral agent evaluation cases. Each case reports a flat list of
+	// metrics (deterministic checks, LLM-as-judge scores, rubric dimensions, and
+	// ADK prebuilt metrics) with per-metric status, score, and threshold.
+	//
+	// Returns a long-running operation. Poll GetOperation or wait on the operation
+	// name until done. The operation completes successfully when execution finishes,
+	// even if individual cases fail; inspect each Run status in the published
+	// payload to determine pass or fail.
 	RunAgentEval(ctx context.Context, in *RunAgentEvalRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
+	// Observes server-side infrastructure metrics without generating load.
+	// Fetches Cloud Monitoring snapshots for declared infrastructure targets, such as Cloud Run and Spanner
+	// over a configurable lookback window (for example peak-hour observation via an external scheduler).
+	//
+	// Returns a long-running operation. Poll GetOperation or wait on the operation
+	// name until done. The operation completes successfully when execution finishes;
+	// inspect each Run status and snapshot fetch_status in the published payload.
 	RunInfraObservation(ctx context.Context, in *RunInfraObservationRequest, opts ...grpc.CallOption) (*longrunning.Operation, error)
 }
 
@@ -87,10 +151,50 @@ func (c *testServiceClient) RunInfraObservation(ctx context.Context, in *RunInfr
 // TestServiceServer is the server API for TestService service.
 // All implementations must embed UnimplementedTestServiceServer
 // for forward compatibility.
+//
+// Executes post-deploy tests and evaluations. Each RPC starts a long-running
+// operation that runs bundled cases for one kind of test. One operation may
+// produce multiple Run resources (one per completed suite). When the operation
+// completes, the response returns the resource names of all resulting Runs
+// (`runs/{run_id}`). Each full Run payload is published for persistence and
+// event consumers (for example BigQuery or Pub/Sub).
 type TestServiceServer interface {
+	// Runs integration-scope cases: one or a few service boundaries, in-process
+	// or sibling gRPC calls, typically fast and suitable for post-deploy smoke.
+	//
+	// Returns a long-running operation. Poll GetOperation or wait on the operation
+	// name until done. The operation completes successfully when execution finishes,
+	// even if individual cases fail; inspect each Run status in the published
+	// payload to determine pass or fail.
 	RunIntegrationTest(context.Context, *RunIntegrationTestRequest) (*longrunning.Operation, error)
+	// Runs a load test: generates traffic at the requested intensity against
+	// each selected load case, records per-case performance in
+	// LoadTestResults.cases, and evaluates configured Service Level Objectives
+	// (SLOs). An SLO is a pass/fail bound on a metric such as latency, error
+	// rate, or throughput; every evaluated check appears in the case's checks
+	// with its observed value, limit, and status.
+	//
+	// Returns a long-running operation. Poll GetOperation or wait on the operation
+	// name until done. The operation completes successfully when execution finishes,
+	// even if thresholds are breached; inspect each Run status in the published
+	// payload to determine pass or fail.
 	RunLoadTest(context.Context, *RunLoadTestRequest) (*longrunning.Operation, error)
+	// Runs behavioral agent evaluation cases. Each case reports a flat list of
+	// metrics (deterministic checks, LLM-as-judge scores, rubric dimensions, and
+	// ADK prebuilt metrics) with per-metric status, score, and threshold.
+	//
+	// Returns a long-running operation. Poll GetOperation or wait on the operation
+	// name until done. The operation completes successfully when execution finishes,
+	// even if individual cases fail; inspect each Run status in the published
+	// payload to determine pass or fail.
 	RunAgentEval(context.Context, *RunAgentEvalRequest) (*longrunning.Operation, error)
+	// Observes server-side infrastructure metrics without generating load.
+	// Fetches Cloud Monitoring snapshots for declared infrastructure targets, such as Cloud Run and Spanner
+	// over a configurable lookback window (for example peak-hour observation via an external scheduler).
+	//
+	// Returns a long-running operation. Poll GetOperation or wait on the operation
+	// name until done. The operation completes successfully when execution finishes;
+	// inspect each Run status and snapshot fetch_status in the published payload.
 	RunInfraObservation(context.Context, *RunInfraObservationRequest) (*longrunning.Operation, error)
 	mustEmbedUnimplementedTestServiceServer()
 }

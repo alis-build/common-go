@@ -4,6 +4,30 @@
 // 	protoc        v3.21.12
 // source: alis/evals/v1/evaluation.proto
 
+// Runs post-deploy tests and evaluations and records the outcome of each
+// finished suite as a `Run` (`runs/{run_id}`).
+//
+// `TestService` has one RPC per kind of run. Each starts a
+// `google.longrunning.Operation` whose response lists the names of the runs
+// it produced:
+//
+// - `RunIntegrationTest`: integration cases scored by deterministic checks.
+// - `RunLoadTest`: generated traffic at a `RunLoadTestRequest.Mode` preset,
+//   with Service Level Objective (SLO) checks on latency, errors, and
+//   throughput.
+// - `RunAgentEval`: agent evaluation cases scored by deterministic checks,
+//   LLM-as-judge scores, rubric dimensions, and ADK prebuilt metrics.
+// - `RunInfraObservation`: Cloud Monitoring snapshots of declared Cloud Run
+//   and Spanner targets, without generating load.
+//
+// Requests select cases by id: `suite.case` selects one case, `suite` selects
+// every case in that suite, and an empty list runs every registered case. An
+// operation completes successfully once execution finishes, even when cases
+// fail, so read `Run.status` for the outcome. Runs, cases, checks, and
+// metrics all report a `Status`. Each completed run is published as a
+// `RunPublishedEvent` for persistence and downstream consumers such as
+// BigQuery or Pub/Sub.
+
 package evals
 
 import (
@@ -26,12 +50,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Role of an infrastructure target within a load or observation case.
+//
+// ENTRY marks the service under direct test (for example the Cloud Run service
+// receiving generated load). DEPENDENCY marks downstream services or data stores
+// observed for correlation (for example internal Cloud Run hops or Spanner).
 type InfraTargetRole int32
 
 const (
+	// Default value. Must not appear on completed results.
 	InfraTargetRole_INFRA_TARGET_ROLE_UNSPECIFIED InfraTargetRole = 0
-	InfraTargetRole_INFRA_TARGET_ROLE_ENTRY       InfraTargetRole = 1
-	InfraTargetRole_INFRA_TARGET_ROLE_DEPENDENCY  InfraTargetRole = 2
+	// The primary service receiving traffic or acting as the case entrypoint.
+	InfraTargetRole_INFRA_TARGET_ROLE_ENTRY InfraTargetRole = 1
+	// A downstream service or datastore observed alongside the entry target.
+	InfraTargetRole_INFRA_TARGET_ROLE_DEPENDENCY InfraTargetRole = 2
 )
 
 // Enum value maps for InfraTargetRole.
@@ -75,13 +107,23 @@ func (InfraTargetRole) EnumDescriptor() ([]byte, []int) {
 	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{0}
 }
 
+// Outcome of fetching infrastructure metrics for one target from Cloud
+// Monitoring.
+//
+// Partial per-metric failure may still yield OK when at least one metric
+// succeeded; details are recorded in fetch_message on the snapshot.
 type InfraFetchStatus int32
 
 const (
-	InfraFetchStatus_INFRA_FETCH_STATUS_UNSPECIFIED       InfraFetchStatus = 0
-	InfraFetchStatus_INFRA_FETCH_STATUS_OK                InfraFetchStatus = 1
-	InfraFetchStatus_INFRA_FETCH_STATUS_UNAVAILABLE       InfraFetchStatus = 2
-	InfraFetchStatus_INFRA_FETCH_STATUS_TIMEOUT           InfraFetchStatus = 3
+	// Default value. Must not appear on completed results.
+	InfraFetchStatus_INFRA_FETCH_STATUS_UNSPECIFIED InfraFetchStatus = 0
+	// At least one metric was fetched successfully for this target.
+	InfraFetchStatus_INFRA_FETCH_STATUS_OK InfraFetchStatus = 1
+	// The Monitoring API was unreachable or returned no usable data.
+	InfraFetchStatus_INFRA_FETCH_STATUS_UNAVAILABLE InfraFetchStatus = 2
+	// The fetch exceeded its per-target timeout.
+	InfraFetchStatus_INFRA_FETCH_STATUS_TIMEOUT InfraFetchStatus = 3
+	// The caller lacked permission to read metrics for this target.
 	InfraFetchStatus_INFRA_FETCH_STATUS_PERMISSION_DENIED InfraFetchStatus = 4
 )
 
@@ -130,12 +172,16 @@ func (InfraFetchStatus) EnumDescriptor() ([]byte, []int) {
 	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{1}
 }
 
+// Infrastructure resource kind referenced by infra SLO checks and snapshots.
 type InfraKind int32
 
 const (
+	// Default value. Must not appear on completed results.
 	InfraKind_INFRA_KIND_UNSPECIFIED InfraKind = 0
-	InfraKind_INFRA_KIND_CLOUD_RUN   InfraKind = 1
-	InfraKind_INFRA_KIND_SPANNER     InfraKind = 2
+	// A Google Cloud Run service revision scope.
+	InfraKind_INFRA_KIND_CLOUD_RUN InfraKind = 1
+	// A Cloud Spanner instance and database scope.
+	InfraKind_INFRA_KIND_SPANNER InfraKind = 2
 )
 
 // Enum value maps for InfraKind.
@@ -179,13 +225,19 @@ func (InfraKind) EnumDescriptor() ([]byte, []int) {
 	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{2}
 }
 
+// Outcome status for runs, cases, checks, metrics, and rubric dimensions.
 type Status int32
 
 const (
+	// Default value. Must not appear on completed results.
 	Status_STATUS_UNSPECIFIED Status = 0
-	Status_PASSED             Status = 1
-	Status_FAILED             Status = 2
-	Status_NOT_EVALUATED      Status = 3
+	// All applicable checks passed and execution completed.
+	Status_PASSED Status = 1
+	// Execution completed but at least one check failed or scored below threshold.
+	Status_FAILED Status = 2
+	// The item was skipped, non-gating, monitoring-only, or preconditions were
+	// not met. Does not imply pass or fail.
+	Status_NOT_EVALUATED Status = 3
 )
 
 // Enum value maps for Status.
@@ -231,13 +283,19 @@ func (Status) EnumDescriptor() ([]byte, []int) {
 	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{3}
 }
 
+// Identifies which kind of test or evaluation produced a Run.
 type Run_Type int32
 
 const (
-	Run_TYPE_UNSPECIFIED  Run_Type = 0
-	Run_INTEGRATION_TEST  Run_Type = 1
-	Run_LOAD_TEST         Run_Type = 2
-	Run_AGENT_EVAL        Run_Type = 3
+	// Default value. This value is unused.
+	Run_TYPE_UNSPECIFIED Run_Type = 0
+	// An integration test run (RunIntegrationTest).
+	Run_INTEGRATION_TEST Run_Type = 1
+	// A load test run (RunLoadTest).
+	Run_LOAD_TEST Run_Type = 2
+	// An agent evaluation run (RunAgentEval).
+	Run_AGENT_EVAL Run_Type = 3
+	// An infrastructure observation run (RunInfraObservation).
 	Run_INFRA_OBSERVATION Run_Type = 4
 )
 
@@ -286,15 +344,25 @@ func (Run_Type) EnumDescriptor() ([]byte, []int) {
 	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{0, 0}
 }
 
+// Load intensity presets, ordered as an ascending scale from minimal to
+// ludicrous. Higher modes apply more concurrent load; the exact parameters
+// are environment-specific.
 type RunLoadTestRequest_Mode int32
 
 const (
+	// Default value. The server rejects this value if sent by clients.
 	RunLoadTestRequest_MODE_UNSPECIFIED RunLoadTestRequest_Mode = 0
-	RunLoadTestRequest_MINIMAL          RunLoadTestRequest_Mode = 1
-	RunLoadTestRequest_CONSERVATIVE     RunLoadTestRequest_Mode = 2
-	RunLoadTestRequest_MODERATE         RunLoadTestRequest_Mode = 3
-	RunLoadTestRequest_HIGH             RunLoadTestRequest_Mode = 4
-	RunLoadTestRequest_LUDICROUS        RunLoadTestRequest_Mode = 5
+	// Minimal load for smoke or baseline measurement.
+	RunLoadTestRequest_MINIMAL RunLoadTestRequest_Mode = 1
+	// Conservative load with headroom for shared infrastructure.
+	RunLoadTestRequest_CONSERVATIVE RunLoadTestRequest_Mode = 2
+	// Moderate load suitable for routine capacity checks.
+	RunLoadTestRequest_MODERATE RunLoadTestRequest_Mode = 3
+	// Strong load short of ludicrous; useful for capacity ceiling probes.
+	RunLoadTestRequest_HIGH RunLoadTestRequest_Mode = 4
+	// Highest load the target environment is expected to sustain without
+	// degrading shared infrastructure.
+	RunLoadTestRequest_LUDICROUS RunLoadTestRequest_Mode = 5
 )
 
 // Enum value maps for RunLoadTestRequest_Mode.
@@ -344,25 +412,56 @@ func (RunLoadTestRequest_Mode) EnumDescriptor() ([]byte, []int) {
 	return file_alis_evals_v1_evaluation_proto_rawDescGZIP(), []int{16, 0}
 }
 
+// Represents the outcome of a completed suite within a test or evaluation job.
+// This is the common persistence and event payload for all run kinds.
+// Every branch lists each executed case with its rolled-up status and all
+// evaluated checks, passed and failed alike. Multiple Runs may share the same
+// parent operation.
 type Run struct {
-	state   protoimpl.MessageState `protogen:"open.v1"`
-	Name    string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	BatchId *string                `protobuf:"bytes,3,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
-	Type    Run_Type               `protobuf:"varint,4,opt,name=type,proto3,enum=alis.evals.v1.Run_Type" json:"type,omitempty"`
-	Status  Status                 `protobuf:"varint,5,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the run.
+	//
+	// Format: `runs/{run_id}`
+	//
+	// `{run_id}` is independent of the long-running operation identifier.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// The batch ID of the run.
+	// This is populated when batch id is provided in the request.
+	BatchId *string `protobuf:"bytes,3,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
+	// The type of run. Set explicitly so consumers can filter without inspecting
+	// the data branch.
+	Type Run_Type `protobuf:"varint,4,opt,name=type,proto3,enum=alis.evals.v1.Run_Type" json:"type,omitempty"`
+	// The rolled-up outcome for the run.
+	//
+	// Precedence: FAILED if any case or check failed, errored, or scored
+	// below threshold; else PASSED when at least one case ran successfully.
+	Status Status `protobuf:"varint,5,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// Branch-specific result detail. Exactly one branch is set; it corresponds to
+	// `type`.
+	//
 	// Types that are valid to be assigned to Data:
 	//
 	//	*Run_IntegrationTest
 	//	*Run_LoadTest
 	//	*Run_AgentEval
 	//	*Run_InfraObservation
-	Data            isRun_Data             `protobuf_oneof:"data"`
-	StartTime       *timestamppb.Timestamp `protobuf:"bytes,21,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime         *timestamppb.Timestamp `protobuf:"bytes,22,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	Operation       string                 `protobuf:"bytes,23,opt,name=operation,proto3" json:"operation,omitempty"`
-	Error           *status.Status         `protobuf:"bytes,24,opt,name=error,proto3,oneof" json:"error,omitempty"`
-	CreateTime      *timestamppb.Timestamp `protobuf:"bytes,25,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
-	GoogleProjectId string                 `protobuf:"bytes,26,opt,name=google_project_id,json=googleProjectId,proto3" json:"google_project_id,omitempty"`
+	Data isRun_Data `protobuf_oneof:"data"`
+	// Execution wall-clock start. Distinct from resource lifecycle timestamps.
+	StartTime *timestamppb.Timestamp `protobuf:"bytes,21,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	// Execution wall-clock end.
+	EndTime *timestamppb.Timestamp `protobuf:"bytes,22,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	// The parent long-running operation for this run.
+	//
+	// Format: `operations/{operation_id}`
+	Operation string `protobuf:"bytes,23,opt,name=operation,proto3" json:"operation,omitempty"`
+	// Optional. Populated when the run could not complete. Root-cause summary
+	// for triage.
+	Error *status.Status `protobuf:"bytes,24,opt,name=error,proto3,oneof" json:"error,omitempty"`
+	// The time when this run resource was materialized.
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,25,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// The project ID of the environment where the run was executed.
+	// Example: marvel-sm-dev-123, marvel-sm-prod-456
+	GoogleProjectId string `protobuf:"bytes,26,opt,name=google_project_id,json=googleProjectId,proto3" json:"google_project_id,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -515,18 +614,22 @@ type isRun_Data interface {
 }
 
 type Run_IntegrationTest struct {
+	// Integration test case results (RunIntegrationTest).
 	IntegrationTest *IntegrationTestResults `protobuf:"bytes,6,opt,name=integration_test,json=integrationTest,proto3,oneof"`
 }
 
 type Run_LoadTest struct {
+	// Load test case results (RunLoadTest).
 	LoadTest *LoadTestResults `protobuf:"bytes,7,opt,name=load_test,json=loadTest,proto3,oneof"`
 }
 
 type Run_AgentEval struct {
+	// Agent evaluation case results (RunAgentEval).
 	AgentEval *AgentEvalResults `protobuf:"bytes,8,opt,name=agent_eval,json=agentEval,proto3,oneof"`
 }
 
 type Run_InfraObservation struct {
+	// Infrastructure observation case results (RunInfraObservation).
 	InfraObservation *InfraObservationResults `protobuf:"bytes,9,opt,name=infra_observation,json=infraObservation,proto3,oneof"`
 }
 
@@ -538,8 +641,11 @@ func (*Run_AgentEval) isRun_Data() {}
 
 func (*Run_InfraObservation) isRun_Data() {}
 
+// Result detail for an integration test run.
 type IntegrationTestResults struct {
-	state         protoimpl.MessageState         `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Every case executed in this run, in execution order. Each entry
+	// includes its rolled-up status and all checks evaluated for that case.
 	Cases         []*IntegrationTestResults_Case `protobuf:"bytes,1,rep,name=cases,proto3" json:"cases,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -582,14 +688,32 @@ func (x *IntegrationTestResults) GetCases() []*IntegrationTestResults_Case {
 	return nil
 }
 
+// Request latency distribution, in milliseconds.
+//
+// Percentile fields give the latency at or below which that fraction of
+// requests completed. For example, p95_ms is the latency experienced by
+// the fastest 95% of requests; the remaining 5% were slower. Percentiles
+// surface tail latency that a mean would hide and are the usual basis for
+// SLO checks.
+//
+// Package-level so load summaries, Cloud Run metrics, and Spanner metrics
+// share an identical BQ column shape.
 type LatencyPercentiles struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	P50Ms         float64                `protobuf:"fixed64,1,opt,name=p50_ms,json=p50Ms,proto3" json:"p50_ms,omitempty"`
-	P95Ms         float64                `protobuf:"fixed64,2,opt,name=p95_ms,json=p95Ms,proto3" json:"p95_ms,omitempty"`
-	P99Ms         float64                `protobuf:"fixed64,3,opt,name=p99_ms,json=p99Ms,proto3" json:"p99_ms,omitempty"`
-	MinMs         float64                `protobuf:"fixed64,4,opt,name=min_ms,json=minMs,proto3" json:"min_ms,omitempty"`
-	MeanMs        float64                `protobuf:"fixed64,5,opt,name=mean_ms,json=meanMs,proto3" json:"mean_ms,omitempty"`
-	MaxMs         float64                `protobuf:"fixed64,6,opt,name=max_ms,json=maxMs,proto3" json:"max_ms,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Median latency. Half of requests completed at or below this value.
+	P50Ms float64 `protobuf:"fixed64,1,opt,name=p50_ms,json=p50Ms,proto3" json:"p50_ms,omitempty"`
+	// 95th percentile latency. 95% of requests completed at or below this
+	// value; the slowest 5% exceeded it.
+	P95Ms float64 `protobuf:"fixed64,2,opt,name=p95_ms,json=p95Ms,proto3" json:"p95_ms,omitempty"`
+	// 99th percentile latency. 99% of requests completed at or below this
+	// value; the slowest 1% exceeded it.
+	P99Ms float64 `protobuf:"fixed64,3,opt,name=p99_ms,json=p99Ms,proto3" json:"p99_ms,omitempty"`
+	// The fastest observed request latency.
+	MinMs float64 `protobuf:"fixed64,4,opt,name=min_ms,json=minMs,proto3" json:"min_ms,omitempty"`
+	// The arithmetic mean of observed request latencies.
+	MeanMs float64 `protobuf:"fixed64,5,opt,name=mean_ms,json=meanMs,proto3" json:"mean_ms,omitempty"`
+	// The slowest observed request latency.
+	MaxMs         float64 `protobuf:"fixed64,6,opt,name=max_ms,json=maxMs,proto3" json:"max_ms,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -666,8 +790,16 @@ func (x *LatencyPercentiles) GetMaxMs() float64 {
 	return 0
 }
 
+// Result detail for a load test run. The runner generates sustained traffic
+// against each selected load case, records per-case performance in the case's
+// summary, and evaluates the configured Service Level Objectives (SLOs). An
+// SLO defines an acceptable bound on a metric; every evaluated check is listed
+// with its observed value, limit, and outcome, passed and failed alike.
 type LoadTestResults struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Every load case executed in this run, in execution order. Each entry
+	// includes its rolled-up status, the performance summary for its load
+	// window, and all SLO checks evaluated against that summary.
 	Cases         []*LoadTestResults_Case `protobuf:"bytes,1,rep,name=cases,proto3" json:"cases,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -710,9 +842,15 @@ func (x *LoadTestResults) GetCases() []*LoadTestResults_Case {
 	return nil
 }
 
+// Result detail for an agent evaluation run. Every executed case is listed
+// with its rolled-up status and a flat list of metrics. JudgeInfo summarizes
+// the scoring model used across the run when LLM-as-judge metrics are present.
 type AgentEvalResults struct {
-	state         protoimpl.MessageState      `protogen:"open.v1"`
-	Cases         []*AgentEvalResults_Case    `protobuf:"bytes,1,rep,name=cases,proto3" json:"cases,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Every case executed in this run, in execution order.
+	Cases []*AgentEvalResults_Case `protobuf:"bytes,1,rep,name=cases,proto3" json:"cases,omitempty"`
+	// Judge model provenance and call statistics for this run. Unset when the
+	// run used no LLM-as-judge metrics.
 	Judge         *AgentEvalResults_JudgeInfo `protobuf:"bytes,2,opt,name=judge,proto3,oneof" json:"judge,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -762,12 +900,20 @@ func (x *AgentEvalResults) GetJudge() *AgentEvalResults_JudgeInfo {
 	return nil
 }
 
+// Declared Cloud Run target for infrastructure observation.
+//
+// Identifies the Monitoring resource filters used when fetching server-side
+// Cloud Run metrics. Referenced from CloudRunTargetSnapshot.target.
 type CloudRunTargetRef struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Region        string                 `protobuf:"bytes,2,opt,name=region,proto3" json:"region,omitempty"`
-	ServiceName   string                 `protobuf:"bytes,3,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
-	Revision      *string                `protobuf:"bytes,4,opt,name=revision,proto3,oneof" json:"revision,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Google Cloud project ID hosting the Cloud Run service.
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// Cloud Run region (for example `europe-west1`).
+	Region string `protobuf:"bytes,2,opt,name=region,proto3" json:"region,omitempty"`
+	// Cloud Run service name (for example `search-v1`).
+	ServiceName string `protobuf:"bytes,3,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	// Optional revision filter. Empty aggregates all revisions.
+	Revision      *string `protobuf:"bytes,4,opt,name=revision,proto3,oneof" json:"revision,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -830,12 +976,20 @@ func (x *CloudRunTargetRef) GetRevision() string {
 	return ""
 }
 
+// Declared Spanner target for infrastructure observation.
+//
+// Identifies the Monitoring resource filters used when fetching server-side
+// Spanner metrics. Referenced from SpannerTargetSnapshot.target.
 type SpannerTargetRef struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	InstanceId    string                 `protobuf:"bytes,2,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
-	Location      string                 `protobuf:"bytes,3,opt,name=location,proto3" json:"location,omitempty"`
-	Database      string                 `protobuf:"bytes,4,opt,name=database,proto3" json:"database,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Google Cloud project ID hosting the Spanner instance.
+	ProjectId string `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// Spanner instance ID (for example `prod-spanner`).
+	InstanceId string `protobuf:"bytes,2,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	// Spanner instance location (for example `europe-west1`).
+	Location string `protobuf:"bytes,3,opt,name=location,proto3" json:"location,omitempty"`
+	// Required database within the instance (for example `orders`).
+	Database      string `protobuf:"bytes,4,opt,name=database,proto3" json:"database,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -898,17 +1052,30 @@ func (x *SpannerTargetRef) GetDatabase() string {
 	return ""
 }
 
+// Observed Cloud Run server-side metrics for one target and window.
 type CloudRunMetrics struct {
-	state                protoimpl.MessageState `protogen:"open.v1"`
-	RequestCount         int64                  `protobuf:"varint,1,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
-	Latency              *LatencyPercentiles    `protobuf:"bytes,2,opt,name=latency,proto3,oneof" json:"latency,omitempty"`
-	Error_5XxRate        *float64               `protobuf:"fixed64,3,opt,name=error_5xx_rate,json=error5xxRate,proto3,oneof" json:"error_5xx_rate,omitempty"`
-	MaxInstanceCount     *float64               `protobuf:"fixed64,4,opt,name=max_instance_count,json=maxInstanceCount,proto3,oneof" json:"max_instance_count,omitempty"`
-	CpuUtilizationP99    *float64               `protobuf:"fixed64,5,opt,name=cpu_utilization_p99,json=cpuUtilizationP99,proto3,oneof" json:"cpu_utilization_p99,omitempty"`
-	MemoryUtilizationP99 *float64               `protobuf:"fixed64,6,opt,name=memory_utilization_p99,json=memoryUtilizationP99,proto3,oneof" json:"memory_utilization_p99,omitempty"`
-	StartupLatencyP99    *float64               `protobuf:"fixed64,7,opt,name=startup_latency_p99,json=startupLatencyP99,proto3,oneof" json:"startup_latency_p99,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Server-side request count. Zero when the service saw no traffic.
+	RequestCount int64 `protobuf:"varint,1,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
+	// Server-side request latency distribution (run.googleapis.com/request_latencies).
+	// Unset when this metric type could not be fetched.
+	Latency *LatencyPercentiles `protobuf:"bytes,2,opt,name=latency,proto3,oneof" json:"latency,omitempty"`
+	// Fraction of server-side responses with 5xx status (0.0–1.0). Unset when
+	// this metric type could not be fetched.
+	Error_5XxRate *float64 `protobuf:"fixed64,3,opt,name=error_5xx_rate,json=error5xxRate,proto3,oneof" json:"error_5xx_rate,omitempty"`
+	// Peak concurrent instance count during the window. Unset when this metric
+	// type could not be fetched.
+	MaxInstanceCount *float64 `protobuf:"fixed64,4,opt,name=max_instance_count,json=maxInstanceCount,proto3,oneof" json:"max_instance_count,omitempty"`
+	// Container CPU utilization 99th percentile during the window (0.0–1.0).
+	// Unset when this metric type could not be fetched.
+	CpuUtilizationP99 *float64 `protobuf:"fixed64,5,opt,name=cpu_utilization_p99,json=cpuUtilizationP99,proto3,oneof" json:"cpu_utilization_p99,omitempty"`
+	// Container memory utilization 99th percentile during the window (0.0–1.0).
+	// Unset when this metric type could not be fetched.
+	MemoryUtilizationP99 *float64 `protobuf:"fixed64,6,opt,name=memory_utilization_p99,json=memoryUtilizationP99,proto3,oneof" json:"memory_utilization_p99,omitempty"`
+	// Container startup latency 99th percentile in milliseconds, when available.
+	StartupLatencyP99 *float64 `protobuf:"fixed64,7,opt,name=startup_latency_p99,json=startupLatencyP99,proto3,oneof" json:"startup_latency_p99,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *CloudRunMetrics) Reset() {
@@ -990,13 +1157,24 @@ func (x *CloudRunMetrics) GetStartupLatencyP99() float64 {
 	return 0
 }
 
+// Observed Spanner server-side metrics for one target and window.
 type SpannerMetrics struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	QueryCount        int64                  `protobuf:"varint,1,opt,name=query_count,json=queryCount,proto3" json:"query_count,omitempty"`
-	QueryErrorCount   int64                  `protobuf:"varint,2,opt,name=query_error_count,json=queryErrorCount,proto3" json:"query_error_count,omitempty"`
-	ApiLatency        *LatencyPercentiles    `protobuf:"bytes,3,opt,name=api_latency,json=apiLatency,proto3,oneof" json:"api_latency,omitempty"`
-	QueryLatency      *LatencyPercentiles    `protobuf:"bytes,4,opt,name=query_latency,json=queryLatency,proto3,oneof" json:"query_latency,omitempty"`
-	CpuUtilizationMax *float64               `protobuf:"fixed64,5,opt,name=cpu_utilization_max,json=cpuUtilizationMax,proto3,oneof" json:"cpu_utilization_max,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Query count for the database during the window. Zero when no queries ran.
+	QueryCount int64 `protobuf:"varint,1,opt,name=query_count,json=queryCount,proto3" json:"query_count,omitempty"`
+	// Query count where status was not OK during the window.
+	QueryErrorCount int64 `protobuf:"varint,2,opt,name=query_error_count,json=queryErrorCount,proto3" json:"query_error_count,omitempty"`
+	// API request latency distribution (spanner.googleapis.com/api/request_latencies).
+	// Unset when this metric type could not be fetched.
+	ApiLatency *LatencyPercentiles `protobuf:"bytes,3,opt,name=api_latency,json=apiLatency,proto3,oneof" json:"api_latency,omitempty"`
+	// Query execution latency distribution
+	// (spanner.googleapis.com/query_stat/total/query_latencies). Unset when this
+	// metric type could not be fetched.
+	QueryLatency *LatencyPercentiles `protobuf:"bytes,4,opt,name=query_latency,json=queryLatency,proto3,oneof" json:"query_latency,omitempty"`
+	// Instance CPU utilization maximum during the window (0.0–1.0). Instance-
+	// scoped; not attributable to a single database when multiple databases share
+	// the instance. Unset when this metric type could not be fetched.
+	CpuUtilizationMax *float64 `protobuf:"fixed64,5,opt,name=cpu_utilization_max,json=cpuUtilizationMax,proto3,oneof" json:"cpu_utilization_max,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -1066,16 +1244,32 @@ func (x *SpannerMetrics) GetCpuUtilizationMax() float64 {
 	return 0
 }
 
+// Cloud Run infrastructure snapshot for one declared target.
+//
+// Always emitted for every target declared on the suite, even when
+// request_count is zero or the fetch partially failed. Pairs configuration
+// (id, role, target) with observed metrics over window_start..window_end.
 type CloudRunTargetSnapshot struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Role          InfraTargetRole        `protobuf:"varint,2,opt,name=role,proto3,enum=alis.evals.v1.InfraTargetRole" json:"role,omitempty"`
-	Target        *CloudRunTargetRef     `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
-	WindowStart   *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=window_start,json=windowStart,proto3" json:"window_start,omitempty"`
-	WindowEnd     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=window_end,json=windowEnd,proto3" json:"window_end,omitempty"`
-	FetchStatus   InfraFetchStatus       `protobuf:"varint,6,opt,name=fetch_status,json=fetchStatus,proto3,enum=alis.evals.v1.InfraFetchStatus" json:"fetch_status,omitempty"`
-	FetchMessage  *string                `protobuf:"bytes,7,opt,name=fetch_message,json=fetchMessage,proto3,oneof" json:"fetch_message,omitempty"`
-	Metrics       *CloudRunMetrics       `protobuf:"bytes,8,opt,name=metrics,proto3" json:"metrics,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Stable target identifier from suite configuration (for example `search-v1`).
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Role of this target within the case (ENTRY or DEPENDENCY).
+	Role InfraTargetRole `protobuf:"varint,2,opt,name=role,proto3,enum=alis.evals.v1.InfraTargetRole" json:"role,omitempty"`
+	// Declared Cloud Run resource coordinates used for the Monitoring query.
+	Target *CloudRunTargetRef `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
+	// Inclusive start of the observation window (UTC).
+	WindowStart *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=window_start,json=windowStart,proto3" json:"window_start,omitempty"`
+	// Exclusive end of the observation window (UTC).
+	WindowEnd *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=window_end,json=windowEnd,proto3" json:"window_end,omitempty"`
+	// Outcome of the Monitoring fetch for this target.
+	FetchStatus InfraFetchStatus `protobuf:"varint,6,opt,name=fetch_status,json=fetchStatus,proto3,enum=alis.evals.v1.InfraFetchStatus" json:"fetch_status,omitempty"`
+	// Human-readable detail when fetch_status is not OK or when individual
+	// metrics failed partially. Unset on full success.
+	FetchMessage *string `protobuf:"bytes,7,opt,name=fetch_message,json=fetchMessage,proto3,oneof" json:"fetch_message,omitempty"`
+	// Observed server-side metrics for this target and window. Populated on
+	// best-effort basis when fetch_status is OK; fields may be unset when a
+	// specific metric type failed.
+	Metrics       *CloudRunMetrics `protobuf:"bytes,8,opt,name=metrics,proto3" json:"metrics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1166,16 +1360,32 @@ func (x *CloudRunTargetSnapshot) GetMetrics() *CloudRunMetrics {
 	return nil
 }
 
+// Spanner infrastructure snapshot for one declared target.
+//
+// Always emitted for every target declared on the suite, even when
+// query_count is zero or the fetch partially failed. Pairs configuration
+// (id, role, target) with observed metrics over window_start..window_end.
 type SpannerTargetSnapshot struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Role          InfraTargetRole        `protobuf:"varint,2,opt,name=role,proto3,enum=alis.evals.v1.InfraTargetRole" json:"role,omitempty"`
-	Target        *SpannerTargetRef      `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
-	WindowStart   *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=window_start,json=windowStart,proto3" json:"window_start,omitempty"`
-	WindowEnd     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=window_end,json=windowEnd,proto3" json:"window_end,omitempty"`
-	FetchStatus   InfraFetchStatus       `protobuf:"varint,6,opt,name=fetch_status,json=fetchStatus,proto3,enum=alis.evals.v1.InfraFetchStatus" json:"fetch_status,omitempty"`
-	FetchMessage  *string                `protobuf:"bytes,7,opt,name=fetch_message,json=fetchMessage,proto3,oneof" json:"fetch_message,omitempty"`
-	Metrics       *SpannerMetrics        `protobuf:"bytes,8,opt,name=metrics,proto3" json:"metrics,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Stable target identifier from suite configuration (for example `orders-db`).
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Always INFRA_TARGET_ROLE_DEPENDENCY on the wire for Spanner targets.
+	Role InfraTargetRole `protobuf:"varint,2,opt,name=role,proto3,enum=alis.evals.v1.InfraTargetRole" json:"role,omitempty"`
+	// Declared Spanner resource coordinates used for the Monitoring query.
+	Target *SpannerTargetRef `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
+	// Inclusive start of the observation window (UTC).
+	WindowStart *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=window_start,json=windowStart,proto3" json:"window_start,omitempty"`
+	// Exclusive end of the observation window (UTC).
+	WindowEnd *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=window_end,json=windowEnd,proto3" json:"window_end,omitempty"`
+	// Outcome of the Monitoring fetch for this target.
+	FetchStatus InfraFetchStatus `protobuf:"varint,6,opt,name=fetch_status,json=fetchStatus,proto3,enum=alis.evals.v1.InfraFetchStatus" json:"fetch_status,omitempty"`
+	// Human-readable detail when fetch_status is not OK or when individual
+	// metrics failed partially. Unset on full success.
+	FetchMessage *string `protobuf:"bytes,7,opt,name=fetch_message,json=fetchMessage,proto3,oneof" json:"fetch_message,omitempty"`
+	// Observed server-side metrics for this target and window. Populated on
+	// best-effort basis when fetch_status is OK; fields may be unset when a
+	// specific metric type failed.
+	Metrics       *SpannerMetrics `protobuf:"bytes,8,opt,name=metrics,proto3" json:"metrics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1266,16 +1476,31 @@ func (x *SpannerTargetSnapshot) GetMetrics() *SpannerMetrics {
 	return nil
 }
 
+// One infrastructure SLO check outcome.
+//
+// Mirrors SloCheck on the client side: snapshots carry observed values;
+// infra_checks carry pass/fail against configured limits. Diagnostics-only in
+// v1: infra_checks is always empty on the wire until infra SLO evaluators ship.
 type InfraSloCheck struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Kind          InfraKind              `protobuf:"varint,1,opt,name=kind,proto3,enum=alis.evals.v1.InfraKind" json:"kind,omitempty"`
-	TargetId      string                 `protobuf:"bytes,2,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
-	CheckId       string                 `protobuf:"bytes,3,opt,name=check_id,json=checkId,proto3" json:"check_id,omitempty"`
-	Status        Status                 `protobuf:"varint,4,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Message       *string                `protobuf:"bytes,5,opt,name=message,proto3,oneof" json:"message,omitempty"`
-	Observed      float64                `protobuf:"fixed64,6,opt,name=observed,proto3" json:"observed,omitempty"`
-	Limit         float64                `protobuf:"fixed64,7,opt,name=limit,proto3" json:"limit,omitempty"`
-	Unit          string                 `protobuf:"bytes,8,opt,name=unit,proto3" json:"unit,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resource kind this check evaluated (CLOUD_RUN or SPANNER).
+	Kind InfraKind `protobuf:"varint,1,opt,name=kind,proto3,enum=alis.evals.v1.InfraKind" json:"kind,omitempty"`
+	// Matches CloudRunTargetSnapshot.id or SpannerTargetSnapshot.id.
+	TargetId string `protobuf:"bytes,2,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	// Stable metric key (for example `latency.p99_ms` or `query_error_rate`).
+	CheckId string `protobuf:"bytes,3,opt,name=check_id,json=checkId,proto3" json:"check_id,omitempty"`
+	// The outcome of the check. FAILED when the observed value crossed the
+	// limit or the metric could not be measured.
+	Status Status `protobuf:"varint,4,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// Human-readable detail. Unset when the check passed with no extra context.
+	Message *string `protobuf:"bytes,5,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	// The metric value measured during the observation window (for example 612.4
+	// when unit is `ms`).
+	Observed float64 `protobuf:"fixed64,6,opt,name=observed,proto3" json:"observed,omitempty"`
+	// The configured SLO bound (for example 500.0 when unit is `ms`).
+	Limit float64 `protobuf:"fixed64,7,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Unit shared by observed and limit (for example `ms`, `%`, `count`).
+	Unit          string `protobuf:"bytes,8,opt,name=unit,proto3" json:"unit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1366,8 +1591,14 @@ func (x *InfraSloCheck) GetUnit() string {
 	return ""
 }
 
+// Result detail for a standalone infrastructure observation run.
+//
+// Produced by RunInfraObservation without load generation. Each case fetches
+// Cloud Monitoring snapshots over a resolved lookback window for declared
+// Cloud Run and Spanner targets.
 type InfraObservationResults struct {
-	state         protoimpl.MessageState          `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Every infra observation case executed in this run, in execution order.
 	Cases         []*InfraObservationResults_Case `protobuf:"bytes,1,rep,name=cases,proto3" json:"cases,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1410,10 +1641,21 @@ func (x *InfraObservationResults) GetCases() []*InfraObservationResults_Case {
 	return nil
 }
 
+// The request message for RunIntegrationTest.
 type RunIntegrationTestRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	BatchId       *string                `protobuf:"bytes,1,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
-	CaseIds       []string               `protobuf:"bytes,2,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The batch ID to associate with the run.
+	BatchId *string `protobuf:"bytes,1,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
+	// The case ids to execute.
+	//
+	// If empty, all cases registered for integration runs are executed.
+	// If non-empty, only registered cases whose id matches an entry are
+	// executed.
+	//
+	// A qualified id `suite.case` selects one case. A suite id `suite`
+	// selects all cases in that suite; shared setup and teardown for the suite
+	// run once per suite.
+	CaseIds       []string `protobuf:"bytes,2,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1462,12 +1704,20 @@ func (x *RunIntegrationTestRequest) GetCaseIds() []string {
 	return nil
 }
 
+// Metadata for a RunIntegrationTest long-running operation while it is in
+// progress.
 type RunIntegrationTestMetadata struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	CaseCount           int32                  `protobuf:"varint,1,opt,name=case_count,json=caseCount,proto3" json:"case_count,omitempty"`
-	CompletedCaseCount  int32                  `protobuf:"varint,2,opt,name=completed_case_count,json=completedCaseCount,proto3" json:"completed_case_count,omitempty"`
-	SuiteCount          int32                  `protobuf:"varint,3,opt,name=suite_count,json=suiteCount,proto3" json:"suite_count,omitempty"`
-	CompletedSuiteCount int32                  `protobuf:"varint,4,opt,name=completed_suite_count,json=completedSuiteCount,proto3" json:"completed_suite_count,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The number of cases selected for this operation after filter resolution.
+	CaseCount int32 `protobuf:"varint,1,opt,name=case_count,json=caseCount,proto3" json:"case_count,omitempty"`
+	// The number of cases finished so far (passed, failed, or errored).
+	// This value increases monotonically during the run.
+	CompletedCaseCount int32 `protobuf:"varint,2,opt,name=completed_case_count,json=completedCaseCount,proto3" json:"completed_case_count,omitempty"`
+	// The number of suites selected for this operation.
+	SuiteCount int32 `protobuf:"varint,3,opt,name=suite_count,json=suiteCount,proto3" json:"suite_count,omitempty"`
+	// The number of suites finished so far. This value increases monotonically
+	// during the run.
+	CompletedSuiteCount int32 `protobuf:"varint,4,opt,name=completed_suite_count,json=completedSuiteCount,proto3" json:"completed_suite_count,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -1530,9 +1780,15 @@ func (x *RunIntegrationTestMetadata) GetCompletedSuiteCount() int32 {
 	return 0
 }
 
+// The response message for RunIntegrationTest, stored in the completed
+// Operation.
 type RunIntegrationTestResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Runs          []string               `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource names of all runs produced by this operation.
+	//
+	// Each entry has the format `runs/{run_id}`. Single-suite jobs return a
+	// list of length one.
+	Runs          []string `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1574,11 +1830,26 @@ func (x *RunIntegrationTestResponse) GetRuns() []string {
 	return nil
 }
 
+// The request message for RunLoadTest.
 type RunLoadTestRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	Mode          RunLoadTestRequest_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=alis.evals.v1.RunLoadTestRequest_Mode" json:"mode,omitempty"`
-	CaseIds       []string                `protobuf:"bytes,2,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
-	BatchId       *string                 `protobuf:"bytes,3,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The load intensity preset. Controls concurrency, request rate, and
+	// duration according to server-side configuration; suites may override the
+	// preset's parameters at registration. The resolved values are recorded in
+	// each case's Summary.
+	Mode RunLoadTestRequest_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=alis.evals.v1.RunLoadTestRequest_Mode" json:"mode,omitempty"`
+	// The load case ids to execute.
+	//
+	// If empty, all cases registered for load tests are executed.
+	// If non-empty, only registered cases whose id matches an entry are
+	// executed.
+	//
+	// A qualified id `suite.case` selects one case. A suite id `suite`
+	// selects all cases in that suite; shared setup and teardown for the suite
+	// run once per suite.
+	CaseIds []string `protobuf:"bytes,2,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
+	// The batch ID to associate with the runs produced by this operation.
+	BatchId       *string `protobuf:"bytes,3,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1634,12 +1905,20 @@ func (x *RunLoadTestRequest) GetBatchId() string {
 	return ""
 }
 
+// Metadata for a RunLoadTest long-running operation while it is in progress.
 type RunLoadTestMetadata struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	CaseCount           int32                  `protobuf:"varint,1,opt,name=case_count,json=caseCount,proto3" json:"case_count,omitempty"`
-	CompletedCaseCount  int32                  `protobuf:"varint,2,opt,name=completed_case_count,json=completedCaseCount,proto3" json:"completed_case_count,omitempty"`
-	SuiteCount          int32                  `protobuf:"varint,3,opt,name=suite_count,json=suiteCount,proto3" json:"suite_count,omitempty"`
-	CompletedSuiteCount int32                  `protobuf:"varint,4,opt,name=completed_suite_count,json=completedSuiteCount,proto3" json:"completed_suite_count,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The number of load cases selected for this operation after filter
+	// resolution. Each case runs one load window against its target.
+	CaseCount int32 `protobuf:"varint,1,opt,name=case_count,json=caseCount,proto3" json:"case_count,omitempty"`
+	// The number of cases whose load window has finished so far. This value
+	// increases monotonically during the run.
+	CompletedCaseCount int32 `protobuf:"varint,2,opt,name=completed_case_count,json=completedCaseCount,proto3" json:"completed_case_count,omitempty"`
+	// The number of suites selected for this operation.
+	SuiteCount int32 `protobuf:"varint,3,opt,name=suite_count,json=suiteCount,proto3" json:"suite_count,omitempty"`
+	// The number of suites finished so far. This value increases monotonically
+	// during the run.
+	CompletedSuiteCount int32 `protobuf:"varint,4,opt,name=completed_suite_count,json=completedSuiteCount,proto3" json:"completed_suite_count,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -1702,9 +1981,13 @@ func (x *RunLoadTestMetadata) GetCompletedSuiteCount() int32 {
 	return 0
 }
 
+// The response message for RunLoadTest, stored in the completed Operation.
 type RunLoadTestResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Runs          []string               `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource names of all runs produced by this operation.
+	//
+	// Each entry has the format `runs/{run_id}`.
+	Runs          []string `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1746,10 +2029,29 @@ func (x *RunLoadTestResponse) GetRuns() []string {
 	return nil
 }
 
+// The request message for RunAgentEval.
 type RunAgentEvalRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CaseIds       []string               `protobuf:"bytes,1,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
-	SessionState  *structpb.Struct       `protobuf:"bytes,2,opt,name=session_state,json=sessionState,proto3" json:"session_state,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The case ids to execute.
+	//
+	// If empty, all cases registered for agent evaluation are executed.
+	// If non-empty, only registered cases whose id matches an entry are
+	// executed.
+	//
+	// A qualified id `suite.case` selects one case. A suite id `suite`
+	// selects all cases in that suite; shared setup and teardown for the suite
+	// run once per suite.
+	CaseIds []string `protobuf:"bytes,1,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
+	// Initial ADK session state applied to every case in this run.
+	//
+	// Mirrors ADK SessionInput.state: a JSON object of arbitrary values
+	// (strings, numbers, bools, lists, nested objects). Agents interpret
+	// keys according to their own session-state contracts.
+	//
+	// Unset or empty means no run-level state is supplied. When set, these
+	// entries are merged into each case's session input before inference.
+	// A key already set on the case wins over the same key here.
+	SessionState  *structpb.Struct `protobuf:"bytes,2,opt,name=session_state,json=sessionState,proto3" json:"session_state,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1798,12 +2100,19 @@ func (x *RunAgentEvalRequest) GetSessionState() *structpb.Struct {
 	return nil
 }
 
+// Metadata for a RunAgentEval long-running operation while it is in progress.
 type RunAgentEvalMetadata struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	CaseCount           int32                  `protobuf:"varint,1,opt,name=case_count,json=caseCount,proto3" json:"case_count,omitempty"`
-	CompletedCaseCount  int32                  `protobuf:"varint,2,opt,name=completed_case_count,json=completedCaseCount,proto3" json:"completed_case_count,omitempty"`
-	SuiteCount          int32                  `protobuf:"varint,3,opt,name=suite_count,json=suiteCount,proto3" json:"suite_count,omitempty"`
-	CompletedSuiteCount int32                  `protobuf:"varint,4,opt,name=completed_suite_count,json=completedSuiteCount,proto3" json:"completed_suite_count,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The number of cases selected for this operation after filter resolution.
+	CaseCount int32 `protobuf:"varint,1,opt,name=case_count,json=caseCount,proto3" json:"case_count,omitempty"`
+	// The number of cases finished so far (passed, failed, or errored).
+	// This value increases monotonically during the run.
+	CompletedCaseCount int32 `protobuf:"varint,2,opt,name=completed_case_count,json=completedCaseCount,proto3" json:"completed_case_count,omitempty"`
+	// The number of suites selected for this operation.
+	SuiteCount int32 `protobuf:"varint,3,opt,name=suite_count,json=suiteCount,proto3" json:"suite_count,omitempty"`
+	// The number of suites finished so far. This value increases monotonically
+	// during the run.
+	CompletedSuiteCount int32 `protobuf:"varint,4,opt,name=completed_suite_count,json=completedSuiteCount,proto3" json:"completed_suite_count,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -1866,9 +2175,13 @@ func (x *RunAgentEvalMetadata) GetCompletedSuiteCount() int32 {
 	return 0
 }
 
+// The response message for RunAgentEval, stored in the completed Operation.
 type RunAgentEvalResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Runs          []string               `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource names of all runs produced by this operation.
+	//
+	// Each entry has the format `runs/{run_id}`.
+	Runs          []string `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1910,11 +2223,24 @@ func (x *RunAgentEvalResponse) GetRuns() []string {
 	return nil
 }
 
+// The request message for RunInfraObservation.
 type RunInfraObservationRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CaseIds       []string               `protobuf:"bytes,1,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
-	BatchId       *string                `protobuf:"bytes,2,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
-	Lookback      *durationpb.Duration   `protobuf:"bytes,3,opt,name=lookback,proto3,oneof" json:"lookback,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The infra observation case ids to execute.
+	//
+	// If empty, all cases registered for infra observation are executed.
+	// If non-empty, only registered cases whose id matches an entry are
+	// executed.
+	//
+	// A qualified id `suite.case` selects one case. A suite id `suite`
+	// selects all cases in that suite; shared setup and teardown for the suite
+	// run once per suite.
+	CaseIds []string `protobuf:"bytes,1,rep,name=case_ids,json=caseIds,proto3" json:"case_ids,omitempty"`
+	// The batch ID to associate with the runs produced by this operation.
+	BatchId *string `protobuf:"bytes,2,opt,name=batch_id,json=batchId,proto3,oneof" json:"batch_id,omitempty"`
+	// Highest-precedence lookback override when set. When unset, the server
+	// resolves lookback from per-case and suite defaults.
+	Lookback      *durationpb.Duration `protobuf:"bytes,3,opt,name=lookback,proto3,oneof" json:"lookback,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1970,12 +2296,20 @@ func (x *RunInfraObservationRequest) GetLookback() *durationpb.Duration {
 	return nil
 }
 
+// Metadata for a RunInfraObservation long-running operation while it is in
+// progress.
 type RunInfraObservationMetadata struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	CaseCount           int32                  `protobuf:"varint,1,opt,name=case_count,json=caseCount,proto3" json:"case_count,omitempty"`
-	CompletedCaseCount  int32                  `protobuf:"varint,2,opt,name=completed_case_count,json=completedCaseCount,proto3" json:"completed_case_count,omitempty"`
-	SuiteCount          int32                  `protobuf:"varint,3,opt,name=suite_count,json=suiteCount,proto3" json:"suite_count,omitempty"`
-	CompletedSuiteCount int32                  `protobuf:"varint,4,opt,name=completed_suite_count,json=completedSuiteCount,proto3" json:"completed_suite_count,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The number of infra observation cases selected after filter resolution.
+	CaseCount int32 `protobuf:"varint,1,opt,name=case_count,json=caseCount,proto3" json:"case_count,omitempty"`
+	// The number of cases finished so far. This value increases monotonically
+	// during the run.
+	CompletedCaseCount int32 `protobuf:"varint,2,opt,name=completed_case_count,json=completedCaseCount,proto3" json:"completed_case_count,omitempty"`
+	// The number of suites selected for this operation.
+	SuiteCount int32 `protobuf:"varint,3,opt,name=suite_count,json=suiteCount,proto3" json:"suite_count,omitempty"`
+	// The number of suites finished so far. This value increases monotonically
+	// during the run.
+	CompletedSuiteCount int32 `protobuf:"varint,4,opt,name=completed_suite_count,json=completedSuiteCount,proto3" json:"completed_suite_count,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -2038,9 +2372,14 @@ func (x *RunInfraObservationMetadata) GetCompletedSuiteCount() int32 {
 	return 0
 }
 
+// The response message for RunInfraObservation, stored in the completed
+// Operation.
 type RunInfraObservationResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Runs          []string               `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource names of all runs produced by this operation.
+	//
+	// Each entry has the format `runs/{run_id}`.
+	Runs          []string `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2082,11 +2421,15 @@ func (x *RunInfraObservationResponse) GetRuns() []string {
 	return nil
 }
 
+// General validation outcome for specialized eval case branches.
 type Validation struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                 `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Stable validation identifier (for example a rule id or `_evals.case`).
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Validation outcome.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// Human-readable detail when status is not PASSED. Empty on pass.
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2142,9 +2485,13 @@ func (x *Validation) GetMessage() string {
 	return ""
 }
 
+// Event published when a completed test or evaluation run is ready for
+// persistence and downstream consumers (for example BigQuery or Pub/Sub).
 type RunPublishedEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Run           *Run                   `protobuf:"bytes,1,opt,name=run,proto3" json:"run,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The completed run, including per-case status and check results for the
+	// suite that finished.
+	Run           *Run `protobuf:"bytes,1,opt,name=run,proto3" json:"run,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2186,12 +2533,18 @@ func (x *RunPublishedEvent) GetRun() *Run {
 	return nil
 }
 
+// The result of one integration case.
 type IntegrationTestResults_Case struct {
-	state         protoimpl.MessageState               `protogen:"open.v1"`
-	Id            string                               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                               `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Checks        []*IntegrationTestResults_Case_Check `protobuf:"bytes,3,rep,name=checks,proto3" json:"checks,omitempty"`
-	Duration      *durationpb.Duration                 `protobuf:"bytes,4,opt,name=duration,proto3" json:"duration,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The case id.
+	// Example: example-v1.example-case-1
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The rolled-up status for the case.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// All checks evaluated for this case, in execution order.
+	Checks []*IntegrationTestResults_Case_Check `protobuf:"bytes,3,rep,name=checks,proto3" json:"checks,omitempty"`
+	// Wall-clock duration for this case.
+	Duration      *durationpb.Duration `protobuf:"bytes,4,opt,name=duration,proto3" json:"duration,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2254,11 +2607,18 @@ func (x *IntegrationTestResults_Case) GetDuration() *durationpb.Duration {
 	return nil
 }
 
+// One deterministic check within a case. Checks are rule-based
+// pass/fail validations (for example response shape, status code, or
+// field equality).
 type IntegrationTestResults_Case_Check struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                 `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// A stable identifier for the check (for example a metric or assertion id).
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The outcome of the check.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// Human-readable detail: validation failures, expected versus actual,
+	// or error text. Empty when the check passed with no extra context.
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2314,10 +2674,13 @@ func (x *IntegrationTestResults_Case_Check) GetMessage() string {
 	return ""
 }
 
+// Key/value entry for string-valued associative fields on the wire.
 type LoadTestResults_StringEntry struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The entry key.
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// The string value associated with `key`.
+	Value         string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2366,10 +2729,13 @@ func (x *LoadTestResults_StringEntry) GetValue() string {
 	return ""
 }
 
+// Key/value entry for int64-valued associative fields on the wire.
 type LoadTestResults_Int64Entry struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Value         int64                  `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The entry key.
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// The int64 value associated with `key`.
+	Value         int64 `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2418,17 +2784,36 @@ func (x *LoadTestResults_Int64Entry) GetValue() int64 {
 	return 0
 }
 
+// The result of one load case.
 type LoadTestResults_Case struct {
-	state         protoimpl.MessageState         `protogen:"open.v1"`
-	Id            string                         `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                         `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Summary       *LoadTestResults_Summary       `protobuf:"bytes,3,opt,name=summary,proto3" json:"summary,omitempty"`
-	Checks        []*LoadTestResults_SloCheck    `protobuf:"bytes,4,rep,name=checks,proto3" json:"checks,omitempty"`
-	Tags          []*LoadTestResults_StringEntry `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`
-	CloudRun      []*CloudRunTargetSnapshot      `protobuf:"bytes,6,rep,name=cloud_run,json=cloudRun,proto3" json:"cloud_run,omitempty"`
-	Spanner       []*SpannerTargetSnapshot       `protobuf:"bytes,7,rep,name=spanner,proto3" json:"spanner,omitempty"`
-	InfraChecks   []*InfraSloCheck               `protobuf:"bytes,8,rep,name=infra_checks,json=infraChecks,proto3" json:"infra_checks,omitempty"`
-	Validations   []*Validation                  `protobuf:"bytes,9,rep,name=validations,proto3" json:"validations,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The case id.
+	// Example: files-v2-load.list-files
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The rolled-up status for the case. FAILED when any SLO check failed or
+	// load generation could not complete.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// Performance metrics observed during this case's load window. Always
+	// populated for executed cases.
+	Summary *LoadTestResults_Summary `protobuf:"bytes,3,opt,name=summary,proto3" json:"summary,omitempty"`
+	// All SLO checks evaluated for this case, in declaration order.
+	Checks []*LoadTestResults_SloCheck `protobuf:"bytes,4,rep,name=checks,proto3" json:"checks,omitempty"`
+	// Author-declared labels for filtering and grouping in reports (for example
+	// model name, RPC method, or dataset slice). Empty when the case declares
+	// no tags.
+	Tags []*LoadTestResults_StringEntry `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`
+	// Server-side Cloud Run metrics for declared targets over this case's
+	// observation window. Empty when the suite declares no Cloud Run targets.
+	CloudRun []*CloudRunTargetSnapshot `protobuf:"bytes,6,rep,name=cloud_run,json=cloudRun,proto3" json:"cloud_run,omitempty"`
+	// Server-side Spanner metrics for declared targets over this case's
+	// observation window. Empty when the suite declares no Spanner targets.
+	Spanner []*SpannerTargetSnapshot `protobuf:"bytes,7,rep,name=spanner,proto3" json:"spanner,omitempty"`
+	// Infrastructure SLO check outcomes. Diagnostics-only in v1: always empty
+	// on the wire until infra SLO evaluators ship.
+	InfraChecks []*InfraSloCheck `protobuf:"bytes,8,rep,name=infra_checks,json=infraChecks,proto3" json:"infra_checks,omitempty"`
+	// Developer and framework validation outcomes for this case in declaration
+	// order. Integration cases continue using checks instead.
+	Validations   []*Validation `protobuf:"bytes,9,rep,name=validations,proto3" json:"validations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2526,23 +2911,52 @@ func (x *LoadTestResults_Case) GetValidations() []*Validation {
 	return nil
 }
 
+// Performance summary for one load case's load window: the resolved load
+// settings and the observed request counts, errors, throughput, and latency.
 type LoadTestResults_Summary struct {
-	state             protoimpl.MessageState         `protogen:"open.v1"`
-	Mode              RunLoadTestRequest_Mode        `protobuf:"varint,1,opt,name=mode,proto3,enum=alis.evals.v1.RunLoadTestRequest_Mode" json:"mode,omitempty"`
-	TargetQps         float64                        `protobuf:"fixed64,2,opt,name=target_qps,json=targetQps,proto3" json:"target_qps,omitempty"`
-	Concurrency       int32                          `protobuf:"varint,3,opt,name=concurrency,proto3" json:"concurrency,omitempty"`
-	Duration          *durationpb.Duration           `protobuf:"bytes,4,opt,name=duration,proto3" json:"duration,omitempty"`
-	RequestCount      int64                          `protobuf:"varint,5,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
-	ErrorCount        int64                          `protobuf:"varint,6,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
-	ActualQps         float64                        `protobuf:"fixed64,7,opt,name=actual_qps,json=actualQps,proto3" json:"actual_qps,omitempty"`
-	Latency           *LatencyPercentiles            `protobuf:"bytes,8,opt,name=latency,proto3" json:"latency,omitempty"`
-	ErrorsByCode      []*LoadTestResults_Int64Entry  `protobuf:"bytes,9,rep,name=errors_by_code,json=errorsByCode,proto3" json:"errors_by_code,omitempty"`
-	DroppedCount      int64                          `protobuf:"varint,10,opt,name=dropped_count,json=droppedCount,proto3" json:"dropped_count,omitempty"`
-	CheckPassedCount  int64                          `protobuf:"varint,11,opt,name=check_passed_count,json=checkPassedCount,proto3" json:"check_passed_count,omitempty"`
-	CheckFailedCount  int64                          `protobuf:"varint,12,opt,name=check_failed_count,json=checkFailedCount,proto3" json:"check_failed_count,omitempty"`
-	Stream            *LoadTestResults_StreamSummary `protobuf:"bytes,13,opt,name=stream,proto3,oneof" json:"stream,omitempty"`
-	QpsStages         []*LoadTestResults_LoadStage   `protobuf:"bytes,14,rep,name=qps_stages,json=qpsStages,proto3" json:"qps_stages,omitempty"`
-	ConcurrencyStages []*LoadTestResults_LoadStage   `protobuf:"bytes,15,rep,name=concurrency_stages,json=concurrencyStages,proto3" json:"concurrency_stages,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The load intensity mode used for this run.
+	Mode RunLoadTestRequest_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=alis.evals.v1.RunLoadTestRequest_Mode" json:"mode,omitempty"`
+	// The request rate the generator was configured to sustain, in queries
+	// (requests) per second. Resolved from the mode preset and any suite-level
+	// overrides; recorded so observed throughput can be interpreted and runs
+	// compared over time.
+	TargetQps float64 `protobuf:"fixed64,2,opt,name=target_qps,json=targetQps,proto3" json:"target_qps,omitempty"`
+	// The number of concurrent workers used to generate load.
+	Concurrency int32 `protobuf:"varint,3,opt,name=concurrency,proto3" json:"concurrency,omitempty"`
+	// Total wall-clock duration of the case's load window, excluding warmup.
+	Duration *durationpb.Duration `protobuf:"bytes,4,opt,name=duration,proto3" json:"duration,omitempty"`
+	// Total requests sent during the load window.
+	RequestCount int64 `protobuf:"varint,5,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
+	// Total request errors observed during the load window (transport
+	// failures, non-OK statuses, timeouts). Distinct from SLO checks, which
+	// are threshold comparisons evaluated after metrics are aggregated.
+	ErrorCount int64 `protobuf:"varint,6,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
+	// Observed steady-state throughput in queries (requests) per second.
+	ActualQps float64 `protobuf:"fixed64,7,opt,name=actual_qps,json=actualQps,proto3" json:"actual_qps,omitempty"`
+	// Request latency distribution for the load window.
+	Latency *LatencyPercentiles `protobuf:"bytes,8,opt,name=latency,proto3" json:"latency,omitempty"`
+	// Request errors grouped by canonical gRPC status code name (for example
+	// `UNAVAILABLE` or `DEADLINE_EXCEEDED`). Values sum to error_count.
+	ErrorsByCode []*LoadTestResults_Int64Entry `protobuf:"bytes,9,rep,name=errors_by_code,json=errorsByCode,proto3" json:"errors_by_code,omitempty"`
+	// Scheduled request ticks that were not dispatched because all workers
+	// were busy. Distinct from error_count; surfaces generator saturation.
+	DroppedCount int64 `protobuf:"varint,10,opt,name=dropped_count,json=droppedCount,proto3" json:"dropped_count,omitempty"`
+	// Semantic assertion passes during the load window. Distinct from
+	// transport error_count — a request may succeed at the wire layer yet
+	// fail a check (for example an unexpected eval score).
+	CheckPassedCount int64 `protobuf:"varint,11,opt,name=check_passed_count,json=checkPassedCount,proto3" json:"check_passed_count,omitempty"`
+	// Semantic assertion failures during the load window.
+	CheckFailedCount int64 `protobuf:"varint,12,opt,name=check_failed_count,json=checkFailedCount,proto3" json:"check_failed_count,omitempty"`
+	// Streaming RPC metrics when the case exercised client or server streaming.
+	// Omitted for unary-only cases.
+	Stream *LoadTestResults_StreamSummary `protobuf:"bytes,13,opt,name=stream,proto3,oneof" json:"stream,omitempty"`
+	// Resolved QPS stage configuration. Empty when the profile used a
+	// constant target_qps for the entire window.
+	QpsStages []*LoadTestResults_LoadStage `protobuf:"bytes,14,rep,name=qps_stages,json=qpsStages,proto3" json:"qps_stages,omitempty"`
+	// Resolved concurrency stage configuration. Empty when the profile used
+	// a constant concurrency for the entire window.
+	ConcurrencyStages []*LoadTestResults_LoadStage `protobuf:"bytes,15,rep,name=concurrency_stages,json=concurrencyStages,proto3" json:"concurrency_stages,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -2682,10 +3096,14 @@ func (x *LoadTestResults_Summary) GetConcurrencyStages() []*LoadTestResults_Load
 	return nil
 }
 
+// One step in a staged load profile (QPS or concurrency depending on context).
 type LoadTestResults_LoadStage struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Duration      *durationpb.Duration   `protobuf:"bytes,1,opt,name=duration,proto3" json:"duration,omitempty"`
-	Target        float64                `protobuf:"fixed64,2,opt,name=target,proto3" json:"target,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Wall-clock duration of this stage.
+	Duration *durationpb.Duration `protobuf:"bytes,1,opt,name=duration,proto3" json:"duration,omitempty"`
+	// Target value for this stage: queries per second when nested under
+	// qps_stages, or worker count when nested under concurrency_stages.
+	Target        float64 `protobuf:"fixed64,2,opt,name=target,proto3" json:"target,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2734,15 +3152,23 @@ func (x *LoadTestResults_LoadStage) GetTarget() float64 {
 	return 0
 }
 
+// Aggregate streaming metrics for a load case that exercised streaming RPCs.
 type LoadTestResults_StreamSummary struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	StreamCount       int64                  `protobuf:"varint,1,opt,name=stream_count,json=streamCount,proto3" json:"stream_count,omitempty"`
-	MessagesSentTotal int64                  `protobuf:"varint,2,opt,name=messages_sent_total,json=messagesSentTotal,proto3" json:"messages_sent_total,omitempty"`
-	Ttfb              *LatencyPercentiles    `protobuf:"bytes,3,opt,name=ttfb,proto3" json:"ttfb,omitempty"`
-	ResponseLatency   *LatencyPercentiles    `protobuf:"bytes,4,opt,name=response_latency,json=responseLatency,proto3" json:"response_latency,omitempty"`
-	TotalDuration     *LatencyPercentiles    `protobuf:"bytes,5,opt,name=total_duration,json=totalDuration,proto3" json:"total_duration,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Number of streaming invocations measured during the load window.
+	StreamCount int64 `protobuf:"varint,1,opt,name=stream_count,json=streamCount,proto3" json:"stream_count,omitempty"`
+	// Total messages sent across all measured streams.
+	MessagesSentTotal int64 `protobuf:"varint,2,opt,name=messages_sent_total,json=messagesSentTotal,proto3" json:"messages_sent_total,omitempty"`
+	// Time-to-first-byte / send-phase latency distribution in milliseconds.
+	// For client streaming, this spans stream open through the last successful
+	// Send (or through the first send error).
+	Ttfb *LatencyPercentiles `protobuf:"bytes,3,opt,name=ttfb,proto3" json:"ttfb,omitempty"`
+	// CloseAndRecv / response-phase latency distribution in milliseconds.
+	ResponseLatency *LatencyPercentiles `protobuf:"bytes,4,opt,name=response_latency,json=responseLatency,proto3" json:"response_latency,omitempty"`
+	// End-to-end stream call duration distribution in milliseconds.
+	TotalDuration *LatencyPercentiles `protobuf:"bytes,5,opt,name=total_duration,json=totalDuration,proto3" json:"total_duration,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *LoadTestResults_StreamSummary) Reset() {
@@ -2810,14 +3236,31 @@ func (x *LoadTestResults_StreamSummary) GetTotalDuration() *LatencyPercentiles {
 	return nil
 }
 
+// One Service Level Objective (SLO) check outcome.
+//
+// An SLO expresses an acceptable bound on a load-test metric (for example
+// "p99 latency must stay below 500 ms" or "error rate must stay below 1%").
+// Every configured check is recorded with the measured value, the configured
+// limit, and whether the bound held, so consumers can see headroom on passed
+// checks as well as breaches.
 type LoadTestResults_SloCheck struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                 `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
-	Observed      float64                `protobuf:"fixed64,4,opt,name=observed,proto3" json:"observed,omitempty"`
-	Limit         float64                `protobuf:"fixed64,5,opt,name=limit,proto3" json:"limit,omitempty"`
-	Unit          string                 `protobuf:"bytes,6,opt,name=unit,proto3" json:"unit,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// A stable identifier for the SLO check or metric (for example
+	// `latency.p99_ms` or `error_rate`).
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The outcome of the check. FAILED when the observed value crossed the
+	// limit or the metric could not be measured.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// Human-readable detail (for example expected versus observed values or
+	// measurement errors). Empty when the check passed with no extra context.
+	Message string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	// The metric value measured during the run (for example 612.4 when unit
+	// is `ms`).
+	Observed float64 `protobuf:"fixed64,4,opt,name=observed,proto3" json:"observed,omitempty"`
+	// The configured SLO bound (for example 500.0 when unit is `ms`).
+	Limit float64 `protobuf:"fixed64,5,opt,name=limit,proto3" json:"limit,omitempty"`
+	// The unit shared by observed and limit (for example `ms`, `rps`, or `%`).
+	Unit          string `protobuf:"bytes,6,opt,name=unit,proto3" json:"unit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2894,12 +3337,23 @@ func (x *LoadTestResults_SloCheck) GetUnit() string {
 	return ""
 }
 
+// Provenance and statistics for the LLM-as-judge used in this run.
+//
+// The judge is a separate model invoked to score metrics that cannot be
+// checked deterministically (for example tone, reasoning quality, or policy
+// adherence).
 type AgentEvalResults_JudgeInfo struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Model           string                 `protobuf:"bytes,1,opt,name=model,proto3" json:"model,omitempty"`
-	ModelVersion    *string                `protobuf:"bytes,2,opt,name=model_version,json=modelVersion,proto3,oneof" json:"model_version,omitempty"`
-	JudgeCallCount  int64                  `protobuf:"varint,3,opt,name=judge_call_count,json=judgeCallCount,proto3" json:"judge_call_count,omitempty"`
-	JudgeErrorCount int64                  `protobuf:"varint,4,opt,name=judge_error_count,json=judgeErrorCount,proto3" json:"judge_error_count,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The judge model identifier (for example `gemini-2.5-pro`).
+	Model string `protobuf:"bytes,1,opt,name=model,proto3" json:"model,omitempty"`
+	// The pinned model version, when available.
+	ModelVersion *string `protobuf:"bytes,2,opt,name=model_version,json=modelVersion,proto3,oneof" json:"model_version,omitempty"`
+	// Total judge API calls made during this run (one or more per metric).
+	JudgeCallCount int64 `protobuf:"varint,3,opt,name=judge_call_count,json=judgeCallCount,proto3" json:"judge_call_count,omitempty"`
+	// Judge infrastructure failures (timeout, API error). Distinct from
+	// metric failures, where the judge ran successfully but assigned a score
+	// below threshold.
+	JudgeErrorCount int64 `protobuf:"varint,4,opt,name=judge_error_count,json=judgeErrorCount,proto3" json:"judge_error_count,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -2962,14 +3416,23 @@ func (x *AgentEvalResults_JudgeInfo) GetJudgeErrorCount() int64 {
 	return 0
 }
 
+// The result of one agent evaluation case.
 type AgentEvalResults_Case struct {
-	state         protoimpl.MessageState          `protogen:"open.v1"`
-	Id            string                          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                          `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Duration      *durationpb.Duration            `protobuf:"bytes,3,opt,name=duration,proto3" json:"duration,omitempty"`
-	SessionId     string                          `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Metrics       []*AgentEvalResults_Case_Metric `protobuf:"bytes,5,rep,name=metrics,proto3" json:"metrics,omitempty"`
-	Validations   []*Validation                   `protobuf:"bytes,6,rep,name=validations,proto3" json:"validations,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The case id (ADK evalId).
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The rolled-up status for the case.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// Wall-clock duration for this case.
+	Duration *durationpb.Duration `protobuf:"bytes,3,opt,name=duration,proto3" json:"duration,omitempty"`
+	// ADK session identifier for triage and replay.
+	SessionId string `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	// All metrics evaluated for this case, in execution order. Includes
+	// deterministic checks, LLM-as-judge scores, and ADK prebuilt metrics.
+	Metrics []*AgentEvalResults_Case_Metric `protobuf:"bytes,5,rep,name=metrics,proto3" json:"metrics,omitempty"`
+	// Developer and framework validation outcomes for this case in declaration
+	// order. Integration cases continue using checks instead.
+	Validations   []*Validation `protobuf:"bytes,6,rep,name=validations,proto3" json:"validations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3046,13 +3509,22 @@ func (x *AgentEvalResults_Case) GetValidations() []*Validation {
 	return nil
 }
 
+// One evaluated metric within a case.
 type AgentEvalResults_Case_Metric struct {
-	state         protoimpl.MessageState                      `protogen:"open.v1"`
-	Id            string                                      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                                      `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Score         *float64                                    `protobuf:"fixed64,3,opt,name=score,proto3,oneof" json:"score,omitempty"`
-	Threshold     *float64                                    `protobuf:"fixed64,4,opt,name=threshold,proto3,oneof" json:"threshold,omitempty"`
-	Message       string                                      `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// A stable identifier for the metric (ADK metricName).
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The outcome of the metric.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// The observed score, when applicable. Omitted for binary metrics.
+	Score *float64 `protobuf:"fixed64,3,opt,name=score,proto3,oneof" json:"score,omitempty"`
+	// The minimum score required for this metric to pass, when applicable.
+	Threshold *float64 `protobuf:"fixed64,4,opt,name=threshold,proto3,oneof" json:"threshold,omitempty"`
+	// Human-readable detail: validation failures, score below threshold,
+	// or not-evaluated reason. Empty when the metric passed with no extra
+	// context.
+	Message string `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
+	// Per-rubric breakdown when the metric defines multiple rubric dimensions.
 	Rubric        []*AgentEvalResults_Case_Metric_RubricScore `protobuf:"bytes,6,rep,name=rubric,proto3" json:"rubric,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3130,12 +3602,17 @@ func (x *AgentEvalResults_Case_Metric) GetRubric() []*AgentEvalResults_Case_Metr
 	return nil
 }
 
+// The result for one rubric dimension within a metric.
 type AgentEvalResults_Case_Metric_RubricScore struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                 `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Score         *float64               `protobuf:"fixed64,3,opt,name=score,proto3,oneof" json:"score,omitempty"`
-	Rationale     *string                `protobuf:"bytes,4,opt,name=rationale,proto3,oneof" json:"rationale,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The identifier of the rubric dimension.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The outcome assigned to this rubric dimension.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// The observed score for this rubric dimension, when applicable.
+	Score *float64 `protobuf:"fixed64,3,opt,name=score,proto3,oneof" json:"score,omitempty"`
+	// The rationale for the score, when applicable.
+	Rationale     *string `protobuf:"bytes,4,opt,name=rationale,proto3,oneof" json:"rationale,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3198,17 +3675,34 @@ func (x *AgentEvalResults_Case_Metric_RubricScore) GetRationale() string {
 	return ""
 }
 
+// The result of one infrastructure observation case.
 type InfraObservationResults_Case struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Id            string                    `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Status        Status                    `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
-	Lookback      *durationpb.Duration      `protobuf:"bytes,3,opt,name=lookback,proto3" json:"lookback,omitempty"`
-	WindowStart   *timestamppb.Timestamp    `protobuf:"bytes,4,opt,name=window_start,json=windowStart,proto3" json:"window_start,omitempty"`
-	WindowEnd     *timestamppb.Timestamp    `protobuf:"bytes,5,opt,name=window_end,json=windowEnd,proto3" json:"window_end,omitempty"`
-	CloudRun      []*CloudRunTargetSnapshot `protobuf:"bytes,6,rep,name=cloud_run,json=cloudRun,proto3" json:"cloud_run,omitempty"`
-	Spanner       []*SpannerTargetSnapshot  `protobuf:"bytes,7,rep,name=spanner,proto3" json:"spanner,omitempty"`
-	InfraChecks   []*InfraSloCheck          `protobuf:"bytes,8,rep,name=infra_checks,json=infraChecks,proto3" json:"infra_checks,omitempty"`
-	Validations   []*Validation             `protobuf:"bytes,9,rep,name=validations,proto3" json:"validations,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The case id.
+	// Example: peak-hours.observe-search
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The rolled-up status for the case. Diagnostics-only in v1: PASSED when
+	// observation completes; FAILED only on runner or setup errors, not on
+	// infra threshold breach until infra SLO evaluators ship.
+	Status Status `protobuf:"varint,2,opt,name=status,proto3,enum=alis.evals.v1.Status" json:"status,omitempty"`
+	// Resolved lookback duration for this case.
+	Lookback *durationpb.Duration `protobuf:"bytes,3,opt,name=lookback,proto3" json:"lookback,omitempty"`
+	// Inclusive start of the settled observation window (UTC).
+	WindowStart *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=window_start,json=windowStart,proto3" json:"window_start,omitempty"`
+	// Exclusive end of the settled observation window (UTC).
+	WindowEnd *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=window_end,json=windowEnd,proto3" json:"window_end,omitempty"`
+	// Server-side Cloud Run metrics for declared targets over this case's
+	// observation window. Empty when the suite declares no Cloud Run targets.
+	CloudRun []*CloudRunTargetSnapshot `protobuf:"bytes,6,rep,name=cloud_run,json=cloudRun,proto3" json:"cloud_run,omitempty"`
+	// Server-side Spanner metrics for declared targets over this case's
+	// observation window. Empty when the suite declares no Spanner targets.
+	Spanner []*SpannerTargetSnapshot `protobuf:"bytes,7,rep,name=spanner,proto3" json:"spanner,omitempty"`
+	// Infrastructure SLO check outcomes. Diagnostics-only in v1: always empty
+	// on the wire until infra SLO evaluators ship.
+	InfraChecks []*InfraSloCheck `protobuf:"bytes,8,rep,name=infra_checks,json=infraChecks,proto3" json:"infra_checks,omitempty"`
+	// Developer and framework validation outcomes for this case in declaration
+	// order. Integration cases continue using checks instead.
+	Validations   []*Validation `protobuf:"bytes,9,rep,name=validations,proto3" json:"validations,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
