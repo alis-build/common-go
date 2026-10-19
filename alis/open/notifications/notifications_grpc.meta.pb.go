@@ -3,19 +3,19 @@
 // Source: alis/open/notifications/v1/notifications.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:40:58 UTC
+// Generated on: 2026-10-19 08:24:36 UTC
 
 package notifications
 
 const (
 	// NotificationsService_ValidateMessage_FullMethodDescription returns the description of the alis.open.notifications.v1.NotificationsService.ValidateMessage method.
-	NotificationsService_ValidateMessage_FullMethodDescription = ""
+	NotificationsService_ValidateMessage_FullMethodDescription = "Validates any proto message that is used directly or indirectly by this service.\n Most common use case is to validate request messages from a client-side application."
 	// NotificationsService_RetrieveRules_FullMethodDescription returns the description of the alis.open.notifications.v1.NotificationsService.RetrieveRules method.
-	NotificationsService_RetrieveRules_FullMethodDescription = ""
+	NotificationsService_RetrieveRules_FullMethodDescription = "Retrieves the validation rules for any proto message that is used directly or indirectly by this service.\n Serves as live auto-documentation of the validation rules in this service."
 	// NotificationsService_TestIamPermissions_FullMethodDescription returns the description of the alis.open.notifications.v1.NotificationsService.TestIamPermissions method.
-	NotificationsService_TestIamPermissions_FullMethodDescription = ""
+	NotificationsService_TestIamPermissions_FullMethodDescription = "Returns permissions that a caller has on the specified resource."
 	// NotificationsService_SendFcmMessage_FullMethodDescription returns the description of the alis.open.notifications.v1.NotificationsService.SendFcmMessage method.
-	NotificationsService_SendFcmMessage_FullMethodDescription = ""
+	NotificationsService_SendFcmMessage_FullMethodDescription = "Sends a Firebase Cloud Messaging(FCM) message to a user or topic."
 	// NotificationsService_BatchSendFcmMessages_FullMethodDescription returns the description of the alis.open.notifications.v1.NotificationsService.BatchSendFcmMessages method.
-	NotificationsService_BatchSendFcmMessages_FullMethodDescription = ""
+	NotificationsService_BatchSendFcmMessages_FullMethodDescription = "Sends a batch of Firebase Cloud Messaging(FCM) messages to users or topics."
 )

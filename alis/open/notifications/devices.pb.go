@@ -4,6 +4,19 @@
 // 	protoc        v3.21.12
 // source: alis/open/notifications/v1/devices.proto
 
+// Registers the devices users receive notifications on, and sends
+// notifications to users through Firebase Cloud Messaging (FCM).
+//
+// - `DevicesService` manages `Device` resources
+//   (`users/{user}/devices/{device}`): a user's device and its device token.
+//   `RegisterDevice` registers a device by ID and token. The IAM RPCs take a
+//   device name as the resource.
+// - `NotificationsService` sends FCM messages (title, body, and optional
+//   image, data payload and URI) to a user, one at a time or in a batch.
+//
+// Both services also expose `ValidateMessage` and `RetrieveRules` from
+// `alis.open.validation.v1`.
+
 package notifications
 
 import (
@@ -27,12 +40,19 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// A user's device that can receive notifications.
 type Device struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	Etag          string                 `protobuf:"bytes,97,opt,name=etag,proto3" json:"etag,omitempty"`
-	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Device token
+	Token string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	// ETag
+	Etag string `protobuf:"bytes,97,opt,name=etag,proto3" json:"etag,omitempty"`
+	// Device creation time
+	CreateTime *timestamppb.Timestamp `protobuf:"bytes,98,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
+	// Device update time
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,99,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -103,9 +123,12 @@ func (x *Device) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+// Request message for the GetDevice method.
 type GetDeviceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the device to get.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -147,13 +170,22 @@ func (x *GetDeviceRequest) GetName() string {
 	return ""
 }
 
+// Request message for the ListDevices method.
 type ListDevicesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Parent        string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	ReadMask      *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
-	Filter        string                 `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Parent user resource.
+	// Format: users/([a-z0-9-]{2,50})
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// The maximum number of devices to return.
+	// The service may return fewer than this value.
+	// If not specified, returns up to 100 devices.
+	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// A page token, received from a previous ListDevices call.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// The fields to return in snake_case.
+	ReadMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=read_mask,json=readMask,proto3" json:"read_mask,omitempty"`
+	// An optional filter to apply to the list of devices.
+	Filter        string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -223,10 +255,13 @@ func (x *ListDevicesRequest) GetFilter() string {
 	return ""
 }
 
+// Response message for the ListDevices method.
 type ListDevicesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Devices       []*Device              `protobuf:"bytes,1,rep,name=devices,proto3" json:"devices,omitempty"`
-	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The devices.
+	Devices []*Device `protobuf:"bytes,1,rep,name=devices,proto3" json:"devices,omitempty"`
+	// A token to retrieve the next page of results.
+	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -275,9 +310,12 @@ func (x *ListDevicesResponse) GetNextPageToken() string {
 	return ""
 }
 
+// Request message for the DeleteDevice method.
 type DeleteDeviceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The resource name of the device to delete.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -319,10 +357,15 @@ func (x *DeleteDeviceRequest) GetName() string {
 	return ""
 }
 
+// Request message for the RegisterDevice method.
 type RegisterDeviceRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	DeviceToken   string                 `protobuf:"bytes,2,opt,name=device_token,json=deviceToken,proto3" json:"device_token,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Device id.
+	//
+	// In the case of Web, this can be the Firebase Instance ID.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// Device token.
+	DeviceToken   string `protobuf:"bytes,2,opt,name=device_token,json=deviceToken,proto3" json:"device_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -371,6 +414,7 @@ func (x *RegisterDeviceRequest) GetDeviceToken() string {
 	return ""
 }
 
+// Response message for the RegisterDevice method.
 type RegisterDeviceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields

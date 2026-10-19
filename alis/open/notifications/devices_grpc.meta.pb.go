@@ -3,31 +3,31 @@
 // Source: alis/open/notifications/v1/devices.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:40:58 UTC
+// Generated on: 2026-10-19 08:24:36 UTC
 
 package notifications
 
 const (
 	// DevicesService_ValidateMessage_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.ValidateMessage method.
-	DevicesService_ValidateMessage_FullMethodDescription = ""
+	DevicesService_ValidateMessage_FullMethodDescription = "Validates any proto message that is used directly or indirectly by this service.\n Most common use case is to validate request messages from a client-side application."
 	// DevicesService_RetrieveRules_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.RetrieveRules method.
-	DevicesService_RetrieveRules_FullMethodDescription = ""
+	DevicesService_RetrieveRules_FullMethodDescription = "Retrieves the validation rules for any proto message that is used directly or indirectly by this service.\n Serves as live auto-documentation of the validation rules in this service."
 	// DevicesService_GetIamPolicy_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.GetIamPolicy method.
-	DevicesService_GetIamPolicy_FullMethodDescription = ""
+	DevicesService_GetIamPolicy_FullMethodDescription = "Gets the IAM policy for a resource implemented in this service. Resource should be the fully qualified name of the device.\n Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})"
 	// DevicesService_SetIamPolicy_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.SetIamPolicy method.
-	DevicesService_SetIamPolicy_FullMethodDescription = ""
+	DevicesService_SetIamPolicy_FullMethodDescription = "Sets the IAM policy for a resource implemented in this service. Resource should be the fully qualified name of the device.\n Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})"
 	// DevicesService_TestIamPermissions_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.TestIamPermissions method.
-	DevicesService_TestIamPermissions_FullMethodDescription = ""
+	DevicesService_TestIamPermissions_FullMethodDescription = "Returns permissions that a caller has on the specified resource. Resource should be the fully qualified name of the device.\n Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})"
 	// DevicesService_AddIamBindings_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.AddIamBindings method.
-	DevicesService_AddIamBindings_FullMethodDescription = ""
+	DevicesService_AddIamBindings_FullMethodDescription = "Adds principals or updates the roles existing principals have on an IAM Policy protected resource. Resource should be the fully qualified name of the device.\n Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})"
 	// DevicesService_RemoveIamBindings_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.RemoveIamBindings method.
-	DevicesService_RemoveIamBindings_FullMethodDescription = ""
+	DevicesService_RemoveIamBindings_FullMethodDescription = "Removes principals or some of the roles they have on an IAM Policy protected resource. Resource should be the fully qualified name of the device.\n Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})"
 	// DevicesService_RegisterDevice_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.RegisterDevice method.
-	DevicesService_RegisterDevice_FullMethodDescription = ""
+	DevicesService_RegisterDevice_FullMethodDescription = "Registers a user's device."
 	// DevicesService_GetDevice_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.GetDevice method.
-	DevicesService_GetDevice_FullMethodDescription = ""
+	DevicesService_GetDevice_FullMethodDescription = "Gets a device."
 	// DevicesService_ListDevices_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.ListDevices method.
-	DevicesService_ListDevices_FullMethodDescription = ""
+	DevicesService_ListDevices_FullMethodDescription = "Lists devices."
 	// DevicesService_DeleteDevice_FullMethodDescription returns the description of the alis.open.notifications.v1.DevicesService.DeleteDevice method.
-	DevicesService_DeleteDevice_FullMethodDescription = ""
+	DevicesService_DeleteDevice_FullMethodDescription = "Deletes a device."
 )

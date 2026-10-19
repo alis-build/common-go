@@ -23,17 +23,25 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Request message for the SendFcmMessage method.
 type SendFcmMessageRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// The target of the message.
+	//
 	// Types that are valid to be assigned to Target:
 	//
 	//	*SendFcmMessageRequest_User
-	Target        isSendFcmMessageRequest_Target `protobuf_oneof:"target"`
-	Title         string                         `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	Body          string                         `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
-	Image         string                         `protobuf:"bytes,5,opt,name=image,proto3" json:"image,omitempty"`
-	Data          map[string]string              `protobuf:"bytes,6,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Uri           string                         `protobuf:"bytes,7,opt,name=uri,proto3" json:"uri,omitempty"`
+	Target isSendFcmMessageRequest_Target `protobuf_oneof:"target"`
+	// The title of the message.
+	Title string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	// The body of the message.
+	Body string `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
+	// An optional image to include in the message.
+	Image string `protobuf:"bytes,5,opt,name=image,proto3" json:"image,omitempty"`
+	// An optional data payload to include in the message.
+	Data map[string]string `protobuf:"bytes,6,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// An optional URL to send along with the message.
+	Uri           string `protobuf:"bytes,7,opt,name=uri,proto3" json:"uri,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -124,14 +132,18 @@ type isSendFcmMessageRequest_Target interface {
 }
 
 type SendFcmMessageRequest_User struct {
+	// The user to send the message to.
+	// Format: users/{userId}
 	User string `protobuf:"bytes,1,opt,name=user,proto3,oneof"`
 }
 
 func (*SendFcmMessageRequest_User) isSendFcmMessageRequest_Target() {}
 
+// Response message for the SendFcmMessage method.
 type SendFcmMessageResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageIds    []string               `protobuf:"bytes,1,rep,name=message_ids,json=messageIds,proto3" json:"message_ids,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Message IDs of the messages sent.
+	MessageIds    []string `protobuf:"bytes,1,rep,name=message_ids,json=messageIds,proto3" json:"message_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -173,8 +185,10 @@ func (x *SendFcmMessageResponse) GetMessageIds() []string {
 	return nil
 }
 
+// Request message for the  BatchSendFcmMessages method.
 type BatchSendFcmMessagesRequest struct {
-	state         protoimpl.MessageState   `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The messages to send.
 	Requests      []*SendFcmMessageRequest `protobuf:"bytes,1,rep,name=requests,proto3" json:"requests,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -217,9 +231,11 @@ func (x *BatchSendFcmMessagesRequest) GetRequests() []*SendFcmMessageRequest {
 	return nil
 }
 
+// Response message for the  BatchSendFcmMessages method.
 type BatchSendFcmMessagesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageIds    []string               `protobuf:"bytes,1,rep,name=message_ids,json=messageIds,proto3" json:"message_ids,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Message IDs of the messages sent.
+	MessageIds    []string `protobuf:"bytes,1,rep,name=message_ids,json=messageIds,proto3" json:"message_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

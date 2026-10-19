@@ -4,6 +4,19 @@
 // - protoc             v3.21.12
 // source: alis/open/notifications/v1/devices.proto
 
+// Registers the devices users receive notifications on, and sends
+// notifications to users through Firebase Cloud Messaging (FCM).
+//
+// - `DevicesService` manages `Device` resources
+//   (`users/{user}/devices/{device}`): a user's device and its device token.
+//   `RegisterDevice` registers a device by ID and token. The IAM RPCs take a
+//   device name as the resource.
+// - `NotificationsService` sends FCM messages (title, body, and optional
+//   image, data payload and URI) to a user, one at a time or in a batch.
+//
+// Both services also expose `ValidateMessage` and `RetrieveRules` from
+// `alis.open.validation.v1`.
+
 package notifications
 
 import (
@@ -39,17 +52,47 @@ const (
 // DevicesServiceClient is the client API for DevicesService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// DevicesService provides RPCs for managing Device resources.
 type DevicesServiceClient interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	// Gets the IAM policy for a resource implemented in this service.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	GetIamPolicy(ctx context.Context, in *v1.GetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	SetIamPolicy(ctx context.Context, in *v1.SetIamPolicyRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	AddIamBindings(ctx context.Context, in *iam.AddIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	RemoveIamBindings(ctx context.Context, in *iam.RemoveIamBindingsRequest, opts ...grpc.CallOption) (*v1.Policy, error)
+	// Registers a user's device.
 	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*RegisterDeviceResponse, error)
+	// Gets a device.
 	GetDevice(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*Device, error)
+	// Lists devices.
 	ListDevices(ctx context.Context, in *ListDevicesRequest, opts ...grpc.CallOption) (*ListDevicesResponse, error)
+	// Deletes a device.
 	DeleteDevice(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -174,17 +217,47 @@ func (c *devicesServiceClient) DeleteDevice(ctx context.Context, in *DeleteDevic
 // DevicesServiceServer is the server API for DevicesService service.
 // All implementations must embed UnimplementedDevicesServiceServer
 // for forward compatibility.
+//
+// DevicesService provides RPCs for managing Device resources.
 type DevicesServiceServer interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	// Gets the IAM policy for a resource implemented in this service.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	GetIamPolicy(context.Context, *v1.GetIamPolicyRequest) (*v1.Policy, error)
+	// Sets the IAM policy for a resource implemented in this service.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	SetIamPolicy(context.Context, *v1.SetIamPolicyRequest) (*v1.Policy, error)
+	// Returns permissions that a caller has on the specified resource.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error)
+	// Adds principals or updates the roles existing principals have on an IAM Policy protected resource.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	AddIamBindings(context.Context, *iam.AddIamBindingsRequest) (*v1.Policy, error)
+	// Removes principals or some of the roles they have on an IAM Policy protected resource.
+	//
+	// Resource should be the fully qualified name of the device.
+	// Format: users/([a-z0-9-]{2,50})/devices/([a-zA-Z0-9-_]{2,50})
 	RemoveIamBindings(context.Context, *iam.RemoveIamBindingsRequest) (*v1.Policy, error)
+	// Registers a user's device.
 	RegisterDevice(context.Context, *RegisterDeviceRequest) (*RegisterDeviceResponse, error)
+	// Gets a device.
 	GetDevice(context.Context, *GetDeviceRequest) (*Device, error)
+	// Lists devices.
 	ListDevices(context.Context, *ListDevicesRequest) (*ListDevicesResponse, error)
+	// Deletes a device.
 	DeleteDevice(context.Context, *DeleteDeviceRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedDevicesServiceServer()
 }

@@ -31,11 +31,20 @@ const (
 // NotificationsServiceClient is the client API for NotificationsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// NotificationsService provides RPCs for sending notifications to users or topics.
 type NotificationsServiceClient interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(ctx context.Context, in *validation.ValidateMessageRequest, opts ...grpc.CallOption) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(ctx context.Context, in *validation.RetrieveRulesRequest, opts ...grpc.CallOption) (*validation.RetrieveRulesResponse, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(ctx context.Context, in *v1.TestIamPermissionsRequest, opts ...grpc.CallOption) (*v1.TestIamPermissionsResponse, error)
+	// Sends a Firebase Cloud Messaging(FCM) message to a user or topic.
 	SendFcmMessage(ctx context.Context, in *SendFcmMessageRequest, opts ...grpc.CallOption) (*SendFcmMessageResponse, error)
+	// Sends a batch of Firebase Cloud Messaging(FCM) messages to users or topics.
 	BatchSendFcmMessages(ctx context.Context, in *BatchSendFcmMessagesRequest, opts ...grpc.CallOption) (*BatchSendFcmMessagesResponse, error)
 }
 
@@ -100,11 +109,20 @@ func (c *notificationsServiceClient) BatchSendFcmMessages(ctx context.Context, i
 // NotificationsServiceServer is the server API for NotificationsService service.
 // All implementations must embed UnimplementedNotificationsServiceServer
 // for forward compatibility.
+//
+// NotificationsService provides RPCs for sending notifications to users or topics.
 type NotificationsServiceServer interface {
+	// Validates any proto message that is used directly or indirectly by this service.
+	// Most common use case is to validate request messages from a client-side application.
 	ValidateMessage(context.Context, *validation.ValidateMessageRequest) (*validation.ValidateMessageResponse, error)
+	// Retrieves the validation rules for any proto message that is used directly or indirectly by this service.
+	// Serves as live auto-documentation of the validation rules in this service.
 	RetrieveRules(context.Context, *validation.RetrieveRulesRequest) (*validation.RetrieveRulesResponse, error)
+	// Returns permissions that a caller has on the specified resource.
 	TestIamPermissions(context.Context, *v1.TestIamPermissionsRequest) (*v1.TestIamPermissionsResponse, error)
+	// Sends a Firebase Cloud Messaging(FCM) message to a user or topic.
 	SendFcmMessage(context.Context, *SendFcmMessageRequest) (*SendFcmMessageResponse, error)
+	// Sends a batch of Firebase Cloud Messaging(FCM) messages to users or topics.
 	BatchSendFcmMessages(context.Context, *BatchSendFcmMessagesRequest) (*BatchSendFcmMessagesResponse, error)
 	mustEmbedUnimplementedNotificationsServiceServer()
 }
