@@ -3,7 +3,7 @@
 // Source: alis/open/config/v1/config.proto
 // Plugin version: v0.0.1
 //
-// Generated on: 2026-09-02 16:40:57 UTC
+// Generated on: 2026-10-19 08:24:36 UTC
 
 package config
 

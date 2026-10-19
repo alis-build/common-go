@@ -4,6 +4,13 @@
 // 	protoc        v3.21.12
 // source: alis/open/config/v1/config.proto
 
+// Product configuration that is passed in as an environment variable.
+//
+// `ProductConfig` identifies the product by resource name
+// (`organisations/{organisation}/products/{product}`) and ID, gives the Google
+// Cloud project ID and number of the product, and lists the IAM roles
+// (`alis.open.iam.v1.Role`) defined for the product.
+
 package config
 
 import (
@@ -22,13 +29,20 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// The definition of a product config which is passed in as an environment variable
 type ProductConfig struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
-	ProjectId     string                 `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ProjectNumber string                 `protobuf:"bytes,4,opt,name=project_number,json=projectNumber,proto3" json:"project_number,omitempty"`
-	Roles         []*iam.Role            `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the product
+	// Format: organisations/([a-z][a-z0-9]{2,9})/products/([a-z]{2})
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The id of the product
+	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	// The google project id of the product
+	ProjectId string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	// The google project number of the product
+	ProjectNumber string `protobuf:"bytes,4,opt,name=project_number,json=projectNumber,proto3" json:"project_number,omitempty"`
+	// The iam roles defined for the product
+	Roles         []*iam.Role `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
